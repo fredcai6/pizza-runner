@@ -9,23 +9,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="stage" width="800" height="400"></canvas>
+  <canvas id="stage" width="1280" height="720"></canvas>
   <div id="controls" class="hidden">
+    <button id="pauseBtn" class="corner">❚❚</button>
     <div class="pad">
       <button data-key="left">◀</button>
       <button data-key="right">▶</button>
     </div>
     <div class="pad">
       <button id="giveBtn" data-key="give" class="ctx off"></button>
-      <button id="specialBtn" data-key="special" class="act">DASH</button>
+      <button id="specialBtn" data-key="special" class="act">SPECIAL</button>
       <button data-key="power" class="act">POWER</button>
       <button data-key="jump" class="jump">JUMP</button>
     </div>
   </div>
+  <div id="dialog" class="hidden"><div class="who"></div><div class="line"></div></div>
   <div id="screen"></div>
+  <div id="pause" class="hidden"><div class="sheet"><h2>Paused</h2><div class="actions">
+    <button id="resumeBtn">Resume</button><button id="pauseBoardBtn" class="quiet">Corkboard</button><button id="muteBtn" class="quiet">Sound: on</button>
+  </div></div></div>
+  <div id="overlay" class="hidden"></div>
+  <div id="turn">Turn your phone sideways</div>
   <script src="js/content.js"></script>
   <script src="js/rules.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/sprites.js"></script>
   <script src="js/play.js"></script>
+  <script src="js/hq.js"></script>
+  <script src="js/board.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

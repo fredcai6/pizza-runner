@@ -1,9 +1,9 @@
-// The loop between runs: comic, pie, wheel, street, receipt.
+// The loop between runs: back room, order, street, receipt, back room.
 (function () {
-  const C = window.PR_CONTENT, R = window.PR_RULES, P = window.PR_PLAY;
-  const SAVE = 'pizzaRunnerSave';
+  const C = window.PR_CONTENT, R = window.PR_RULES, P = window.PR_PLAY, H = window.PR_HQ, B = window.PR_BOARD, A = window.PR_SOUND;
+  const SAVE = 'pizzaRunnerSave2';
   const $ = id => document.getElementById(id);
-  const screen = $('screen'), canvas = $('stage'), controls = $('controls');
+  const screen = $('screen'), canvas = $('stage'), controls = $('controls'), dialog = $('dialog'), overlay = $('overlay');
   const debug = new URLSearchParams(location.search).has('debug');
   let camp = load(), run = null;
 
@@ -23,121 +23,124 @@
     }
   }
 
-  const panels = list => `<div class="comic">${list.map(t => `<div class="panel">${t}</div>`).join('')}</div>`;
-
-  function receiptHtml(r, real = false) {
-    return `<div class="receipt${real ? ' real' : ''}">
-      <div class="r-head">THE ORDER</div><div>ORDER #${r.order}</div><div>PLACED: ${r.date}</div>
-      <div>DELIVER TO: <b>${r.to}</b></div><hr><div>${r.city}</div>
-      ${r.lines.map(l => `<div>${l}</div>`).join('')}</div>`;
+  function scene(shots, done, extra = {}) {
+    controls.classList.add('hidden');
+    screen.classList.add('hidden');
+    H.play(canvas, dialog, shots, { hq: R.headquarters(camp), city: R.currentCity(camp), ...extra }, done);
   }
+
+  const boardButton = back => ['Corkboard', () => B.open(overlay, camp, () => { overlay.classList.add('hidden'); if (back) back(); }), 'quiet'];
 
   function title() {
     const acts = [];
     if (camp) acts.push(['Continue', route]);
-    acts.push([camp ? 'New order' : 'Start your order', () => { camp = R.newCampaign(); save(); route(); }]);
-    show(`<h1>PIZZA RUNNER</h1><p class="sub">Hot. Boxed. Late.</p>`, acts);
+    acts.push([camp ? 'New game' : 'Start', () => { camp = R.newCampaign(); save(); route(); }]);
+    show('<h1>PIZZA RUNNER</h1><p class="sub">You have been deployed.</p>', acts);
   }
 
   function route() {
     save();
-    if (camp.phase === 'intro') return intro();
-    if (camp.phase === 'finale-intro') return finaleIntro();
-    if (camp.phase === 'slice') return pickSlice();
-    if (camp.phase === 'ending') return ending();
+    const city = R.currentCity(camp);
+    switch (camp.phase) {
+      case 'briefing': return scene(city.briefing, orderScreen);
+      case 'reorder': return reorder();
+      case 'slice': return pickSlice();
+      case 'return': return scene(R.returnScene(camp), pickSlice);
+      case 'door': return scene([{ comp: 'door', lines: city.door }], leave, { customer: city.customer });
+      case 'missed': return scene([{ comp: 'oldtimer', lines: [{ who: 'old', text: 'That whole pizza is gone. Deep undercover. Finest operatives I ever sent.' }] }], leave);
+      case 'ending': return scene(C.ENDING.finale, endCard);
+    }
   }
 
-  function intro() {
+  function leave() { R.leaveCity(camp); route(); }
+
+  function reorder() {
+    scene([{ comp: 'oldtimer', lines: [{ who: 'old', text: 'Deep undercover, the lot of them. And half that street has gone quiet. Fire up another one.' }] }], orderScreen);
+  }
+
+  function orderScreen() {
     const city = R.currentCity(camp), st = C.STYLES[city.style];
-    show(`<h2>${city.name}</h2>${panels(city.panels)}
-      <p><b>${st.name}.</b> ${st.blurb}</p>`, [['Build the pie', () => pieBuilder(city)]]);
+    const order = R.printOrder(camp);
+    show(`<h2>Incoming order</h2>${B.receiptHtml(order)}<p><b>${st.name}.</b> ${st.blurb}</p>`,
+      [['Build the pie', () => pieBuilder(city)], boardButton(() => orderScreen())]);
   }
 
   function pieBuilder(city) {
-    const pick = { a: city.pantry[0], b: city.pantry[0] };
+    const { a: menuA, b: menuB } = city.menu;
+    const pick = { a: menuA[0], b: menuB[0] };
     const render = () => {
-      const col = side => `<div class="side"><h3>${side === 'a' ? 'Slices 1-3' : 'Slices 4-6'}</h3>${city.pantry.map(t => {
+      if (city.menu.whole) {
+        show(`<h2>Build your pie</h2><p>This order is pepperoni. Just pepperoni.</p><p class="blurb">${C.TOPPINGS[pick.a].blurb}</p>`, [['Box it', () => box(city, pick)]]);
+        return;
+      }
+      const col = (side, menu) => `<div class="side"><h3>${side === 'a' ? 'Slices 1-3' : 'Slices 4-6'}</h3>${menu.map(t => {
         const on = pick[side] === t;
         return `<button class="top${on ? ' on' : ''}" data-side="${side}" data-t="${t}"><i style="background:${C.TOPPINGS[t].color}"></i>${C.TOPPINGS[t].name}</button>`;
       }).join('')}</div>`;
-      show(`<h2>Build your pie</h2><p>Whole pie or half and half.</p><div class="pie">${col('a')}${col('b')}</div>
+      show(`<h2>Build your pie</h2><div class="pie">${col('a', menuA)}${col('b', menuB)}</div>
         <p class="blurb">${C.TOPPINGS[pick.a].blurb}${pick.a !== pick.b ? ' ' + C.TOPPINGS[pick.b].blurb : ''}</p>`,
-        [['Box it', () => confirmPie(city, pick)]]);
+        [['Box it', () => box(city, pick)]]);
       screen.querySelectorAll('.top').forEach(b => { b.onclick = () => { pick[b.dataset.side] = b.dataset.t; render(); }; });
     };
     render();
   }
 
-  function confirmPie(city, pick) {
-    R.startCity(camp, pick.a, pick.b);
-    // In the last city the Order already has your choice on file, dated before you made it.
-    if (city.tier >= 3) {
-      const r = { order: C.ORDER_NUMBER, date: '08/25/????', to: 'KATE?', city: city.name, lines: [`${C.TOPPINGS[pick.a].name} / ${C.TOPPINGS[pick.b].name}`, 'PRINTED BEFORE YOU CHOSE'] };
-      camp.receipts.push(r);
-      show(`<h2>This was already in the printer</h2>${receiptHtml(r)}`, [['...okay', route]]);
+  function box(city, pick) {
+    R.placeOrder(camp, pick.a, pick.b);
+    save();
+    // This receipt was printed before she chose. Nobody mentions it.
+    if (city.predicts) {
+      const r = { ...R.printOrder(camp), lines: [`${C.TOPPINGS[pick.a].name} / ${C.TOPPINGS[pick.b].name}`, `PRINTED ${C.PRINTER_CLOCK}, BEFORE YOU CHOSE`] };
+      show(`<h2>This was already in the printer</h2>${B.receiptHtml(r)}`, [['...okay', route]]);
     } else route();
   }
 
-  function roster() {
-    const city = R.currentCity(camp);
-    return city.finale ? R.finaleRoster(camp) : camp.pies[city.id];
-  }
-
   function pickSlice() {
-    const city = R.currentCity(camp), street = camp.streets[city.id];
-    const list = roster().filter(s => s.status === 'ready');
-    const dead = city.finale ? '' : `<p>${street.deaths} of 6 lost on this street.</p>`;
-    show(`<h2>${city.name}</h2><p class="radio">"${R.radio(camp)}"</p>${dead}
-      <div class="slices">${list.map(s => `<button class="slice" data-id="${s.id}" data-origin="${s.origin}">
-        <b>${C.STYLES[s.style].name}</b><span>${s.topping ? C.TOPPINGS[s.topping].name : 'plain'}</span></button>`).join('')}</div>
-      <div class="lore">${camp.lore.slice(-2).map(l => `<p>${l}</p>`).join('')}</div>`);
-    screen.querySelectorAll('.slice').forEach(b => {
-      b.onclick = () => spinWheel(list.find(s => String(s.id) === b.dataset.id && s.origin === b.dataset.origin));
-    });
+    camp.phase = 'slice'; save();
+    const city = R.currentCity(camp), pie = camp.pies[city.id], list = R.ready(pie);
+    const lost = pie.slices.length - list.length;
+    show(`<h2>${city.name}</h2><p>${lost ? `${lost} of 6 gone.` : 'Six slices. Choose who goes.'}</p>
+      <div class="slices">${[...new Set(list.map(s => s.topping))].map(t => {
+        const s = list.find(x => x.topping === t), n = list.filter(x => x.topping === t).length;
+        return `<button class="slice" data-id="${s.id}"><b>${C.STYLES[s.style].name}</b><span>${C.TOPPINGS[t].name} (${n} left)</span></button>`;
+      }).join('')}</div>`, [boardButton(() => pickSlice())]);
+    screen.querySelectorAll('.slice').forEach(b => { b.onclick = () => startRun(pie.slices[b.dataset.id]); });
   }
 
-  function spinWheel(slice) {
-    const city = R.currentCity(camp), street = camp.streets[city.id];
-    const ticket = R.spin(city, street);
-    R.applyTicket(camp, ticket);
-    show(`<h2>The Lazy Susan</h2><div class="wheel spinning"></div><div id="ticket" class="ticket hidden">
-      <h3>${ticket.title}</h3><p>${ticket.text}</p></div>`);
-    setTimeout(() => {
-      $('ticket').classList.remove('hidden');
-      screen.querySelector('.wheel').classList.remove('spinning');
-      const b = document.createElement('button');
-      b.textContent = 'Run'; b.onclick = () => startRun(slice, ticket);
-      screen.querySelector('.actions').appendChild(b);
-    }, debug ? 10 : 1400);
-  }
-
-  function startRun(slice, ticket) {
+  function startRun(slice) {
     const city = R.currentCity(camp), street = camp.streets[city.id];
     screen.classList.add('hidden');
     controls.classList.remove('hidden');
     $('specialBtn').textContent = C.STYLES[slice.style].specialName;
-    run = new P.Run(canvas, input, { camp, city, street, slice, ticket, onEnd: result => afterRun(slice, result) });
+    run = new P.Run(canvas, input, { camp, city, street, slice, onEnd: result => debrief(slice, result) });
     if (debug) window.__pr.run = run;
     run.start();
   }
 
-  function afterRun(slice, result) {
-    const city = R.currentCity(camp);
+  // Every attempt ends here, eaten or delivered, before anything else happens.
+  function debrief(slice, result) {
     const receipt = R.finishRun(camp, slice, result);
     save();
-    const heading = result.outcome === 'delivered' ? 'Delivered' : result.outcome === 'cold' ? 'Gone cold' : 'Eaten';
-    const kept = result.outcome === 'delivered' && !city.finale ? `<p>${camp.crew.filter(s => s.origin === city.id).length} slices go on to the finale.</p>` : '';
-    show(`<h2>${heading}</h2>${receiptHtml(receipt)}${kept}`, [['Next', route]]);
+    A.play('print');
+    const heading = { delivered: 'Delivered', cold: 'Gone cold', dead: 'Eaten' }[result.outcome];
+    show(`<h2 class="stamp ${result.outcome}">${heading}</h2>${B.receiptHtml(receipt)}`, [['Back to HQ', route], boardButton(() => debriefAgain(receipt, heading, result))]);
   }
 
-  function finaleIntro() {
-    show(`<h2>${C.FINALE.name}</h2>${panels(C.FINALE.panels)}<p>${camp.crew.length} slices made it this far.</p>`,
-      [['Go', () => { camp.phase = 'slice'; route(); }]]);
+  function debriefAgain(receipt, heading, result) {
+    show(`<h2 class="stamp ${result.outcome}">${heading}</h2>${B.receiptHtml(receipt)}`, [['Back to HQ', route], boardButton(() => debriefAgain(receipt, heading, result))]);
   }
 
-  function ending() {
-    show(`<div class="ending">${panels(C.ENDING.panels)}${receiptHtml(R.finalReceipt(camp), true)}
-      <p class="note">${C.ENDING.note}</p></div>`, [['Back to title', title]]);
+  function endCard() {
+    const card = C.ENDING.card;
+    const link = card.youtube ? `<a class="listen" href="${card.youtube}" target="_blank" rel="noopener">${card.listen}</a>` : '';
+    show(`<div class="card"><h2>${card.line}</h2>${link}<p class="bday">${card.birthday}</p></div>`, [['Back to title', title, 'quiet']]);
+  }
+
+  function pause(on) {
+    if (!run || run.done) return;
+    run.paused = on;
+    $('pause').classList.toggle('hidden', !on);
+    $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on';
   }
 
   // One input object, fed by keyboard and touch.
@@ -146,9 +149,15 @@
     take(k) { const v = this.queued[k]; this.queued[k] = false; return v; },
   };
   const KEYS = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump', Shift: 'special', f: 'power', e: 'give' };
-  addEventListener('keydown', ev => { const k = KEYS[ev.key]; if (!k) return; if (k === 'left' || k === 'right') input[k] = true; else if (!ev.repeat) input.queued[k] = true; });
+  addEventListener('keydown', ev => {
+    if (ev.key === 'Escape' || ev.key === 'p') return pause(!(run && run.paused));
+    const k = KEYS[ev.key]; if (!k) return;
+    if (k === 'left' || k === 'right') input[k] = true; else if (!ev.repeat) input.queued[k] = true;
+  });
   addEventListener('keyup', ev => { const k = KEYS[ev.key]; if (k === 'left' || k === 'right') input[k] = false; });
-  document.querySelectorAll('#controls button').forEach(b => {
+  addEventListener('pointerdown', () => A.unlock());
+  addEventListener('keydown', () => A.unlock());
+  document.querySelectorAll('#controls button[data-key]').forEach(b => {
     const k = b.dataset.key;
     const down = ev => { ev.preventDefault(); if (k === 'left' || k === 'right') input[k] = true; else input.queued[k] = true; };
     const up = ev => { ev.preventDefault(); if (k === 'left' || k === 'right') input[k] = false; };
@@ -156,14 +165,18 @@
     for (const name of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(name, up);
     b.addEventListener('contextmenu', ev => ev.preventDefault());
   });
+  $('pauseBtn').onclick = () => pause(true);
+  $('resumeBtn').onclick = () => pause(false);
+  $('pauseBoardBtn').onclick = () => B.open(overlay, camp, () => overlay.classList.add('hidden'));
+  $('muteBtn').onclick = () => { A.toggle(); $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on'; };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
   setInterval(() => {
-    const live = run && !run.done;
-    const near = live && run.nearby;
+    const near = run && !run.done && run.nearby;
     const label = near ? { ninja: 'BRIBE', mutant: 'FEED', teen: 'DISTRACT' }[near.e.type] : null;
     $('giveBtn').textContent = label || '';
     $('giveBtn').classList.toggle('off', !label);
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };
-  title();
+  window.PR_SPRITES.load().then(title);
 })();

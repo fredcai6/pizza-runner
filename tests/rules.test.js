@@ -3,149 +3,213 @@ const assert = require('node:assert');
 const R = require('../js/rules.js');
 const C = require('../js/content.js');
 
-const fresh = () => { const c = R.newCampaign(); R.startCity(c, 'pepperoni', 'garlic'); return c; };
-const street = c => c.streets[R.currentCity(c).id];
-const pie = c => c.pies[R.currentCity(c).id];
+const city = c => R.currentCity(c);
+const street = c => c.streets[city(c).id];
+const pie = c => c.pies[city(c).id];
+const order = c => { const m = city(c).menu; R.placeOrder(c, m.a[0], m.b[0]); };
+const fresh = () => { const c = R.newCampaign(); order(c); return c; };
+const lose = (c, s = R.ready(pie(c))[0]) => R.finishRun(c, s, { outcome: 'cold', x: 100 });
+const deliver = (c, s = R.ready(pie(c))[0]) => R.finishRun(c, s, { outcome: 'delivered', x: 100 });
 
-test('a pie is half and half, three slices a side', () => {
-  const p = pie(fresh());
-  assert.deepStrictEqual(p.map(s => s.topping), ['pepperoni', 'pepperoni', 'pepperoni', 'garlic', 'garlic', 'garlic']);
+test('the route runs New York to Long Beach and ends there', () => {
+  assert.deepStrictEqual(C.CITIES.map(x => x.id), ['newyork', 'chicago', 'dc', 'naples', 'california']);
+  assert.ok(C.CITIES[4].final);
+  assert.strictEqual(C.CITIES.filter(x => x.final).length, 1);
 });
 
-test('the street is identical every time', () => {
-  for (const city of [...C.CITIES, C.FINALE]) {
-    assert.deepStrictEqual(R.generateStreet(city), R.generateStreet(city));
+test('New York is pepperoni only', () => {
+  const c = R.newCampaign();
+  assert.throws(() => R.placeOrder(c, 'pepperoni', 'garlic'));
+  R.placeOrder(c, 'pepperoni', 'pepperoni');
+  assert.ok(pie(c).slices.every(s => s.topping === 'pepperoni'));
+});
+
+test('a pie is half and half, three slices a side', () => {
+  const p = R.buildPie(C.CITIES[1], 'sausage', 'mushroom');
+  assert.deepStrictEqual(p.slices.map(s => s.topping), ['sausage', 'sausage', 'sausage', 'mushroom', 'mushroom', 'mushroom']);
+});
+
+test('streets are identical every time', () => {
+  for (const x of C.CITIES) assert.deepStrictEqual(R.generateStreet(x), R.generateStreet(x));
+});
+
+test('every barricade and platform can be reached by the heaviest pie', () => {
+  const lift = Math.min(...Object.values(C.STYLES).map(s => s.jump ** 2 / (2 * 1.05)));
+  for (const x of C.CITIES) {
+    const s = R.generateStreet(x);
+    for (const b of s.barricades) assert.ok(b.h < lift);
+    for (const p of s.platforms) assert.ok(R.GROUND - p.y < lift);
   }
 });
 
-test('platforms can be reached from the ground', () => {
-  for (const city of C.CITIES) for (const p of R.generateStreet(city).platforms) assert.ok(R.GROUND - p.y <= 125);
-});
-
-test('every barricade can be jumped by the heaviest pie', () => {
-  const lift = C.STYLES.deep.jump ** 2 / (2 * 0.6);
-  for (const city of C.CITIES) for (const c of R.generateStreet(city).barricades) assert.ok(c.h < lift);
-});
-
-test('a defeated enemy stays defeated and hands back its toppings', () => {
-  const c = fresh(); const e = street(c).enemies[0];
-  e.toppings.push('garlic');
-  assert.deepStrictEqual(R.defeat(c, e), ['garlic']);
-  R.finishRun(c, pie(c)[0], { outcome: 'cold', x: 100 });
+test('a defeated enemy stays gone and hands back its toppings', () => {
+  const c = fresh(), e = street(c).enemies[0];
+  e.toppings.push('pepperoni');
+  assert.deepStrictEqual(R.defeat(c, e), ['pepperoni']);
+  lose(c);
   assert.strictEqual(street(c).enemies[0].alive, false);
 });
 
 test('the enemy that gets you grows and takes your topping', () => {
-  const c = fresh(); const e = street(c).enemies[1];
-  R.finishRun(c, pie(c)[0], { outcome: 'dead', killer: e.id, x: 300 });
+  const c = fresh(), e = street(c).enemies[1];
+  R.finishRun(c, pie(c).slices[0], { outcome: 'dead', killer: e.id, x: 300 });
   assert.strictEqual(e.power, 1);
   assert.deepStrictEqual(e.toppings, ['pepperoni']);
   assert.strictEqual(street(c).dead.length, 1);
 });
 
-test('a ninja bribe only lasts the run it was paid in', () => {
-  const c = fresh(); const n = street(c).enemies.find(e => e.type === 'ninja');
+test('a ninja bribe lasts one run, and a fed mutant stays calm', () => {
+  const c = fresh();
+  const n = { toppings: [], bribedRun: -1 }, m = { toppings: [], bribedRun: -1 };
   R.bribe(c, n, 'pepperoni', 0);
-  assert.ok(R.peaceful(n, 0));
-  assert.ok(!R.peaceful(n, 1));
-  assert.deepStrictEqual(n.toppings, ['pepperoni']);
-});
-
-test('a fed mutant stays calm', () => {
-  const c = fresh(); const m = street(c).enemies.find(e => e.type === 'mutant');
   R.feed(c, m, 'garlic');
-  assert.ok(R.peaceful(m, 0) && R.peaceful(m, 5));
+  assert.ok(R.peaceful(n, 0) && !R.peaceful(n, 1));
+  assert.ok(R.peaceful(m, 0) && R.peaceful(m, 9));
 });
 
-test('being filmed speeds up only the next run', () => {
-  const c = fresh(); const t = { mods: {} };
-  R.finishRun(c, pie(c)[0], { outcome: 'cold', x: 1, filmed: true });
-  assert.strictEqual(R.modsFor(street(c), t).enemySpeed, 1.3);
-  R.finishRun(c, pie(c)[1], { outcome: 'cold', x: 1, filmed: false });
-  assert.strictEqual(R.modsFor(street(c), t).enemySpeed, 1);
-});
-
-test('a delivery moves unused slices to the crew and opens the next city', () => {
+test('a delivery ends the city, and its leftovers stay behind', () => {
   const c = fresh();
-  R.finishRun(c, pie(c)[0], { outcome: 'cold', x: 1 });
-  R.finishRun(c, c.pies.california[1], { outcome: 'delivered', x: 1 });
-  assert.strictEqual(c.crew.length, 4);
+  lose(c);
+  assert.strictEqual(c.phase, 'return');
+  deliver(c);
+  assert.strictEqual(c.phase, 'door');
+  R.leaveCity(c);
   assert.strictEqual(c.cityIndex, 1);
-  assert.strictEqual(c.phase, 'intro');
+  assert.strictEqual(c.phase, 'briefing');
+  assert.strictEqual(c.pies.newyork.slices.filter(s => s.status === 'ready').length, 4);
 });
 
-test('losing all six slices still moves on, with nothing kept', () => {
+test('every city uses its own fresh pie', () => {
+  const c = fresh(); deliver(c); R.leaveCity(c); order(c);
+  assert.strictEqual(R.ready(pie(c)).length, 6);
+  assert.strictEqual(pie(c).slices[0].style, 'deep');
+});
+
+test('losing all six goes undercover and the story moves on', () => {
   const c = fresh();
-  for (const s of c.pies.california) R.finishRun(c, s, { outcome: 'cold', x: 1 });
-  assert.strictEqual(c.crew.length, 0);
+  for (let i = 0; i < 6; i++) lose(c);
+  assert.strictEqual(c.phase, 'missed');
+  assert.strictEqual(R.roster(c).filter(r => r.taped).length, 1);
+  R.leaveCity(c);
   assert.strictEqual(c.cityIndex, 1);
 });
 
-function toFinale(outcomes) {
+test('delivering with the last slice also tapes the roster', () => {
+  const c = fresh();
+  for (let i = 0; i < 5; i++) lose(c);
+  deliver(c);
+  assert.strictEqual(c.phase, 'door');
+  assert.ok(R.roster(c).find(r => r.city === 'newyork').taped);
+});
+
+test('in the last city a lost pie reorders onto the same street', () => {
   const c = R.newCampaign();
-  for (const city of C.CITIES) {
-    R.startCity(c, city.pantry[0], city.pantry[1]);
-    for (const s of c.pies[city.id]) {
-      if (c.cityIndex >= C.CITIES.length || R.currentCity(c).id !== city.id) break;
-      R.finishRun(c, s, outcomes(c, city));
-    }
-  }
-  return c;
-}
-
-test('a campaign with zero slices left can still be won', () => {
-  const c = toFinale(() => ({ outcome: 'cold', x: 1 }));
-  assert.strictEqual(c.phase, 'finale-intro');
-  const boss = c.streets.finale.enemies.find(e => e.type === 'boss');
-  for (let i = 0; i < 3; i++) {
-    const roster = R.finaleRoster(c);
-    assert.strictEqual(roster[0].style, 'crust');
-    R.finishRun(c, roster[0], { outcome: 'dead', killer: boss.id, x: 1 });
-    roster[0].status = 'ready';
-  }
-  while (boss.alive) R.defeat(c, boss);
-  R.finishRun(c, R.finaleRoster(c)[0], { outcome: 'delivered', x: 1 });
+  for (let i = 0; i < 4; i++) { order(c); deliver(c); R.leaveCity(c); }
+  order(c);
+  const first = street(c).enemies[0];
+  R.defeat(c, first);
+  const living = street(c).enemies.filter(e => e.alive).length;
+  street(c).fires[0].lit = false;
+  for (let i = 0; i < 6; i++) lose(c);
+  assert.strictEqual(c.phase, 'reorder');
+  order(c);
+  assert.strictEqual(R.ready(pie(c)).length, 6);
+  assert.strictEqual(pie(c).reorder, 1);
+  assert.strictEqual(street(c).enemies[0].alive, false);
+  assert.strictEqual(street(c).dead.length, 6);
+  assert.ok(street(c).fires.every(f => f.lit));
+  assert.strictEqual(street(c).enemies.filter(e => e.alive).length, Math.floor(living / 2));
+  deliver(c);
+  R.leaveCity(c);
   assert.strictEqual(c.phase, 'ending');
-  assert.strictEqual(R.finalReceipt(c).to, 'KATELYN');
-  assert.strictEqual(R.finalReceipt(c).date, '08/25/2015');
+  assert.strictEqual(R.headquarters(c).alewife, true);
 });
 
-test('the best nemesis of each city comes to the Pass with its toppings', () => {
-  const c = toFinale((camp, city) => {
-    const e = camp.streets[city.id].enemies[0];
-    return { outcome: 'dead', killer: e.id, x: 1 };
-  });
-  const fin = c.streets.finale.enemies;
-  assert.strictEqual(fin.filter(e => e.nemesisFrom).length, 4);
-  const boss = fin.find(e => e.type === 'boss');
-  assert.ok(boss.toppings.length >= 4);
-  assert.strictEqual(boss.hp, 6 + Math.min(boss.toppings.length, 8));
-});
-
-test('no receipt before the last spells her name right or shows the date', () => {
-  const c = toFinale(() => ({ outcome: 'cold', x: 1 }));
-  for (const r of c.receipts) {
-    assert.notStrictEqual(r.to, 'KATELYN');
-    assert.notStrictEqual(r.date, C.ORDER_DATE);
+test('enough lost pies always empties the last street', () => {
+  const c = R.newCampaign();
+  for (let i = 0; i < 4; i++) { order(c); deliver(c); R.leaveCity(c); }
+  order(c);
+  street(c).enemies[3].power = 5;
+  let pies = 1;
+  while (street(c).enemies.some(e => e.alive)) {
+    for (let i = 0; i < 6; i++) lose(c);
+    order(c); pies++;
+    assert.ok(!street(c).enemies[3].alive);
+    assert.ok(pies < 12);
   }
 });
 
-test('later cities can draw tickets earlier ones cannot', () => {
-  const draw = city => new Set(Array.from({ length: 400 }, (_, i) => R.spin(city, null, () => (i % 40) / 40).id));
-  assert.ok(![...draw(C.CITIES[0])].includes('moon'));
-  assert.ok([...draw(C.CITIES[2])].includes('moon'));
+test('HQ starts with five cold plain pizzas and shows what happened', () => {
+  const c = R.newCampaign();
+  const before = R.headquarters(c);
+  assert.strictEqual(before.pizzas.length, 5);
+  assert.ok(before.pizzas.every(p => !p.a && p.left === 6));
+  order(c); deliver(c);
+  const after = R.headquarters(c).pizzas[0];
+  assert.strictEqual(after.a, 'pepperoni');
+  assert.strictEqual(after.left, 5);
 });
 
-test('a rewrite ticket amends the last receipt', () => {
+test('enemy notes stay hidden until the behavior is seen', () => {
   const c = fresh();
-  R.finishRun(c, pie(c)[0], { outcome: 'cold', x: 1 });
-  R.applyTicket(c, C.TICKETS.find(t => t.rewrite));
-  assert.ok(c.receipts[0].amended);
+  assert.deepStrictEqual(R.enemyFile(c, 'teen').notes, []);
+  assert.strictEqual(R.learn(c, 'teen', 'films'), true);
+  assert.strictEqual(R.learn(c, 'teen', 'films'), false);
+  assert.strictEqual(R.enemyFile(c, 'teen').notes.length, 1);
 });
 
-test('the radio reacts to the ledger', () => {
+test('theory notes follow city milestones regardless of enemy encounters', () => {
   const c = fresh();
-  assert.match(R.radio(c), /Expediter/);
-  R.finishRun(c, pie(c)[0], { outcome: 'cold', x: 1 });
-  assert.match(R.radio(c), /cold/);
+  const n = R.theory(c).length;
+  deliver(c); R.leaveCity(c);
+  assert.ok(R.theory(c).length > n);
+});
+
+test('every receipt is an alias and a different spelling from the last', () => {
+  const c = fresh();
+  for (let i = 0; i < 3; i++) lose(c);
+  const names = c.receipts.map(r => r.to);
+  assert.strictEqual(new Set(names).size, 3);
+  assert.ok(!names.includes('Katelyn'));
+  assert.deepStrictEqual(R.aliases(c), names);
+});
+
+test('being filmed lasts only the next run', () => {
+  const c = fresh();
+  R.finishRun(c, pie(c).slices[0], { outcome: 'cold', x: 1, filmed: true });
+  assert.strictEqual(street(c).filmed, true);
+  lose(c);
+  assert.strictEqual(street(c).filmed, false);
+});
+
+test('scenes stay within the cutscene budget', () => {
+  const check = shots => {
+    assert.ok(shots.length <= 3);
+    assert.ok(shots.flatMap(s => s.lines).length <= 10);
+  };
+  for (const x of C.CITIES) check(x.briefing);
+  for (const r of C.RETURNS) check([{ lines: r.lines }]);
+  check(C.ENDING.finale);
+});
+
+test('Chicago quotes what the old slice only says later', () => {
+  const said = C.CITIES[2].briefing.flatMap(s => s.lines).map(l => l.text);
+  assert.ok(said.includes(C.CITIES[1].instructions));
+});
+
+test('the story has nothing left from the old design', () => {
+  const text = JSON.stringify(C);
+  for (const word of ['Lazy Susan', 'Great Recall', 'contraband', 'stale crust', 'The Pass']) assert.ok(!text.includes(word), word);
+});
+
+test('the end card has no link until a real one is supplied', () => {
+  assert.strictEqual(C.ENDING.card.youtube, null);
+  assert.match(C.ENDING.finale[0].lines[0].text, /^Know thy enemy\.\.\.$/);
+});
+
+test('a save survives a trip through JSON', () => {
+  const c = fresh(); lose(c);
+  const back = JSON.parse(JSON.stringify(c));
+  assert.deepStrictEqual(R.headquarters(back), R.headquarters(c));
+  assert.strictEqual(R.ready(back.pies.newyork).length, 5);
 });
