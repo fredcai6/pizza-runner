@@ -1,1 +1,22 @@
-{}
+{
+  "slice-ny": [
+    "idle",
+    "run",
+    "jump",
+    "fold",
+    "cold"
+  ],
+  "old-timer": [
+    "idle",
+    "talk",
+    "squint"
+  ],
+  "teen": [
+    "idle",
+    "walk"
+  ],
+  "turtle": [
+    "idle",
+    "walk"
+  ]
+}

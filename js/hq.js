@@ -14,8 +14,10 @@
 
   function pie(ctx, x, y, r, z) {
     const from = -Math.PI / 2;
-    ctx.fillStyle = 'rgba(0,0,0,0.25)'; dot(ctx, x + 4, y + 6, r + 5);
-    ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x - r - 8, y - r - 8, 2 * r + 16, 2 * r + 16);
+    if (!S.prop(ctx, 'hq/box', x, y + r + 26)) {
+      ctx.fillStyle = 'rgba(0,0,0,0.25)'; dot(ctx, x + 4, y + 6, r + 5);
+      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x - r - 8, y - r - 8, 2 * r + 16, 2 * r + 16);
+    }
     for (let i = 0; i < z.left; i++) {
       const a0 = from + i * Math.PI / 3, a1 = a0 + Math.PI / 3;
       ctx.fillStyle = '#c98a44'; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, r, a0 + 0.02, a1 - 0.02); ctx.fill();
@@ -31,8 +33,11 @@
 
   // The board draws itself, including the photo of itself, so later evidence shows up at every depth.
   function board(ctx, x, y, w, h, hq, depth = 0) {
-    ctx.fillStyle = '#4a3020'; ctx.fillRect(x - w * 0.03, y - h * 0.04, w * 1.06, h * 1.08);
-    ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
+    // The top level sits on the painted cork. Only the board inside the photo draws its own.
+    if (depth > 0 || !S.layer('hq/back')) {
+      ctx.fillStyle = '#4a3020'; ctx.fillRect(x - w * 0.03, y - h * 0.04, w * 1.06, h * 1.08);
+      ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
+    }
     const n = Math.min(hq.receipts, 18);
     for (let i = 0; i < n; i++) {
       ctx.fillStyle = '#fffef6';
@@ -97,8 +102,10 @@
     if (!S.layer('hq/back')) { ctx.fillStyle = '#ffdc96'; dot(ctx, 640, 34, 26); }
     const rect = C.HQ_BOARD;
     board(ctx, rect.x, rect.y, rect.w, rect.h, hq);
-    ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
-    ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
+    if (!layer(ctx, 'hq/table', camX, 0)) {
+      ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
+      ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
+    }
     hq.pizzas.forEach((z, i) => pie(ctx, 460 + i * 150, 420, 58, z));
     oldTimer(ctx, 300, 410, ms, view.mood);
     layer(ctx, 'hq/front', camX, -0.18);

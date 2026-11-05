@@ -174,7 +174,7 @@
   };
 
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
-  const HQ_BOARD = { x: 700, y: 70, w: 520, h: 350 };
+  const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
   const api = { TOPPINGS, STYLES, CITIES, RETURNS, THEORY, ENEMIES, BARKS, SHELL_PAPER, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;

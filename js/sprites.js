@@ -24,7 +24,8 @@
 
   // Painted layers are optional, and each one simply appears once its file exists.
   const layers = {};
-  const LAYERS = ['hq/back', 'hq/mid', 'hq/front', ...['newyork', 'chicago', 'dc', 'naples', 'california'].flatMap(c => [`${c}/far`, `${c}/mid`, `${c}/near`])];
+  const CITY_LAYERS = ['far', 'mid', 'near', 'platform', 'barricade', 'barrel', 'barrel-out', 'door'];
+  const LAYERS = ['hq/back', 'hq/mid', 'hq/table', 'hq/front', 'hq/box', ...['newyork', 'chicago', 'dc', 'naples', 'california'].flatMap(c => CITY_LAYERS.map(l => `${c}/${l}`))];
 
   function loadLayers() {
     return Promise.all(LAYERS.map(name => new Promise(done => {
@@ -47,10 +48,28 @@
     return true;
   }
 
+  // Draws a painted prop with its bottom center at (x, foot). False when it has not been painted.
+  function prop(ctx, name, x, foot) {
+    const image = layers[name];
+    if (!image) return false;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(image, Math.round(x - image.width / 2), Math.round(foot - image.height));
+    return true;
+  }
+
+  // Repeats a painted tile across a span, top-left at (x, y).
+  function strip(ctx, name, x, y, w) {
+    const image = layers[name];
+    if (!image) return false;
+    ctx.imageSmoothingEnabled = false;
+    for (let i = 0; i < w; i += image.width) ctx.drawImage(image, 0, 0, Math.min(image.width, w - i), image.height, Math.round(x + i), y, Math.min(image.width, w - i), image.height);
+    return true;
+  }
+
   const has = (character, anim) => !!loaded[`${character}/${anim}`];
 
   // Draws feet-down at (x, foot). Returns false when there is no art, so the caller draws its own.
-  function draw(ctx, character, anim, ms, x, foot, height, facing = 1) {
+  function draw(ctx, character, anim, ms, x, foot, height, facing = 1, squash = 1) {
     const s = loaded[`${character}/${anim}`];
     if (!s) return false;
     const { w, h } = s.atlas.frame, count = s.atlas.count;
@@ -60,11 +79,11 @@
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     ctx.translate(x, foot);
-    ctx.scale(facing, 1);
+    ctx.scale(facing, squash);
     ctx.drawImage(s.image, i * w, 0, w, h, -w * scale / 2, -h * scale, w * scale, h * scale);
     ctx.restore();
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, layer, tile, has, draw };
+  root.PR_SPRITES = { load, loadLayers, layer, tile, prop, strip, has, draw };
 })(window);

@@ -362,17 +362,19 @@
       const far = S.tile(ctx, `${city.id}/far`, cam, 0.2, W);
       if (!far) this.scenery(pal);
       S.tile(ctx, `${city.id}/mid`, cam, 0.5, W);
-      const near = S.tile(ctx, `${city.id}/near`, cam, 1, W);
       ctx.save(); ctx.translate(-Math.round(cam), 0);
-      if (!near) {
-        ctx.fillStyle = pal.ground; ctx.fillRect(cam - 30, GROUND, W + 60, H - GROUND);
-        ctx.fillStyle = pal.top; ctx.fillRect(cam - 30, GROUND, W + 60, 12);
-      }
+      ctx.fillStyle = pal.ground; ctx.fillRect(cam - 30, GROUND, W + 60, H - GROUND);
+      ctx.fillStyle = pal.top; ctx.fillRect(cam - 30, GROUND, W + 60, 12);
+      ctx.restore();
+      S.tile(ctx, `${city.id}/near`, cam, 1, W);
+      ctx.save(); ctx.translate(-Math.round(cam), 0);
       for (const pl of this.street.platforms) {
+        if (S.strip(ctx, `${city.id}/platform`, pl.x, pl.y, pl.w)) continue;
         ctx.fillStyle = pal.ground; ctx.fillRect(pl.x, pl.y, pl.w, 24);
         ctx.fillStyle = pal.top; ctx.fillRect(pl.x, pl.y, pl.w, 7);
       }
       for (const c of this.street.barricades) {
+        if (S.prop(ctx, `${city.id}/barricade`, c.x + c.w / 2, GROUND)) continue;
         ctx.fillStyle = '#5b4a3a'; ctx.fillRect(c.x, GROUND - c.h, c.w, c.h);
         ctx.strokeStyle = '#2b2119'; ctx.lineWidth = 5; ctx.strokeRect(c.x + 3, GROUND - c.h + 3, c.w - 6, c.h - 6);
       }
@@ -417,6 +419,7 @@
     drawFires() {
       const { ctx } = this;
       for (const f of this.street.fires) {
+        if (S.prop(ctx, `${this.city.id}/${f.lit ? 'barrel' : 'barrel-out'}`, f.x, GROUND)) continue;
         ctx.fillStyle = '#39302b'; ctx.fillRect(f.x - 27, GROUND - 62, 54, 62);
         if (f.lit) { ctx.font = '46px serif'; ctx.textAlign = 'center'; ctx.fillText('🔥', f.x, GROUND - 62); }
       }
@@ -430,6 +433,7 @@
 
     drawDoor() {
       const { ctx } = this, x = this.street.door;
+      if (S.prop(ctx, `${this.city.id}/door`, x + 56, GROUND)) return;
       ctx.fillStyle = '#2b1d14'; ctx.fillRect(x, GROUND - 165, 112, 165);
       ctx.fillStyle = '#ffd76a'; ctx.fillRect(x + 14, GROUND - 150, 84, 150);
       ctx.fillStyle = '#fff'; ctx.font = 'bold 19px sans-serif'; ctx.textAlign = 'center';
@@ -456,8 +460,11 @@
       const cheese = f > 0.6 ? '#ffcc33' : f > 0.3 ? '#e8bc55' : '#c9b48a';
       const landing = this.land / 12, stretch = !p.grounded ? Math.min(0.14, Math.abs(p.vy) * 0.008) : 0;
       const squash = this.folded > 0 ? 0.55 : 1 - landing * 0.25 + stretch, scale = this.style.scale || 1;
-      const anim = !p.grounded ? 'jump' : p.vx ? 'run' : 'idle';
-      if (!S.draw(ctx, sliceArt(this.slice.style), this.folded > 0 ? 'fold' : anim, this.frame * 16.7, p.x + 36, p.y + p.h, HERO * scale * squash, p.facing)) {
+      const cold = f <= 0.3 && p.grounded && !p.vx;
+      const anim = this.folded > 0 ? 'fold' : !p.grounded ? 'jump' : p.vx ? 'run' : cold ? 'cold' : 'idle';
+      // One-shot animations play from their own start.
+      if (anim !== this.anim) { this.anim = anim; this.animFrame = this.frame; }
+      if (!S.draw(ctx, sliceArt(this.slice.style), anim, (this.frame - this.animFrame) * 16.7, p.x + 36, p.y + p.h, HERO * scale, p.facing, this.folded > 0 ? 1 : squash)) {
         drawSlice(ctx, p.x + 36, p.y + 48 + (1 - squash) * 36, this.slice.style, this.topping, cheese, 2.15 * scale, false, p.facing, squash);
       }
       if (this.smash > 0) { ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(p.x + 36, p.y + 48, 62 * scale, 0, 7); ctx.stroke(); }
