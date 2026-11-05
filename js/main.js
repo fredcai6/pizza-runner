@@ -178,5 +178,5 @@
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };
-  window.PR_SPRITES.load().then(title);
+  Promise.all([window.PR_SPRITES.load(), window.PR_SPRITES.loadLayers()]).then(title);
 })();

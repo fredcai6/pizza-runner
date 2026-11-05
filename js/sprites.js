@@ -22,6 +22,31 @@
     await Promise.all(Object.entries(manifest).flatMap(([c, anims]) => anims.map(a => loadOne(c, a).catch(() => {}))));
   }
 
+  // Painted layers are optional, and each one simply appears once its file exists.
+  const layers = {};
+  const LAYERS = ['hq/back', 'hq/mid', 'hq/front', ...['newyork', 'chicago', 'dc', 'naples', 'california'].flatMap(c => [`${c}/far`, `${c}/mid`, `${c}/near`])];
+
+  function loadLayers() {
+    return Promise.all(LAYERS.map(name => new Promise(done => {
+      const image = new Image();
+      image.onload = () => { layers[name] = image; done(); };
+      image.onerror = done;
+      image.src = `assets/backgrounds/${name}.png`;
+    })));
+  }
+
+  const layer = name => layers[name];
+
+  // Draws a horizontally tiling layer scrolled by cam.
+  function tile(ctx, name, cam, rate, width) {
+    const image = layers[name];
+    if (!image) return false;
+    ctx.imageSmoothingEnabled = false;
+    const w = image.width, x = -((cam * rate) % w);
+    for (let i = x; i < width; i += w) ctx.drawImage(image, Math.round(i), 0);
+    return true;
+  }
+
   const has = (character, anim) => !!loaded[`${character}/${anim}`];
 
   // Draws feet-down at (x, foot). Returns false when there is no art, so the caller draws its own.
@@ -41,5 +66,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, has, draw };
+  root.PR_SPRITES = { load, loadLayers, layer, tile, has, draw };
 })(window);

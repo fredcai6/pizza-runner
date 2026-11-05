@@ -169,10 +169,13 @@
   const PRINTER_CLOCK = '12:00 AM';
 
   const ENDING = {
-    finale: [{ comp: 'polaroid', lines: [{ who: 'old', text: 'Know thy enemy...' }] }],
+    finale: [{ comp: 'polaroid', lines: [{ who: 'old', mood: 'squint', text: 'Know thy enemy...' }] }],
     card: { line: 'To be continued...', listen: 'Listen to DJ Alewife here', youtube: null, birthday: '(Happy birthday Katelyn!)' },
   };
 
-  const api = { TOPPINGS, STYLES, CITIES, RETURNS, THEORY, ENEMIES, BARKS, SHELL_PAPER, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING };
+  // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
+  const HQ_BOARD = { x: 700, y: 70, w: 520, h: 350 };
+
+  const api = { TOPPINGS, STYLES, CITIES, RETURNS, THEORY, ENEMIES, BARKS, SHELL_PAPER, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

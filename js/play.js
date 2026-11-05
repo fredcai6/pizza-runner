@@ -18,7 +18,8 @@
       this.p = { x: 140, y: GROUND - 96, vx: 0, vy: 0, w: 72, h: 96, grounded: true, facing: 1 };
       this.invuln = 0; this.specialCd = 0; this.smash = 0; this.pounding = false; this.folded = 0;
       this.aura = false; this.auraTick = 0;
-      this.shots = []; this.foes = []; this.drops = []; this.bursts = [];
+      this.shots = []; this.foes = []; this.drops = []; this.bursts = []; this.dust = [];
+      this.shake = 0; this.freeze = 0; this.land = 0; this.look = 0;
       this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
       this.filmed = false; this.toppingGone = false; this.done = false; this.nearby = null;
       this.actors = street.enemies.filter(e => e.alive).map(e => ({ e, x: e.x, y: e.y, dir: -1, home: e.x, cd: 40 + e.id * 13 % 60, distracted: false, phase: e.id }));
@@ -55,7 +56,11 @@
     }
 
     step() {
+      // A brief freeze on a hit gives it weight.
+      if (this.freeze > 0) { this.freeze--; return; }
       this.frame++;
+      if (this.shake > 0) this.shake--;
+      if (this.land > 0) this.land--;
       const { p, input } = this;
       if (this.barkT > 0) this.barkT--;
       if (this.invuln > 0) this.invuln--;
@@ -78,7 +83,7 @@
       if (input.take('power')) this.power();
       if (input.take('give')) this.give();
 
-      const lastBottom = p.y + p.h;
+      const lastBottom = p.y + p.h, wasGrounded = p.grounded, fall = p.vy;
       p.vy += G;
       p.y += p.vy;
       p.grounded = false;
@@ -93,6 +98,13 @@
         }
       }
 
+      if (p.grounded && !wasGrounded && fall > 8) {
+        this.land = 12;
+        this.puff(p.x + 36, p.y + p.h, 7);
+      }
+      if (p.grounded && p.vx && this.frame % 7 === 0) this.puff(p.x + 36 - p.facing * 34, p.y + p.h, 1);
+      this.dust = this.dust.filter(d => { d.x += d.vx; d.y += d.vy; d.vy += 0.05; return --d.t > 0; });
+
       this.heat -= this.style.heatDecay / 60;
       this.updateBand();
       this.fires();
@@ -102,7 +114,9 @@
       this.dropsStep();
       this.auraStep();
       this.bursts = this.bursts.filter(b => --b.t > 0);
-      this.cam = Math.max(0, Math.min(this.city.length - W, p.x - W / 3));
+      // The camera leans toward where she is heading, so there is room to react.
+      this.look += (p.facing * 170 - this.look) * 0.04;
+      this.cam = Math.max(0, Math.min(this.city.length - W, p.x - W / 2.6 + this.look));
       if (this.done) return;
       if (this.heat <= 0) return this.end('cold');
       if (p.x + p.w >= this.street.door) this.end('delivered');
@@ -255,6 +269,7 @@
       if (a.e.type === 'turtle' && !smash) { this.note('turtle', 'armored'); return; }
       this.bursts.push({ x: a.x, y: a.y - 40, r: 48, t: 10, color: 'rgba(255,255,255,0.6)' });
       A.play('smash');
+      this.shake = 10; this.freeze = 3;
       this.defeat(a);
     }
 
@@ -274,10 +289,17 @@
 
     hurt(amount, owner, fromX) {
       if (this.invuln > 0) return;
-      this.heat -= amount; this.invuln = 100;
+      this.heat -= amount; this.invuln = 100; this.shake = 16; this.freeze = 5;
       A.play('hit');
       this.p.vy = -10; this.p.x += this.p.x < fromX ? -44 : 44;
       if (this.heat <= 0) this.end('dead', owner);
+    }
+
+    puff(x, y, n) {
+      for (let i = 0; i < n; i++) {
+        const spread = n > 1 ? (i - n / 2) * 0.7 : -this.p.facing * 0.8;
+        this.dust.push({ x, y: y - 4, vx: spread, vy: -0.6 - (i % 3) * 0.3, t: 22, r: 7 + (i % 3) * 3 });
+      }
     }
 
     shotsStep() {
@@ -335,10 +357,17 @@
       const sky = ctx.createLinearGradient(0, 0, 0, H);
       sky.addColorStop(0, pal.skyTop); sky.addColorStop(1, pal.skyBottom);
       ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-      this.scenery(pal);
+      const jolt = this.shake ? (this.shake % 2 ? 1 : -1) * this.shake * 0.7 : 0;
+      ctx.save(); ctx.translate(jolt, -jolt * 0.5);
+      const far = S.tile(ctx, `${city.id}/far`, cam, 0.2, W);
+      if (!far) this.scenery(pal);
+      S.tile(ctx, `${city.id}/mid`, cam, 0.5, W);
+      const near = S.tile(ctx, `${city.id}/near`, cam, 1, W);
       ctx.save(); ctx.translate(-Math.round(cam), 0);
-      ctx.fillStyle = pal.ground; ctx.fillRect(cam, GROUND, W, H - GROUND);
-      ctx.fillStyle = pal.top; ctx.fillRect(cam, GROUND, W, 12);
+      if (!near) {
+        ctx.fillStyle = pal.ground; ctx.fillRect(cam - 30, GROUND, W + 60, H - GROUND);
+        ctx.fillStyle = pal.top; ctx.fillRect(cam - 30, GROUND, W + 60, 12);
+      }
       for (const pl of this.street.platforms) {
         ctx.fillStyle = pal.ground; ctx.fillRect(pl.x, pl.y, pl.w, 24);
         ctx.fillStyle = pal.top; ctx.fillRect(pl.x, pl.y, pl.w, 7);
@@ -353,8 +382,11 @@
       for (const s of this.shots) { ctx.fillStyle = s.color; dot(ctx, s.x, s.y, s.wave ? 16 : 11); }
       for (const f of this.foes) { ctx.fillStyle = f.color; f.star ? ctx.fillRect(f.x - 9, f.y - 9, 18, 18) : dot(ctx, f.x, f.y, 11); }
       if (this.aura) { ctx.fillStyle = 'rgba(180,200,90,0.22)'; dot(ctx, this.p.x + 36, this.p.y + 48, 170 + Math.sin(this.frame / 6) * 8); }
+      ctx.fillStyle = 'rgba(235,225,205,0.45)';
+      for (const d of this.dust) dot(ctx, d.x, d.y, d.r * (d.t / 22));
       this.drawPlayer();
       for (const b of this.bursts) { ctx.fillStyle = b.color; dot(ctx, b.x, b.y, b.r * (1 - b.t / 22)); }
+      ctx.restore();
       ctx.restore();
       this.hud();
     }
@@ -422,7 +454,8 @@
       if (this.invuln > 0 && this.frame % 10 < 5) ctx.globalAlpha = 0.5;
       const f = this.heat / this.heatMax;
       const cheese = f > 0.6 ? '#ffcc33' : f > 0.3 ? '#e8bc55' : '#c9b48a';
-      const squash = this.folded > 0 ? 0.55 : 1, scale = this.style.scale || 1;
+      const landing = this.land / 12, stretch = !p.grounded ? Math.min(0.14, Math.abs(p.vy) * 0.008) : 0;
+      const squash = this.folded > 0 ? 0.55 : 1 - landing * 0.25 + stretch, scale = this.style.scale || 1;
       const anim = !p.grounded ? 'jump' : p.vx ? 'run' : 'idle';
       if (!S.draw(ctx, sliceArt(this.slice.style), this.folded > 0 ? 'fold' : anim, this.frame * 16.7, p.x + 36, p.y + p.h, HERO * scale * squash, p.facing)) {
         drawSlice(ctx, p.x + 36, p.y + 48 + (1 - squash) * 36, this.slice.style, this.topping, cheese, 2.15 * scale, false, p.facing, squash);

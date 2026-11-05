@@ -67,23 +67,46 @@
     ctx.fillStyle = '#111'; dot(ctx, x - h * 0.25, foot - h * 0.66, h * 0.07); dot(ctx, x + h * 0.25, foot - h * 0.66, h * 0.07);
   }
 
-  function oldTimer(ctx, x, y, ms) {
-    if (S.draw(ctx, 'old-timer', 'idle', ms, x, y + 60, 130)) return;
-    P.drawSlice(ctx, x, y, 'ny', null, '#b7a06e', 2.5);
+  function oldTimer(ctx, x, y, ms, mood) {
+    const anim = S.has('old-timer', mood) ? mood : 'idle';
+    if (S.draw(ctx, 'old-timer', anim, ms, x, y + 60, 130)) return;
+    const breath = Math.sin(ms / 700) * 1.5, talk = mood === 'talk' ? Math.abs(Math.sin(ms / 90)) * 3 : 0;
+    P.drawSlice(ctx, x, y - breath - talk, 'ny', null, '#b7a06e', 2.5);
+    y -= breath + talk;
     ctx.strokeStyle = '#3a2413'; ctx.lineWidth = 5;
     ctx.beginPath(); ctx.moveTo(x - 24, y - 42); ctx.lineTo(x - 6, y - 36); ctx.moveTo(x + 28, y - 42); ctx.lineTo(x + 10, y - 36); ctx.stroke();
   }
 
-  function room(ctx, hq, ms) {
-    ctx.fillStyle = '#3b2a22'; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#4c382c'; for (let i = 0; i < 8; i++) ctx.fillRect(i * 190 + 10, 0, 170, 460);
-    ctx.fillStyle = '#ffdc96'; dot(ctx, 640, 34, 26);
-    ctx.fillStyle = 'rgba(255,220,150,0.09)'; ctx.beginPath(); ctx.moveTo(640, 34); ctx.lineTo(90, 720); ctx.lineTo(1190, 720); ctx.fill();
-    board(ctx, 700, 70, 520, 350, hq);
+  // Layers shift against the camera at different rates, so the room has real depth.
+  function layer(ctx, name, camX, rate) {
+    const image = S.layer(name);
+    if (!image) return false;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(image, Math.round((camX - W / 2) * rate), 0);
+    return true;
+  }
+
+  function room(ctx, hq, ms, view) {
+    const camX = view.camX, flicker = 0.08 + 0.025 * Math.sin(ms / 130) + (Math.sin(ms / 1700) > 0.97 ? -0.05 : 0);
+    if (!layer(ctx, 'hq/back', camX, 0.12)) {
+      ctx.fillStyle = '#3b2a22'; ctx.fillRect(-60, -60, W + 120, H + 120);
+      ctx.fillStyle = '#4c382c'; for (let i = 0; i < 8; i++) ctx.fillRect(i * 190 + 10 + (camX - W / 2) * 0.1, 0, 170, 460);
+    }
+    layer(ctx, 'hq/mid', camX, 0.05);
+    ctx.fillStyle = `rgba(255,220,150,${flicker})`; ctx.beginPath(); ctx.moveTo(640, 34); ctx.lineTo(90, 720); ctx.lineTo(1190, 720); ctx.fill();
+    if (!S.layer('hq/back')) { ctx.fillStyle = '#ffdc96'; dot(ctx, 640, 34, 26); }
+    const rect = C.HQ_BOARD;
+    board(ctx, rect.x, rect.y, rect.w, rect.h, hq);
     ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
     ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
     hq.pizzas.forEach((z, i) => pie(ctx, 460 + i * 150, 420, 58, z));
-    oldTimer(ctx, 300, 410, ms);
+    oldTimer(ctx, 300, 410, ms, view.mood);
+    layer(ctx, 'hq/front', camX, -0.18);
+    ctx.fillStyle = 'rgba(255,235,190,0.28)';
+    for (let i = 0; i < 26; i++) {
+      const x = (i * 197 + ms * (0.006 + (i % 5) * 0.002)) % W, y = (i * 113 + Math.sin(ms / 2000 + i) * 26 + ms * 0.004) % 620;
+      dot(ctx, x, y, 1.6 + (i % 3));
+    }
   }
 
   function door(ctx, city, ms) {
@@ -99,7 +122,7 @@
   // Plays shots of lines over the canvas. Tap to advance.
   function play(canvas, dialog, shots, view, onDone) {
     const ctx = canvas.getContext('2d');
-    let s = 0, l = 0, raf, stopped = false, start = performance.now();
+    let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start;
     const text = dialog.querySelector('.line'), name = dialog.querySelector('.who');
     const NAMES = { old: 'The Old Timer', recruit: 'Recruit', customer: view.customer || 'Customer', alewife: 'DJ Alewife' };
     const show = () => {
@@ -111,21 +134,32 @@
     const frame = now => {
       if (stopped) return;
       const shot = shots[s], t = Math.min(1, (now - start) / 6000), cam = CAMERAS[shot.comp] || CAMERAS.wide;
-      const [x, y, z] = cam.from.map((v, i) => v + (cam.to[i] - v) * t);
+      const eased = t * t * (3 - 2 * t);
+      const [x, y, z0] = cam.from.map((v, i) => v + (cam.to[i] - v) * eased);
+      // Each new line punches in a little, and each new shot whips into place.
+      const punch = Math.max(0, 1 - (now - lineAt) / 220), z = z0 * (1 + 0.035 * punch * punch);
+      const whip = Math.max(0, 1 - (now - cutAt) / 240) ** 2 * 260;
       ctx.save();
       ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      const line = shot.lines[l], talking = now - lineAt < Math.min(2400, line.text.length * 42);
+      view.mood = line.mood || (line.who === 'old' && talking ? 'talk' : 'idle');
+      view.camX = x;
       if (shot.comp === 'door') door(ctx, view.city, now);
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
-        ctx.translate(-Math.max(W / 2 / z, Math.min(W - W / 2 / z, x)), -Math.max(H / 2 / z, Math.min(H - H / 2 / z, y)));
-        room(ctx, view.hq, now);
+        ctx.translate(-Math.max(W / 2 / z, Math.min(W - W / 2 / z, x)) + whip / z, -Math.max(H / 2 / z, Math.min(H - H / 2 / z, y)));
+        room(ctx, view.hq, now, view);
       }
       ctx.restore();
+      const edge = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 800);
+      edge.addColorStop(0, 'rgba(0,0,0,0)'); edge.addColorStop(1, 'rgba(0,0,0,0.6)');
+      ctx.fillStyle = edge; ctx.fillRect(0, 0, W, H);
       raf = requestAnimationFrame(frame);
     };
     const advance = () => {
       l++;
-      if (l >= shots[s].lines.length) { l = 0; s++; start = performance.now(); }
+      lineAt = performance.now();
+      if (l >= shots[s].lines.length) { l = 0; s++; start = cutAt = lineAt; }
       if (s >= shots.length) {
         stopped = true; cancelAnimationFrame(raf);
         dialog.classList.add('hidden'); dialog.onclick = null;
