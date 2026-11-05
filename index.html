@@ -1,71 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizza Runner - The Ultimate Pizza Adventure!</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Pizza Runner</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
-        <div class="header">
-            <h1>🍕 PIZZA RUNNER 🍕</h1>
-            <div class="stats">
-                <div class="stat-item">Score: <span id="score">0</span></div>
-                <div class="stat-item">High Score: <span id="highScore">0</span></div>
-                <div class="stat-item">Lives: <span id="lives">3</span></div>
-                <div class="stat-item">Pepperonis: <span id="pepperonis">10</span></div>
-            </div>
-        </div>
-
-        <div class="controls-info">
-            <span><strong>ARROWS/WASD</strong>: Move & Jump</span>
-            <span><strong>SHIFT</strong>: Charge</span>
-            <span><strong>F</strong>: Shoot Pepperoni</span>
-        </div>
-
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-
-        <!-- Mobile Touch Controls -->
-        <div class="mobile-controls">
-            <div class="control-row">
-                <button id="leftBtn" class="control-btn move-btn">
-                    <span class="btn-icon">⬅️</span>
-                </button>
-                <button id="rightBtn" class="control-btn move-btn">
-                    <span class="btn-icon">➡️</span>
-                </button>
-                <button id="jumpBtn" class="control-btn jump-btn">
-                    <span class="btn-icon">⬆️</span>
-                </button>
-            </div>
-            <div class="control-row">
-                <button id="chargeBtn" class="control-btn charge-btn">
-                    <span class="btn-label">CHARGE</span>
-                </button>
-                <button id="shootBtn" class="control-btn shoot-btn">
-                    <span class="btn-label">SHOOT</span>
-                </button>
-            </div>
-        </div>
-
-        <div id="gameOver" class="game-over hidden">
-            <h2>Game Over!</h2>
-            <p>Final Score: <span id="finalScore">0</span></p>
-            <button id="restartBtn">Play Again</button>
-        </div>
-
-        <div class="enemy-info">
-            <h3>Enemy Guide:</h3>
-            <div class="enemy-guide">
-                <div class="guide-item">🐢 <strong>Turtles</strong>: Use CHARGE to defeat</div>
-                <div class="guide-item">👦 <strong>Teenagers</strong>: JUMP on them!</div>
-                <div class="guide-item">👾 <strong>Mutants</strong>: Avoid or shoot</div>
-                <div class="guide-item">🥷 <strong>Ninjas</strong>: SHOOT with pepperoni!</div>
-            </div>
-        </div>
+  <canvas id="stage" width="800" height="400"></canvas>
+  <div id="controls" class="hidden">
+    <div class="pad">
+      <button data-key="left">◀</button>
+      <button data-key="right">▶</button>
     </div>
-
-    <script src="game.js"></script>
+    <div class="pad">
+      <button id="giveBtn" data-key="give" class="ctx off"></button>
+      <button id="specialBtn" data-key="special" class="act">DASH</button>
+      <button data-key="power" class="act">POWER</button>
+      <button data-key="jump" class="jump">JUMP</button>
+    </div>
+  </div>
+  <div id="screen"></div>
+  <script src="js/content.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/play.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
