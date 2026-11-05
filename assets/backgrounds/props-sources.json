@@ -1,0 +1,20 @@
+{
+ "rev": {
+  "sha": "d441e4fbeb32a07d2665422e452861ca7c413edd",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "picked_seeds": {
+   "third/table": 2,
+   "third/box": 4,
+   "second/platform": 2,
+   "fourth/barricade": 1,
+   "second/barrel": 1,
+   "second/barrel_out": 1,
+   "third/door": 3
+  },
+  "table_height_px": 204,
+  "box_anchor": "bottom-centre of box.png sits at (x, 504)"
+ }
+}

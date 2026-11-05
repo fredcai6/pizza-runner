@@ -12,23 +12,44 @@
     polaroid: { from: [1090, 262, 1.9], to: [1090, 252, 2.4] },
   };
 
-  function pie(ctx, x, y, r, z) {
+  const OUTLINE = [30, 16, 48];
+  const pieCache = {};
+
+  // Pies are drawn once to a small canvas, then hardened to match the painted art: no soft
+  // edges, plus the same dark outline every sprite has.
+  function pieImage(r, z) {
+    const key = [r, z.left, z.a, z.b, z.used].join();
+    if (pieCache[key]) return pieCache[key];
+    const size = r * 2 + 8, c = size / 2, canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const g = canvas.getContext('2d', { willReadFrequently: true });
     const from = -Math.PI / 2;
-    if (!S.prop(ctx, 'hq/box', x, y + r + 26)) {
-      ctx.fillStyle = 'rgba(0,0,0,0.25)'; dot(ctx, x + 4, y + 6, r + 5);
-      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x - r - 8, y - r - 8, 2 * r + 16, 2 * r + 16);
-    }
     for (let i = 0; i < z.left; i++) {
       const a0 = from + i * Math.PI / 3, a1 = a0 + Math.PI / 3;
-      ctx.fillStyle = '#c98a44'; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, r, a0 + 0.02, a1 - 0.02); ctx.fill();
-      ctx.fillStyle = z.used ? '#f6c945' : '#d9d0ae'; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, r - 6, a0 + 0.02, a1 - 0.02); ctx.fill();
+      g.fillStyle = '#c98a44'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r, a0 + 0.02, a1 - 0.02); g.fill();
+      g.fillStyle = z.used ? '#f6c945' : '#d9d0ae'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r - 7, a0 + 0.02, a1 - 0.02); g.fill();
       const t = i < 3 ? z.a : z.b;
       if (t) {
-        ctx.fillStyle = C.TOPPINGS[t].color;
+        g.fillStyle = C.TOPPINGS[t].color;
         const mid = (a0 + a1) / 2;
-        dot(ctx, x + Math.cos(mid) * r * 0.62, y + Math.sin(mid) * r * 0.62, r * 0.11);
+        dot(g, c + Math.cos(mid) * r * 0.6, c + Math.sin(mid) * r * 0.6, r * 0.13);
       }
     }
+    const data = g.getImageData(0, 0, size, size), px = data.data, solid = [];
+    for (let i = 3, n = 0; i < px.length; i += 4, n++) { solid[n] = px[i] > 127; px[i] = solid[n] ? 255 : 0; }
+    for (let n = 0; n < solid.length; n++) {
+      const edge = !solid[n] && (solid[n - 1] || solid[n + 1] || solid[n - size] || solid[n + size]);
+      if (edge) { px.set([...OUTLINE, 255], n * 4); }
+    }
+    g.putImageData(data, 0, 0);
+    return (pieCache[key] = canvas);
+  }
+
+  function pie(ctx, x, y, r, z) {
+    if (!S.prop(ctx, 'hq/box', x, 504)) {
+      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x - r - 8, y - r - 8, 2 * r + 16, 2 * r + 16);
+    }
+    if (z.left) { const image = pieImage(r, z); ctx.imageSmoothingEnabled = false; ctx.drawImage(image, x - image.width / 2, y - image.height / 2); }
   }
 
   // The board draws itself, including the photo of itself, so later evidence shows up at every depth.
@@ -106,7 +127,7 @@
       ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
       ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
     }
-    hq.pizzas.forEach((z, i) => pie(ctx, 460 + i * 150, 420, 58, z));
+    hq.pizzas.forEach((z, i) => pie(ctx, 460 + i * 150, 432, 49, z));
     oldTimer(ctx, 300, 410, ms, view.mood);
     layer(ctx, 'hq/front', camX, -0.18);
     ctx.fillStyle = 'rgba(255,235,190,0.28)';
