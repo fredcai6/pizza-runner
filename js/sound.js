@@ -8,6 +8,12 @@
     deliver: [520, 1040, 0.35, 'triangle'], lost: [300, 90, 0.5, 'sine'], note: [880, 1100, 0.12, 'sine'],
   };
 
+  // Each speaker's text sound: wave, pitch, and how far it wanders from note to note.
+  const VOICES = {
+    old: ['square', 150, 8], ny: ['square', 300, 30], deep: ['sawtooth', 105, 6], jumbo: ['triangle', 215, 55], naples: ['triangle', 560, 60],
+    alewife: ['square', 640, 90], customer: ['sine', 380, 25],
+  };
+
   function unlock() { if (!ctx) ctx = new (root.AudioContext || root.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); }
 
   function play(name) {
@@ -23,7 +29,19 @@
     o.start(t); o.stop(t + length);
   }
 
+  function dit(who) {
+    if (state.muted || !ctx) return;
+    const [type, pitch, wander] = VOICES[who] || VOICES.customer;
+    const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime;
+    o.type = type;
+    o.frequency.value = pitch + (Math.random() - 0.5) * wander;
+    g.gain.setValueAtTime(0.035, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+    o.connect(g).connect(ctx.destination);
+    o.start(t); o.stop(t + 0.045);
+  }
+
   function toggle() { state.muted = !state.muted; localStorage.setItem('pizzaRunnerMuted', state.muted ? '1' : '0'); return state.muted; }
 
-  root.PR_SOUND = { play, unlock, toggle, get muted() { return state.muted; } };
+  root.PR_SOUND = { play, dit, unlock, toggle, get muted() { return state.muted; } };
 })(window);

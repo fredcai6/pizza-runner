@@ -23,12 +23,12 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   page.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) errors.push(m.text()); });
   const shot = async n => { if (out) await page.screenshot({ path: path.join(out, `${n}.png`) }); };
   const click = t => page.getByRole('button', { name: t, exact: true }).first().click();
-  const advance = async () => { for (let i = 0; i < 30 && await page.locator('#dialog:not(.hidden)').count(); i++) await page.locator('#dialog').click(); };
+  const advance = async () => { for (let i = 0; i < 120 && await page.locator('#dialog:not(.hidden)').count(); i++) await page.locator('#dialog').click(); };
 
   await page.goto(url);
   await click('Start');
   await page.locator('#dialog:not(.hidden)').waitFor(); await page.waitForTimeout(250); await shot('01-hq-opening');
-  const firstLine = await page.locator('#dialog .line').innerText();
+  const firstLine = await page.locator('#dialog .line').getAttribute('data-full');
   ok('opening scene plays', /New recruits/.test(firstLine), firstLine);
   await advance();
   await shot('03-order');
@@ -91,11 +91,11 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
 
   // The rest of the campaign, through every real screen. Chicago and Long Beach each lose a whole pie first.
   const seen = new Set(), losses = {};
-  for (let guard = 0; guard < 900; guard++) {
+  for (let guard = 0; guard < 1800; guard++) {
     if (await page.locator('.card').count()) break;
     if (await page.locator('#dialog:not(.hidden)').count()) {
       seen.add(await page.evaluate(() => __pr.camp.cityIndex + ':' + __pr.camp.phase));
-      const line = await page.locator('#dialog .line').innerText();
+      const line = await page.locator('#dialog .line').getAttribute('data-full');
       if (line === 'Know thy enemy...') { seen.add('final'); await page.waitForTimeout(1500); await shot('16-know-thy-enemy'); }
       if (/DJ ALEWIFE/.test(line)) { await page.waitForTimeout(200); await shot('15-alewife-door'); }
       const door = await page.evaluate(() => __pr.camp.phase === 'door' && __pr.camp.cityIndex + '.' + __pr.camp.world.delivery);
@@ -121,7 +121,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
         seen.add('taped');
         await click('Corkboard');
         await page.locator('[data-tab=theory]').click(); await shot('13-board-theory');
-        ok('recursive photo shown', (await page.locator('#recursive').count()) === 1);
+        ok('the board does not picture itself', (await page.locator('#recursive').count()) === 0);
         await page.locator('[data-tab=history]').click(); await page.locator('button.pin').first().click(); await shot('13-board-receipt');
         await page.locator('.detail').click();
         await page.locator('.tab.close').click();

@@ -10,7 +10,7 @@
     ${r.instructions ? `<hr><div>NOTES: ${r.instructions}</div>` : ''}</div>`;
 
   function history(camp) {
-    if (!camp.receipts.length) return '<p class="empty">Nothing yet. Nobody has come back.</p>';
+    if (!camp.receipts.length) return '<p class="empty">Nothing yet.</p>';
     const papers = camp.papers.map(p => `<div class="paper">${p}</div>`).join('');
     return `<div class="pins">${camp.receipts.map((r, i) => `<button class="pin ${r.outcome}" data-receipt="${i}">#${r.n}<br>${r.city}${r.attempt > 1 ? ` (try ${r.attempt})` : ''}<br><b>${r.outcome === 'delivered' ? 'DONE' : r.outcome === 'cold' ? 'COLD' : 'EATEN'}</b></button>`).join('')}</div>${papers}`;
   }
@@ -25,14 +25,13 @@
   function theory(camp) {
     const notes = R.theory(camp).map((t, i) => `<div class="sticky s${i % 3}">${t.text}</div>`).join('');
     const names = R.aliases(camp).map(a => `<span class="alias">${a}</span>`).join('');
-    const photo = camp.cityIndex >= 2 ? '<div class="polaroid wide"><canvas id="recursive" width="480" height="320"></canvas><span>HQ. Taken by whom?</span></div>' : '';
-    return `<div class="stickies">${notes}</div>${names ? `<h4>Known aliases</h4><div class="aliases">${names}</div>` : ''}${photo}`;
+    return `<p class="hand">The Old Timer's theory, in his hand.</p><div class="stickies">${notes}</div>${names ? `<h4>Customer names. Aliases?</h4><div class="aliases">${names}</div>` : ''}`;
   }
 
   function roster(camp) {
     return `<div class="roster">${R.roster(camp).map(r => {
       const s = C.STYLES[r.style], city = C.CITIES.find(c => c.id === r.city).name;
-      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${s.name}</b><span>${city}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '' : `<span>${r.left} of 6 left</span>`}${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
+      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${C.SPEAKERS[r.style]}</b><span>${s.name} of ${city}</span><span class="bio">${s.bio}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '' : `<span>${r.left} of 6 left</span>`}${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
     }).join('')}</div>`;
   }
 
@@ -53,11 +52,9 @@
       host.querySelectorAll('[data-enemy]').forEach(b => {
         b.onclick = () => {
           const f = R.enemyFile(camp, b.dataset.enemy);
-          pop(`<div class="file"><h3>${f.name}</h3>${f.notes.length ? f.notes.map(n => `<p>${n}</p>`).join('') : '<p>???</p>'}</div>`);
+          pop(`<div class="file"><h3>${f.name}</h3><p class="claim">O.T.: ${f.claim}</p><h4>Seen in the field</h4>${f.notes.length ? f.notes.map(n => `<p>${n}</p>`).join('') : '<p>???</p>'}</div>`);
         };
       });
-      const recursive = host.querySelector('#recursive');
-      if (recursive) root.PR_HQ.board(recursive.getContext('2d'), 12, 12, 456, 296, R.headquarters(camp));
     };
     render();
   }

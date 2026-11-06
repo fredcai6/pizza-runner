@@ -5,7 +5,7 @@
   const HIT = 12, BITE = 16, TALK_RANGE = 180, TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
   const SIZE = { turtle: 92, teen: 118, mutant: 120, ninja: 118 };
-  const CHOMP = 170, STUN = 150, WIPE = 22;
+  const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180;
 
   class Run {
     constructor(canvas, input, { camp, city, world, slice, start, onEnd }) {
@@ -13,21 +13,22 @@
       this.style = C.STYLES[slice.style];
       const st = this.style;
       this.topping = slice.topping;
-      this.charges = slice.topping ? C.TOPPINGS[slice.topping].charges : 0;
-      this.override = null;
+      this.charges = slice.topping ? C.CHARGES : 0;
       this.heat = this.heatMax = st.heatMax;
       this.p = { x: 0, y: GROUND - st.h, vx: 0, vy: 0, w: st.w, h: st.h, grounded: true, facing: 1 };
       this.invuln = 0; this.specialCd = 0; this.smash = 0; this.pounding = false; this.splat = 0; this.pace = 0;
       this.coyote = 0; this.buffer = 0; this.bounced = false;
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
-      this.bursts = []; this.dust = []; this.sauce = [];
+      this.speech = null; this.quipGap = 0; this.quipCount = {};
+      this.bursts = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
       this.look = 0; this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
-      this.toppingGone = false; this.done = false; this.nearby = null; this.offer = null;
+      this.done = false; this.nearby = null; this.offer = null;
       this.wipe = 0; this.pending = null; this.removed = 0; this.found = 0; this.taken = new Set(); this.warned = false;
       this.enter(start.street, start.x);
       const gone = Object.values(world.streets).reduce((n, s) => n + s.enemies.filter(e => !e.alive).length, 0);
       this.say(gone ? `${gone} still gone from these streets. Deliver to ${this.area0().customer}.` : `Deliver to: ${this.area0().customer}`);
+      this.quip('deploy', true);
     }
 
     area0() { return this.city.areas[Math.min(this.world.delivery, this.city.areas.length - 1)]; }
@@ -65,13 +66,22 @@
     }
     stop() { this.done = true; cancelAnimationFrame(this.raf); }
     say(text) { this.bark = text; this.barkT = 170; }
+
+    // The pizza talks to itself now and then. `urgent` lines ignore the gap, not each other.
+    quip(event, urgent = false) {
+      if (this.speech || (this.quipGap > 0 && !urgent)) return;
+      const lines = C.QUIPS[this.slice.style][event], n = this.quipCount[event] || 0;
+      this.quipCount[event] = n + 1;
+      this.speech = { text: lines[n % lines.length], age: 0 };
+      this.quipGap = QUIP_GAP;
+    }
     jolt(t) { this.trauma = Math.min(1, this.trauma + t); }
 
     end(outcome, killer) {
       if (this.done) return;
       this.stop();
       A.play(outcome === 'delivered' ? 'deliver' : 'lost');
-      this.onEnd({ outcome, killer: killer == null ? null : { street: this.street.id, id: killer }, street: this.street.id, x: this.p.x, toppingGone: this.toppingGone, seconds: Math.round(this.frame / 60), removed: this.removed, checkpoints: this.found });
+      this.onEnd({ outcome, killer: killer == null ? null : { street: this.street.id, id: killer }, street: this.street.id, x: this.p.x, topping: this.held(), left: this.left(), seconds: Math.round(this.frame / 60), removed: this.removed, checkpoints: this.found });
     }
 
     speed() {
@@ -95,6 +105,8 @@
       this.trauma = Math.max(0, this.trauma - 0.022);
       const { p, input, style: st } = this;
       if (this.barkT > 0) this.barkT--;
+      if (this.quipGap > 0) this.quipGap--;
+      if (this.speech && ++this.speech.age > this.speech.text.length * 2 + QUIP_HOLD) this.speech = null;
       if (this.invuln > 0) this.invuln--;
       if (this.specialCd > 0) this.specialCd--;
       if (this.smash > 0) this.smash--;
@@ -152,6 +164,7 @@
       this.stride();
       this.sauceStep();
       this.dust = this.dust.filter(d => { d.x += d.vx; d.y += d.vy; d.vy += 0.05; return --d.t > 0; });
+      this.wispStep();
 
       this.heat -= st.heatDecay / 60;
       this.updateBand();
@@ -235,7 +248,7 @@
       const inZone = cx > street.turnAt + TURN_ZONE[0] && cx < street.turnAt + TURN_ZONE[1] && !!j.turn;
       this.offer = inZone && j.open ? j.turn : null;
       this.heading = R.guide(this.camp, street, cx);
-      if (this.heading.kind === 'door' && this.heading.left < 700 && !this.warned) { this.warned = true; this.say(`${this.area0().customer}'s door, ${C.BARKS.almost}`); }
+      if (this.heading.kind === 'door' && this.heading.left < 700 && !this.warned) { this.warned = true; this.say(`${this.area0().customer}'s door, ${C.BARKS.almost}`); this.quip('door'); }
       if (inZone && !j.open && !this.warned) { this.warned = true; this.say(C.BARKS.gate); }
       if (p.x + p.w >= street.length - 2 && !this.wipe) this.go(j.keep.id);
     }
@@ -253,7 +266,7 @@
     updateBand() {
       const f = this.heat / this.heatMax;
       const band = f > 0.6 ? 'hot' : f > 0.3 ? 'warm' : 'cold';
-      if (band !== this.heatBand) { this.heatBand = band; this.say(C.BARKS[band]); }
+      if (band !== this.heatBand) { this.heatBand = band; this.say(C.BARKS[band]); if (band === 'cold') this.quip('cold', true); }
     }
 
     fires() {
@@ -286,13 +299,13 @@
       this.gateHit(x, reach);
     }
 
-    // Whichever topping is in hand: a pickup while it lasts, then the slice's own.
-    held() { return this.override ? this.override.topping : this.topping; }
-    left() { return this.override ? this.override.uses : this.charges; }
+    // One topping at a time, and when it is used up the slice is plain cheese.
+    held() { return this.topping; }
+    left() { return this.charges; }
 
     power() {
       const held = this.held();
-      if (!held || this.left() <= 0) return;
+      if (!held) return;
       const { p } = this, t = C.TOPPINGS[held], d = p.facing, x = p.x + p.w / 2, y = p.y + p.h * 0.45;
       const shot = o => this.shots.push({ x, y, vx: 18 * d, vy: 0, topping: held, color: t.color, life: 70, ...o });
       A.play('shot');
@@ -311,17 +324,14 @@
     }
 
     spend(n) {
-      if (this.override) {
-        this.override.uses -= n;
-        if (this.override.uses <= 0) { this.override = null; this.aura = false; this.say(C.BARKS.spent); }
-        return;
-      }
       this.charges = Math.max(0, this.charges - n);
-      if (!this.charges) this.aura = false;
+      if (this.charges) return;
+      this.topping = null; this.aura = false;
+      this.say(C.BARKS.spent); this.quip('spent');
     }
 
     canGive(a) {
-      if (!this.held() || this.left() <= 0 || a.leaving || R.peaceful(a.e, this.world.run)) return false;
+      if (!this.held() || a.leaving || R.peaceful(a.e, this.world.run)) return false;
       if (a.e.type === 'teen') return !a.distracted;
       return a.e.type === 'ninja' || (a.e.type === 'mutant' && a.state !== 'lurk');
     }
@@ -334,9 +344,7 @@
       if (a.e.type === 'mutant') { this.spend(1); this.feedMutant(a); return; }
       R.bribe(this.camp, this.world, a.e, held);
       this.say(C.BARKS.bribe); this.note('ninja', 'bribe'); A.play('bribe');
-      if (this.override) this.override = null;
-      else { this.topping = null; this.charges = 0; this.toppingGone = true; }
-      this.aura = false;
+      this.topping = null; this.charges = 0; this.aura = false;
     }
 
     feedMutant(a) {
@@ -392,7 +400,7 @@
           a.state = 'film'; a.t = 50; a.dir = Math.sign(this.p.x - a.x) || 1;
           this.street.filmed = a.x;
           this.bursts.push({ x: a.x, y: a.y - 100, r: 40, t: 8, color: '#ffffff' });
-          this.say(C.BARKS.filmed); this.note('teen', 'films');
+          this.say(C.BARKS.filmed); this.note('teen', 'films'); this.quip('filmed', true);
         }
       }
     }
@@ -424,7 +432,7 @@
       switch (a.state) {
         case 'lurk':
           if (cx > a.x + 60 && cx < a.x + 900) {
-            a.state = 'peek'; a.t = 0; this.say(C.BARKS.drain); this.note('mutant', 'peeks'); A.play('note');
+            a.state = 'peek'; a.t = 0; this.say(C.BARKS.drain); this.note('mutant', 'peeks'); A.play('note'); this.quip('mutant');
           }
           break;
         case 'peek':
@@ -478,7 +486,7 @@
         a.state = 'munch'; a.t = CHOMP; this.note('turtle', 'bites');
         return;
       }
-      if (e.type === 'teen' && stomped) { this.bounce(16); this.note('teen', 'stomp'); this.flee(a); return; }
+      if (e.type === 'teen' && stomped) { this.bounce(16); this.note('teen', 'stomp'); this.quip('stomp'); this.flee(a); return; }
       if (e.type === 'ninja' && stomped) this.note('ninja', 'bounce');
       if (e.type === 'mutant') {
         this.hurt(BITE, e.id, a.x);
@@ -539,6 +547,7 @@
 
     hurt(amount, owner, fromX) {
       if (this.invuln > 0) return;
+      this.quip('hurt');
       this.heat -= amount; this.invuln = 90; this.jolt(0.55); this.freeze = 5; this.wobV += 0.2;
       A.play('hit');
       this.p.vy = -10; this.p.vx = this.p.x < fromX ? -9 : 9;
@@ -567,6 +576,7 @@
       this.bursts.push({ x: street.turnAt, y: GROUND - 50, r: 110, t: 14, color: '#b8843f' });
       A.play('smash'); this.jolt(0.3);
       this.say(R.nextPaper(this.camp) ? C.BARKS.paper : `${j.turn.name} is open.`);
+      this.quip('box');
       return true;
     }
 
@@ -602,9 +612,10 @@
       this.foes = this.foes.filter(f => f.life > 0);
     }
 
-    // A pickup takes over for three uses, then the slice's own topping comes back.
+    // A new topping replaces whatever was on the slice.
     grab(topping) {
-      this.override = { topping, uses: C.PICKUP_USES };
+      this.topping = topping; this.charges = C.CHARGES;
+      this.quip('grab');
       this.aura = false;
       A.play('fire');
     }
@@ -635,9 +646,17 @@
       });
     }
 
+    // Heat rising off the crust: a lot when fresh out of the oven, thinning as it cools.
+    wispStep() {
+      const { p } = this, f = Math.max(0, this.heat / this.heatMax);
+      this.sweep += (p.vx - this.sweep) * 0.12;
+      if (Math.random() < f * f * 0.16 * (p.w / 72)) this.wisps.push({ at: 0.1 + Math.random() * 0.8, seed: Math.random() * 7, age: 0, t: 30 + Math.random() * 24, len: 16 + f * 30 * Math.sqrt(p.w / 72), size: f > 0.55 ? 4 : 3 });
+      this.wisps = this.wisps.filter(w => ++w.age < w.t);
+    }
+
     auraStep() {
       if (!this.aura) return;
-      if (++this.auraTick % 60 === 0) this.spend(1);
+      if (++this.auraTick % AURA_USE === 0) this.spend(1);
       if (this.auraTick % 20) return;
       for (const a of this.actors) {
         if (a.rise > 0.3 && Math.hypot(a.x - this.p.x - this.p.w / 2, a.y - 50 - this.p.y - this.p.h / 2) < 170 && a.e.type !== 'turtle') this.hit(a, 'aura');
@@ -689,12 +708,14 @@
       ctx.fillStyle = 'rgba(235,225,205,0.45)';
       for (const d of this.dust) dot(ctx, d.x, d.y, d.r * (d.t / 22));
       this.drawSauce();
+      this.drawWisps();
       this.drawPlayer();
       for (const b of this.bursts) this.drawBurst(b);
       this.drawParty();
       ctx.restore();
       ctx.restore();
       this.hud();
+      this.drawSpeech();
       if (this.wipe > 0) this.drawWipe();
     }
 
@@ -855,6 +876,27 @@
       if (calm) { ctx.fillStyle = '#fff'; ctx.font = '19px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(a.distracted ? 'scrolling' : 'paid', a.x, a.y - a.size - 26); }
     }
 
+    // Each wisp is a wavy line that lifts off the crust, and running bends it back.
+    drawWisps() {
+      const { ctx, p, style: st } = this, crust = p.y + p.h - st.height;
+      const paint = (color, grow, alpha) => {
+        ctx.fillStyle = color;
+        for (const w of this.wisps) {
+          const base = crust + 6 - w.age * WISP_RISE, x = p.x + p.w * w.at, len = w.len * Math.min(1, w.age / 10);
+          ctx.globalAlpha = alpha * Math.min(1, (1 - w.age / w.t) * 2.5);
+          for (let d = 0; d < len; d += 2) {
+            const up = (crust + 6 - (base - d)) / 60;
+            const wave = Math.sin(d / 7 + w.age / 6 + w.seed) * 3.5, back = this.sweep * WISP_SWEEP * up * up;
+            const n = w.size + grow - (d > len - 8 || d < 4 ? 1 : 0);
+            ctx.fillRect(Math.round((x + wave - back) / 2) * 2 - grow / 2, Math.round((base - d) / 2) * 2 - grow / 2, n, n);
+          }
+        }
+      };
+      paint('#ff7a2e', 3, 0.5);
+      paint('#fffbe8', 0, 0.95);
+      ctx.globalAlpha = 1;
+    }
+
     drawPlayer() {
       const { ctx, p, style: st } = this;
       if (this.invuln > 0 && this.frame % 10 < 5) ctx.globalAlpha = 0.5;
@@ -872,11 +914,46 @@
       this.animMs += 16.7 * (anim === 'run' ? Math.max(0.5, pace) : 1);
       const flop = st.flop ? Math.sin(this.frame / 9) * (moving ? 7 : 2.5) - p.vx * 1.3 + p.vy * 0.6 + this.wob * 30 : 0;
       const tilt = (p.vx / st.speed) * (st.flop ? 0.05 : 0.07);
-      if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop })) {
-        drawSlice(ctx, cx, p.y + p.h * 0.5 + (1 - squash) * 36, this.slice.style, this.topping, cheese, 2.15 * st.height / 124, false, p.facing, squash);
+      const dress = this.held() ? { piece: pieceArt(this.held(), this.slice.style), count: this.left() } : null;
+      if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop, dress })) {
+        drawSlice(ctx, cx, p.y + p.h * 0.5 + (1 - squash) * 36, this.slice.style, this.held(), cheese, 2.15 * st.height / 124, false, p.facing, squash);
       }
       if (this.smash > 0) { ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, p.y + p.h / 2, st.height * 0.5, 0, 7); ctx.stroke(); }
       ctx.globalAlpha = 1;
+    }
+
+    // What the pizza just said, typed out in a box over its head.
+    drawSpeech() {
+      const { ctx, p, style: st, speech } = this;
+      if (!speech) return;
+      const shown = Math.min(speech.text.length, Math.floor(speech.age / 1.6));
+      if (shown < speech.text.length && speech.age % 4 === 0) A.dit(this.slice.style);
+      ctx.font = '700 24px "Pixelify Sans", monospace'; ctx.textAlign = 'left';
+      const w = ctx.measureText(speech.text).width + 28, h = 38;
+      const cx = p.x + p.w / 2 - this.cam, x = Math.max(12, Math.min(W - w - 12, cx - w / 2)), y = Math.max(140, p.y + p.h - st.height - h - 30);
+      ctx.fillStyle = '#14122b'; ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
+      ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = '#14122b'; ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+      ctx.fillRect(Math.round(cx) - 6, y + h, 12, 10);
+      ctx.fillStyle = '#fff'; ctx.fillText(speech.text.slice(0, shown), x + 14, y + 27);
+    }
+
+    // The pie this slice came from. Each wedge goes as it is delivered or lost.
+    drawPie(x, y, r) {
+      const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, n = slices.length, turn = Math.PI * 2 / n;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x - r - 10, y - r - 10, r * 2 + 20, r * 2 + 20);
+      ctx.fillStyle = 'rgba(255,255,255,0.14)'; dot(ctx, x, y, r);
+      slices.forEach((s, i) => {
+        if (s.status !== 'ready') return;
+        const a = -Math.PI / 2 + i * turn, mid = a + turn / 2, out = s === this.slice ? 4 + Math.sin(frame / 9) * 2 : 0;
+        const ox = x + Math.cos(mid) * out, oy = y + Math.sin(mid) * out;
+        const wedge = (radius, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.arc(ox, oy, radius, a + 0.03, a + turn - 0.03); ctx.fill(); };
+        wedge(r, '#b4702e'); wedge(r - 5, '#ffcc33');
+        const topping = s === this.slice ? this.held() : s.topping;
+        if (!topping) return;
+        ctx.fillStyle = C.TOPPINGS[topping].color;
+        dot(ctx, ox + Math.cos(mid) * r * 0.6, oy + Math.sin(mid) * r * 0.6, r * 0.11);
+      });
     }
 
     // A little GPS: how far, and the next thing to do. The street signs do the rest.
@@ -898,12 +975,13 @@
 
     hud() {
       const { ctx, world, city } = this;
+      this.drawPie(444, 62, 36);
       ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 16, 372, 74);
       ctx.fillStyle = '#333'; ctx.fillRect(28, 28, 348, 20);
       const f = Math.max(0, this.heat / this.heatMax);
       ctx.fillStyle = f > 0.6 ? '#ff5a24' : f > 0.3 ? '#f0a53a' : '#7fb6d6'; ctx.fillRect(28, 28, 348 * f, 20);
       ctx.fillStyle = '#fff'; ctx.font = '20px sans-serif'; ctx.textAlign = 'left';
-      const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'no topping';
+      const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
       ctx.fillText(`${this.style.name}: ${t}`, 28, 76);
       // Addresses done, and the street we are on.
       ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 96, 372, 36);
@@ -920,6 +998,7 @@
   }
 
   const sliceArt = style => `slice-${style}`;
+  const pieceArt = (topping, style) => `props/piece-${topping}-${style}`;
 
   function dot(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, 7); ctx.fill(); }
 
@@ -943,5 +1022,5 @@
     ctx.restore();
   }
 
-  root.PR_PLAY = { Run, W, H, drawSlice, dot };
+  root.PR_PLAY = { Run, W, H, drawSlice, dot, pieceArt };
 })(window);

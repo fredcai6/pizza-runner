@@ -101,7 +101,7 @@
     const city = R.currentCity(camp), area = city.areas[camp.world.delivery - 1], last = camp.receipts[camp.receipts.length - 1];
     scene([{ comp: 'door', lines: area.door }], () => {
       show(`<h2 class="stamp delivered">Delivered</h2>${B.receiptHtml(last)}`, [['Next', () => { R.afterDoor(camp); route(); }]]);
-    }, { customer: area.customer, area, slice: { style: camp.world.lastStyle } });
+    }, { customer: area.customer, area, slice: { style: camp.world.lastStyle, topping: camp.world.lastTopping, left: camp.world.lastLeft } });
   }
 
   function orderScreen() {
@@ -244,5 +244,5 @@
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };
-  Promise.all([S.load(), S.loadLayers()]).then(title);
+  Promise.all([S.load(), S.loadLayers(), document.fonts.load('24px "Pixelify Sans"'), document.fonts.load('700 24px "Pixelify Sans"')]).then(title);
 })();
