@@ -1,7 +1,7 @@
-// The loop between runs: back room, order, street, receipt, back room.
+// The loop between slices: order, map, street, receipt, map, then the back room between cities.
 (function () {
-  const C = window.PR_CONTENT, R = window.PR_RULES, P = window.PR_PLAY, H = window.PR_HQ, B = window.PR_BOARD, A = window.PR_SOUND;
-  const SAVE = 'pizzaRunnerSave2';
+  const C = window.PR_CONTENT, R = window.PR_RULES, P = window.PR_PLAY, H = window.PR_HQ, B = window.PR_BOARD, A = window.PR_SOUND, M = window.PR_MAP, S = window.PR_SPRITES;
+  const SAVE = 'pizzaRunnerSave3';
   const $ = id => document.getElementById(id);
   const screen = $('screen'), canvas = $('stage'), controls = $('controls'), dialog = $('dialog'), overlay = $('overlay');
   const debug = new URLSearchParams(location.search).has('debug');
@@ -31,31 +31,58 @@
 
   const boardButton = back => ['Corkboard', () => B.open(overlay, camp, () => { overlay.classList.add('hidden'); if (back) back(); }), 'quiet'];
 
+  // Android and desktop can take the whole screen. iPhones cannot, so they get no button.
+  const stageRoot = document.documentElement;
+  const canFull = !!(stageRoot.requestFullscreen || stageRoot.webkitRequestFullscreen);
+  async function goFull() {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      await (stageRoot.requestFullscreen || stageRoot.webkitRequestFullscreen).call(stageRoot, { navigationUI: 'hide' });
+      await window.screen.orientation?.lock?.('landscape');
+    } catch { /* The browser said no. The game plays fine in a window. */ }
+  }
+  const fullButton = () => (canFull ? [['Full screen', goFull, 'quiet']] : []);
+
   function title() {
     const acts = [];
     if (camp) acts.push(['Continue', route]);
-    acts.push([camp ? 'New game' : 'Start', () => { camp = R.newCampaign(); save(); route(); }]);
-    show('<h1>PIZZA RUNNER</h1><p class="sub">You have been deployed.</p>', acts);
+    acts.push([camp ? 'New game' : 'Start', () => {
+      if (canFull && matchMedia('(pointer: coarse)').matches) goFull();
+      camp = R.newCampaign(); save(); route();
+    }]);
+    show('<h1>PIZZA RUNNER</h1><p class="sub">You have been deployed.</p>', [...acts, ...fullButton()]);
   }
 
-  function route() {
+  async function route() {
     save();
     const city = R.currentCity(camp);
+    await S.loadCity(city);
     switch (camp.phase) {
-      case 'briefing': return scene(city.briefing, orderScreen);
-      case 'reorder': return reorder();
-      case 'slice': return pickSlice();
-      case 'return': return scene(R.returnScene(camp), pickSlice);
-      case 'door': return scene([{ comp: 'door', lines: city.door }], leave, { customer: city.customer });
-      case 'missed': return scene([{ comp: 'oldtimer', lines: [{ who: 'old', text: 'That whole pizza is gone. Deep undercover. Finest operatives I ever sent.' }] }], leave);
+      case 'briefing': return scene(city.briefing, () => {
+        if (city.final) { R.startFinale(camp); route(); } else orderScreen();
+      });
+      case 'order': return orderScreen();
+      case 'map': return mapScreen();
+      case 'door': return doorScene();
+      case 'cityDone': return scene([{ comp: 'pies', lines: C.CITY_DONE }], leave);
+      case 'gameover': return scene([{ comp: 'oldtimer', lines: C.CITY_LOST }], lostCity);
       case 'ending': return scene(C.ENDING.finale, endCard);
     }
   }
 
   function leave() { R.leaveCity(camp); route(); }
 
-  function reorder() {
-    scene([{ comp: 'oldtimer', lines: [{ who: 'old', text: 'Deep undercover, the lot of them. And half that street has gone quiet. Fire up another one.' }] }], orderScreen);
+  function lostCity() {
+    const city = R.currentCity(camp);
+    show(`<h2>${city.name} went cold</h2><p>All the slices are gone. The streets reset, and everything before ${city.name} stays done.</p>`,
+      [[`Back to ${city.name}`, () => { R.retryCity(camp); route(); }], boardButton(lostCity)]);
+  }
+
+  function doorScene() {
+    const city = R.currentCity(camp), area = city.areas[camp.world.delivery - 1], last = camp.receipts[camp.receipts.length - 1];
+    scene([{ comp: 'door', lines: area.door }], () => {
+      show(`<h2 class="stamp delivered">Delivered</h2>${B.receiptHtml(last)}`, [['Next', () => { R.afterDoor(camp); route(); }]]);
+    }, { customer: area.customer, area, slice: { style: camp.world.lastStyle } });
   }
 
   function orderScreen() {
@@ -95,41 +122,53 @@
     } else route();
   }
 
-  function pickSlice() {
-    camp.phase = 'slice'; save();
-    const city = R.currentCity(camp), pie = camp.pies[city.id], list = R.ready(pie);
-    const lost = pie.slices.length - list.length;
-    show(`<h2>${city.name}</h2><p>${lost ? `${lost} of 6 gone.` : 'Six slices. Choose who goes.'}</p>
-      <div class="slices">${[...new Set(list.map(s => s.topping))].map(t => {
-        const s = list.find(x => x.topping === t), n = list.filter(x => x.topping === t).length;
-        return `<button class="slice" data-id="${s.id}"><b>${C.STYLES[s.style].name}</b><span>${C.TOPPINGS[t].name} (${n} left)</span></button>`;
-      }).join('')}</div>`, [boardButton(() => pickSlice())]);
-    screen.querySelectorAll('.slice').forEach(b => { b.onclick = () => startRun(pie.slices[b.dataset.id]); });
+  // Every slice starts here: the full map, the address, and any checkpoint reached so far.
+  function mapScreen() {
+    const city = R.currentCity(camp), world = camp.world, pie = camp.pies[city.id];
+    let node = M.closest(camp) || 'start', chosen = null;
+    const render = () => {
+      const list = R.ready(pie);
+      const groups = [...new Set(list.map(s => `${s.style}|${s.topping}`))].map(k => list.find(s => `${s.style}|${s.topping}` === k));
+      chosen = chosen && chosen.status === 'ready' ? chosen : groups[0];
+      const line = world.run ? R.dispatch(camp).map(l => l.text).join(' ') : '';
+      const n = (s) => list.filter(x => x.style === s.style && x.topping === s.topping).length;
+      show(`<div class="mapscreen">${M.svg(camp, node)}<div class="mapside">
+        <h2>${city.name}</h2>
+        <p class="tally">Address ${world.delivery + 1} of ${city.areas.length}. ${list.length} slice${list.length === 1 ? '' : 's'} left.</p>
+        ${line ? `<p class="dispatch">${line}</p>` : ''}
+        <div class="slices">${groups.map(s => `<button class="slice${s === chosen ? ' on' : ''}" data-id="${s.id}"><b>${C.STYLES[s.style].name}</b><span>${C.TOPPINGS[s.topping].name} (${n(s)})</span></button>`).join('')}</div>
+        <p class="tally">Start from <b>${world.nodes[node].name}</b></p>
+        <div class="mapactions"></div></div></div>`, [['Deploy', () => startRun(chosen, node)], boardButton(mapScreen)]);
+      screen.querySelector('.mapactions').appendChild(screen.querySelector('.actions'));
+      screen.querySelectorAll('.slice').forEach(b => { b.onclick = () => { chosen = pie.slices[b.dataset.id]; render(); }; });
+      screen.querySelectorAll('[data-node]').forEach(g => { g.onclick = () => { node = g.dataset.node; render(); }; });
+    };
+    render();
   }
 
-  function startRun(slice) {
-    const city = R.currentCity(camp), street = camp.streets[city.id];
+  function startRun(slice, node) {
+    const city = R.currentCity(camp), world = camp.world;
+    world.checkpoint = node;
     screen.classList.add('hidden');
     controls.classList.remove('hidden');
     const special = C.STYLES[slice.style].specialName;
     $('specialBtn').textContent = special || '';
     $('specialBtn').classList.toggle('off', !special);
-    run = new P.Run(canvas, input, { camp, city, street, slice, onEnd: result => debrief(slice, result) });
+    run = new P.Run(canvas, input, { camp, city, world, slice, start: R.deployment(world, node), onEnd: result => debrief(slice, result) });
     if (debug) window.__pr.run = run;
     run.start();
   }
 
-  // Every attempt ends here, eaten or delivered, before anything else happens.
+  // Every attempt ends with a quick receipt. A delivery goes to the door first.
   function debrief(slice, result) {
-    const receipt = R.finishRun(camp, slice, result);
+    R.finishRun(camp, slice, result);
     save();
     A.play('print');
-    const heading = { delivered: 'Delivered', cold: 'Gone cold', dead: 'Eaten' }[result.outcome];
-    show(`<h2 class="stamp ${result.outcome}">${heading}</h2>${B.receiptHtml(receipt)}`, [['Back to HQ', route], boardButton(() => debriefAgain(receipt, heading, result))]);
-  }
-
-  function debriefAgain(receipt, heading, result) {
-    show(`<h2 class="stamp ${result.outcome}">${heading}</h2>${B.receiptHtml(receipt)}`, [['Back to HQ', route], boardButton(() => debriefAgain(receipt, heading, result))]);
+    if (result.outcome === 'delivered') return route();
+    const receipt = camp.receipts[camp.receipts.length - 1];
+    const heading = { cold: 'Gone cold', dead: 'Eaten' }[result.outcome];
+    const again = () => show(`<h2 class="stamp ${result.outcome}">${heading}</h2>${B.receiptHtml(receipt)}`, [[camp.phase === 'map' ? 'Back to the map' : 'Next', route], boardButton(again)]);
+    again();
   }
 
   function endCard() {
@@ -147,22 +186,22 @@
 
   // One input object, fed by keyboard and touch.
   const input = {
-    left: false, right: false, queued: {},
+    left: false, right: false, jumpHeld: false, queued: {},
     take(k) { const v = this.queued[k]; this.queued[k] = false; return v; },
   };
-  const KEYS = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump', Shift: 'special', f: 'power', e: 'give' };
+  const KEYS = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump', Shift: 'special', f: 'power', e: 'give', ArrowDown: 'turn', s: 'turn' };
   addEventListener('keydown', ev => {
     if (ev.key === 'Escape' || ev.key === 'p') return pause(!(run && run.paused));
     const k = KEYS[ev.key]; if (!k) return;
-    if (k === 'left' || k === 'right') input[k] = true; else if (!ev.repeat) input.queued[k] = true;
+    if (k === 'left' || k === 'right') input[k] = true; else if (!ev.repeat) { input.queued[k] = true; if (k === 'jump') input.jumpHeld = true; }
   });
-  addEventListener('keyup', ev => { const k = KEYS[ev.key]; if (k === 'left' || k === 'right') input[k] = false; });
+  addEventListener('keyup', ev => { const k = KEYS[ev.key]; if (k === 'left' || k === 'right') input[k] = false; if (k === 'jump') input.jumpHeld = false; });
   addEventListener('pointerdown', () => A.unlock());
   addEventListener('keydown', () => A.unlock());
   document.querySelectorAll('#controls button[data-key]').forEach(b => {
     const k = b.dataset.key;
-    const down = ev => { ev.preventDefault(); if (k === 'left' || k === 'right') input[k] = true; else input.queued[k] = true; };
-    const up = ev => { ev.preventDefault(); if (k === 'left' || k === 'right') input[k] = false; };
+    const down = ev => { ev.preventDefault(); if (k === 'left' || k === 'right') input[k] = true; else { input.queued[k] = true; if (k === 'jump') input.jumpHeld = true; } };
+    const up = ev => { ev.preventDefault(); if (k === 'left' || k === 'right') input[k] = false; if (k === 'jump') input.jumpHeld = false; };
     b.addEventListener('pointerdown', down);
     for (const name of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(name, up);
     b.addEventListener('contextmenu', ev => ev.preventDefault());
@@ -170,6 +209,13 @@
   $('pauseBtn').onclick = () => pause(true);
   $('resumeBtn').onclick = () => pause(false);
   $('pauseBoardBtn').onclick = () => B.open(overlay, camp, () => overlay.classList.add('hidden'));
+  $('pauseMapBtn').onclick = () => {
+    overlay.classList.remove('hidden');
+    overlay.innerHTML = `<div class="board">${M.svg(camp, null)}<div class="tabs"><button class="tab close">Back</button></div></div>`;
+    overlay.querySelector('.close').onclick = () => overlay.classList.add('hidden');
+  };
+  $('fullBtn').onclick = goFull;
+  $('fullBtn').classList.toggle('hidden', !canFull);
   $('muteBtn').onclick = () => { A.toggle(); $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on'; };
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
   setInterval(() => {
@@ -177,8 +223,11 @@
     const label = near ? { ninja: 'BRIBE', mutant: 'FEED', teen: 'DISTRACT' }[near.e.type] : null;
     $('giveBtn').textContent = label || '';
     $('giveBtn').classList.toggle('off', !label);
+    const offer = run && !run.done && run.offer;
+    $('turnBtn').textContent = offer ? `TURN: ${offer.name}` : '';
+    $('turnBtn').classList.toggle('off', !offer);
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };
-  Promise.all([window.PR_SPRITES.load(), window.PR_SPRITES.loadLayers()]).then(title);
+  Promise.all([S.load(), S.loadLayers()]).then(title);
 })();

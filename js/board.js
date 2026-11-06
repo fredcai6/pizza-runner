@@ -12,7 +12,7 @@
   function history(camp) {
     if (!camp.receipts.length) return '<p class="empty">Nothing yet. Nobody has come back.</p>';
     const papers = camp.papers.map(p => `<div class="paper">${p}</div>`).join('');
-    return `<div class="pins">${camp.receipts.map((r, i) => `<button class="pin ${r.outcome}" data-receipt="${i}">#${r.n}<br>${r.city}<br><b>${r.outcome === 'delivered' ? 'DONE' : r.outcome === 'cold' ? 'COLD' : 'EATEN'}</b></button>`).join('')}</div>${papers}`;
+    return `<div class="pins">${camp.receipts.map((r, i) => `<button class="pin ${r.outcome}" data-receipt="${i}">#${r.n}<br>${r.city}${r.attempt > 1 ? ` (try ${r.attempt})` : ''}<br><b>${r.outcome === 'delivered' ? 'DONE' : r.outcome === 'cold' ? 'COLD' : 'EATEN'}</b></button>`).join('')}</div>${papers}`;
   }
 
   function enemies(camp) {
@@ -32,7 +32,7 @@
   function roster(camp) {
     return `<div class="roster">${R.roster(camp).map(r => {
       const s = C.STYLES[r.style], city = C.CITIES.find(c => c.id === r.city).name;
-      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${s.name}</b><span>${city}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
+      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${s.name}</b><span>${city}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '' : `<span>${r.left} of 6 left</span>`}${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
     }).join('')}</div>`;
   }
 

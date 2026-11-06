@@ -18,16 +18,25 @@
   // Pies are drawn once to a small canvas, then hardened to match the painted art: no soft
   // edges, plus the same dark outline every sprite has.
   function pieImage(r, z) {
-    const key = [r, z.left, z.a, z.b, z.used].join();
+    const key = [z.style, z.left, z.a, z.b, z.used].join();
     if (pieCache[key]) return pieCache[key];
-    const size = r * 2 + 8, c = size / 2, canvas = document.createElement('canvas');
+    const art = S.layer(`hq/pie-${z.style}`);
+    if (art) r = art.width / 2;
+    const size = Math.ceil(r * 2 + 8), c = size / 2, canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
     const g = canvas.getContext('2d', { willReadFrequently: true });
     const from = -Math.PI / 2;
     for (let i = 0; i < z.left; i++) {
       const a0 = from + i * Math.PI / 3, a1 = a0 + Math.PI / 3;
-      g.fillStyle = '#c98a44'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r, a0 + 0.02, a1 - 0.02); g.fill();
-      g.fillStyle = z.used ? '#f6c945' : '#d9d0ae'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r - 7, a0 + 0.02, a1 - 0.02); g.fill();
+      if (art) {
+        g.save(); g.beginPath(); g.moveTo(c, c); g.arc(c, c, r + 2, a0 + 0.015, a1 - 0.015); g.clip();
+        g.drawImage(art, c - art.width / 2, c - art.height / 2);
+        if (z.used) { g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(255,190,50,.3)'; g.fillRect(0, 0, size, size); }
+        g.restore();
+      } else {
+        g.fillStyle = '#c98a44'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r, a0 + 0.02, a1 - 0.02); g.fill();
+        g.fillStyle = z.used ? '#f6c945' : '#d9d0ae'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r - 7, a0 + 0.02, a1 - 0.02); g.fill();
+      }
       const t = i < 3 ? z.a : z.b;
       if (t) {
         g.fillStyle = C.TOPPINGS[t].color;
@@ -79,7 +88,9 @@
     const ix = px + pw * 0.06, iy = py + ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
     if (hq.alewife && depth === 0) {
       ctx.fillStyle = '#2a2230'; ctx.fillRect(ix, iy, iw, ih);
-      S.draw(ctx, 'alewife', 'idle', 0, ix + iw / 2, iy + ih, ih * 0.92) || placeholderAlewife(ctx, ix + iw / 2, iy + ih, ih * 0.9);
+      const photo = S.layer('hq/alewife-polaroid');
+      if (photo) { ctx.imageSmoothingEnabled = false; ctx.drawImage(photo, ix, iy, iw, ih); }
+      else S.draw(ctx, 'alewife', 'idle', 0, ix + iw / 2, iy + ih, ih * 0.92) || placeholderAlewife(ctx, ix + iw / 2, iy + ih, ih * 0.9);
     } else {
       ctx.fillStyle = '#6d5a4c'; ctx.fillRect(ix, iy, iw, ih);
       if (depth < 3) board(ctx, ix + iw * 0.1, iy + ih * 0.12, iw * 0.8, ih * 0.76, { ...hq, alewife: false }, depth + 1);
@@ -127,7 +138,7 @@
       ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
       ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
     }
-    hq.pizzas.forEach((z, i) => pie(ctx, 460 + i * 150, 432, 49, z));
+    hq.pizzas.forEach((z, i) => pie(ctx, 470 + i * 196, 432, 49, z));
     oldTimer(ctx, 300, 410, ms, view.mood);
     layer(ctx, 'hq/front', camX, -0.18);
     ctx.fillStyle = 'rgba(255,235,190,0.28)';
@@ -137,14 +148,35 @@
     }
   }
 
-  function door(ctx, city, ms) {
-    const pal = city.palette;
-    ctx.fillStyle = pal.skyBottom; ctx.fillRect(0, 0, W, H);
+  // The delivery: the neighborhood behind, the door, whoever ordered, and the pizza that made it.
+  function door(ctx, view, ms) {
+    const { city, area, slice } = view, pal = area.palette, drift = ms * 0.012;
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, pal.skyTop); sky.addColorStop(1, pal.skyBottom);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    const art = n => (S.layer(`${city.id}/${area.id}/${n}`) ? `${city.id}/${area.id}/${n}` : `${city.id}/${n}`);
+    S.tile(ctx, art('far'), drift, 0.2, W);
+    S.tile(ctx, art('mid'), drift, 0.5, W);
     ctx.fillStyle = pal.ground; ctx.fillRect(0, 600, W, 120);
-    ctx.fillStyle = '#6b5344'; ctx.fillRect(420, 80, 440, 520);
-    ctx.fillStyle = '#20150f'; ctx.fillRect(500, 150, 280, 450);
-    const who = city.final ? 'alewife' : 'customer';
-    if (!S.draw(ctx, who, 'idle', ms, 640, 600, 400)) placeholderAlewife(ctx, 640, 600, 380);
+    S.ground(ctx, `${city.id}/${area.id}/ground`, drift, 600, W);
+    const name = art('door');
+    if (S.layer(name)) {
+      const image = S.layer(name), scale = image.height > 240 ? 1 : 2;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, 760 - image.width * scale / 2, 600 - image.height * scale, image.width * scale, image.height * scale);
+    } else {
+      ctx.fillStyle = '#6b5344'; ctx.fillRect(620, 200, 300, 400);
+      ctx.fillStyle = '#20150f'; ctx.fillRect(660, 250, 220, 350);
+    }
+    const final = city.final && area === city.areas[city.areas.length - 1];
+    if (final) {
+      const tint = ['#ff3fa4', '#4fd8ff', '#ffe14f', '#b45cff'][Math.floor(ms / 240) % 4];
+      ctx.save(); ctx.globalAlpha = 0.3; ctx.fillStyle = tint; ctx.beginPath(); ctx.moveTo(760, 260); ctx.lineTo(240, 720); ctx.lineTo(1240, 720); ctx.fill(); ctx.restore();
+    }
+    const who = final ? 'alewife' : `customer-${city.id}-${area.id}`, height = final ? 340 : 300;
+    if (!S.draw(ctx, who, 'idle', ms, 760, 610, height, -1)) placeholderAlewife(ctx, 760, 610, 300);
+    const style = view.slice && view.slice.style ? view.slice.style : (city.style || 'ny');
+    S.draw(ctx, `slice-${style}`, 'idle', ms, 380, 610, C.STYLES[style].height) || P.drawSlice(ctx, 380, 540, style, null, '#ffcc33', 2.4);
   }
 
   // Plays shots of lines over the canvas. Tap to advance.
@@ -172,7 +204,7 @@
       const line = shot.lines[l], talking = now - lineAt < Math.min(2400, line.text.length * 42);
       view.mood = line.mood || (line.who === 'old' && talking ? 'talk' : 'idle');
       view.camX = x;
-      if (shot.comp === 'door') door(ctx, view.city, now);
+      if (shot.comp === 'door') door(ctx, view, now);
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
         ctx.translate(-Math.max(W / 2 / z, Math.min(W - W / 2 / z, x)) + whip / z, -Math.max(H / 2 / z, Math.min(H - H / 2 / z, y)));
