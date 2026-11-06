@@ -5,4 +5,4 @@ height = 1024
 comfy_args = ["--reserve-vram", "1.5"]
 template = "{action}"
 [shots.idle_a]
-prompt = "Chunky pixel-art style game character, late-1990s platformer, bold dark violet outline, saturated colours, cel shading, cartoony and affectionate. Full body, head to feet, standing facing the viewer in three-quarter view, feet on the ground: a big man with a thick mustache in an enormous puffy winter parka and a plain baseball cap with no logo, thick gloves, rosy cheeks, cheerful. Broad cartoony proportions, slightly big head. No text, no logos, no lettering on clothing. Flat solid magenta background."
+prompt = "Chunky pixel-art style game character, late-1990s platformer, bold dark violet outline, saturated colours, cel shading, cartoony and affectionate. Full body, head to feet, standing facing the viewer in three-quarter view, feet on the ground: a sturdy Chicago woman in a big puffy grey winter parka, trucker cap and jeans, curly hair sticking out, red lipstick, hands in big gloves, unimpressed but friendly. Cartoony proportions, slightly big head. No text, no logos, no lettering on clothing. Flat solid magenta background."

@@ -5,4 +5,4 @@ height = 1024
 comfy_args = ["--reserve-vram", "1.5"]
 template = "{action}"
 [shots.idle_a]
-prompt = "Chunky pixel-art style game character, late-1990s platformer, bold dark violet outline, saturated colours, cel shading, cartoony and affectionate. Full body, head to feet, standing facing the viewer in three-quarter view, feet on the ground: a sweet old man sitting-posture standing hunched with a cane, flat cap, cardigan, with several grey pigeons perched on his shoulders, arms and hat, a gentle smile. Broad cartoony proportions, slightly big head. No text, no logos, no lettering on clothing. Flat solid magenta background."
+prompt = "Chunky pixel-art style game character, late-1990s platformer, bold dark violet outline, saturated colours, cel shading, cartoony and affectionate. Full body, head to feet, standing facing the viewer in three-quarter view, feet on the ground: a tiny elderly woman in a long brown coat and a knitted headscarf, leaning on a cane, kindly and a little unhinged, with several grey pigeons perched on her shoulders and arms. Cartoony proportions, slightly big head. No text, no logos, no lettering on clothing. Flat solid magenta background."
