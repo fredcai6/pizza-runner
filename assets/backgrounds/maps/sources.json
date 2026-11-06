@@ -1,0 +1,20 @@
+{
+ "rev": {
+  "sha": "cda02474d59e13f5d28fc6b3f74b2b8bda66a49b",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "maps": {
+  "newyork": 3,
+  "chicago": 1,
+  "dc": 3,
+  "naples": 1,
+  "california": 1
+ },
+ "pies": {
+  "ny": 3,
+  "deep": 3,
+  "jumbo": 3,
+  "naples": 3
+ }
+}
