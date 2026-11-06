@@ -27,7 +27,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
 
   await page.goto(url);
   await click('Start');
-  await page.waitForTimeout(250); await shot('01-hq-opening');
+  await page.locator('#dialog:not(.hidden)').waitFor(); await page.waitForTimeout(250); await shot('01-hq-opening');
   const firstLine = await page.locator('#dialog .line').innerText();
   ok('opening scene plays', /New recruits/.test(firstLine), firstLine);
   await advance();
@@ -43,8 +43,8 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await page.waitForTimeout(150);
   const jumpBox = await page.locator('#controls .jump').boundingBox();
   await page.touchscreen.tap(jumpBox.x + 20, jumpBox.y + 20);
-  await page.waitForTimeout(120);
-  ok('touch jump works', await page.evaluate(() => __pr.run.p.y < 500));
+  await page.waitForTimeout(50);
+  ok('touch jump works', await page.evaluate(() => !__pr.run.p.grounded || __pr.run.p.y < 480));
   await page.keyboard.down('ArrowRight'); await page.waitForTimeout(1800); await page.keyboard.up('ArrowRight');
   await shot('06-street');
   ok('New York shows no special button', !(await page.locator('#specialBtn').isVisible()));

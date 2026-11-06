@@ -74,6 +74,7 @@
   async function route() {
     save();
     const city = R.currentCity(camp);
+    if (S.needsCity(city)) show(`<h2 class="loading">On the way to ${city.name}...</h2>`);
     await S.loadCity(city);
     switch (camp.phase) {
       case 'briefing': return scene(city.briefing, () => {

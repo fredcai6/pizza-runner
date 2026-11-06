@@ -124,7 +124,7 @@
         A.play('jump');
       }
       // Letting go early cuts the jump short.
-      if (!p.grounded && !this.bounced && p.vy < -7 && input.jumpHeld === false) p.vy = -7;
+      if (!p.grounded && !this.bounced && p.vy < -10 && input.jumpHeld === false) p.vy = -10;
       if (input.take('special')) this.special();
       if (input.take('power')) this.power();
       if (input.take('give')) this.give();

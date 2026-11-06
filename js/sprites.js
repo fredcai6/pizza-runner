@@ -40,9 +40,13 @@
   const loadLayers = () => fetchLayers(SHARED);
 
   // A city's paintings load when the city does, so a phone is not holding all of them at once.
-  function loadCity(city) {
-    const names = [`maps/${city.id}`, ...CITY_LAYERS.map(l => `${city.id}/${l}`), ...city.areas.flatMap(a => AREA_LAYERS.map(l => `${city.id}/${a.id}/${l}`))];
-    return fetchLayers(names);
+  const cityLayers = city => [`maps/${city.id}`, ...CITY_LAYERS.map(l => `${city.id}/${l}`), ...city.areas.flatMap(a => AREA_LAYERS.map(l => `${city.id}/${a.id}/${l}`))];
+  const loadedCities = new Set();
+  const needsCity = city => !loadedCities.has(city.id);
+
+  async function loadCity(city) {
+    await fetchLayers(cityLayers(city));
+    loadedCities.add(city.id);
   }
 
   const layer = name => layers[name];
@@ -113,5 +117,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, loadCity, layer, tile, ground, prop, strip, has, draw };
+  root.PR_SPRITES = { load, loadLayers, loadCity, needsCity, layer, tile, ground, prop, strip, has, draw };
 })(window);
