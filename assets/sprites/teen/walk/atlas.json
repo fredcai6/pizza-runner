@@ -7,13 +7,24 @@
  "frame_ms": 100,
  "loop": true,
  "rev": {
-  "sha": "3c817c6d02524b9193201ca5e4b3f977e41ef84c",
-  "dirty": true,
+  "sha": "f70d6866ba4b2bb9f80ac4de8327fc6cb249b398",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "source": {
-  "rig": "characters/teen/rig/walk.toml",
-  "body": "characters/teen/sprites/walk/sheet.png",
-  "gait": "walk"
+  "poseguide": "qwen-pose-run",
+  "motion": "walk-texting",
+  "seed": 2,
+  "place": "skel",
+  "frames": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ]
  }
 }

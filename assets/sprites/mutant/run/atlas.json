@@ -7,13 +7,24 @@
  "frame_ms": 70,
  "loop": true,
  "rev": {
-  "sha": "e4e2ff669d1359157d90fcf93b34779fce580be2",
-  "dirty": true,
+  "sha": "8cb82b5e4e878c944c7c6a1c90331b090ee6c4f9",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "source": {
-  "rig": "characters/mutant/rig/run.toml",
-  "body": "characters/mutant/sprites/run/sheet.png",
-  "gait": "run"
+  "poseguide": "qwen-pose-run",
+  "motion": "run",
+  "seed": 2,
+  "place": "skel",
+  "frames": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ]
  }
 }

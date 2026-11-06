@@ -7,13 +7,24 @@
  "frame_ms": 70,
  "loop": true,
  "rev": {
-  "sha": "5b713dda92853d30020968af136580a235bc6cfd",
+  "sha": "1b85d9d09f836e00960047c447a7b2572474e4c6",
   "dirty": true,
   "comfy": "v0.44.0"
  },
  "source": {
-  "rig": "characters/ninja/rig/walk.toml",
-  "body": "characters/ninja/sprites/walk/sheet.png",
-  "gait": "run"
+  "poseguide": "qwen-pose-run",
+  "motion": "run",
+  "seed": 2,
+  "place": "skel",
+  "frames": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ]
  }
 }
