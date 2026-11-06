@@ -20,7 +20,7 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       const city = C.CITIES[cityIndex], camp = R.newCampaign(); camp.cityIndex = cityIndex;
       camp.pies[city.id] = { slices: [{ id: 0, style, topping, status: 'ready' }, { id: 1, style, topping, status: 'ready' }] };
       camp.world = R.newWorld(city, 1); camp.phase = 'map';
-      const id = `${city.areas[0].id}.main`, street = camp.world.streets[id];
+      const street = Object.values(camp.world.streets).filter(x => x.id !== 'lead').sort((a, b) => b.length - a.length)[0], id = street.id;
       Object.assign(street, { platforms: [], fires: [], boxes: [], barricades: [], pickups: [], drains: [], enemies: [] });
       enemies.forEach((e, i) => street.enemies.push({ id: i, x: 900, y: GROUND, range: 40, alive: true, power: 0, toppings: [], bribed: -1, hits: 0, ...e }));
       const input = { left: false, right: false, q: {}, take(k) { const v = this.q[k]; this.q[k] = false; return v; } };

@@ -3,6 +3,7 @@ const assert = require('node:assert');
 const R = require('../js/rules.js');
 const C = require('../js/content.js');
 
+const { MAPS } = require('../js/maps.js');
 const city = c => R.currentCity(c);
 const pie = c => c.pies[city(c).id];
 const order = (c, a, b) => { const m = city(c).menu; R.placeOrder(c, a || m.a[0], b || m.b[0]); };
@@ -41,8 +42,8 @@ test('worlds are identical every time', () => {
 test('every address can be reached from every junction, shortcuts closed', () => {
   for (const x of C.CITIES) {
     const world = R.newWorld(x);
-    for (const area of x.areas) for (const node of Object.keys(world.nodes)) {
-      assert.ok(R.routes(world, node, `${area.id}.door`), `${x.id}: ${node} to ${area.id}`);
+    for (const a of MAPS[x.id].addresses) for (const node of Object.keys(world.nodes)) {
+      assert.ok(R.routes(world, node, a), `${x.id}: ${node} to ${a}`);
     }
   }
 });
@@ -57,21 +58,16 @@ test('guidance always points at the address, and stays honest after a missed tur
       // Follow only the guidance from every street in the city: it must always arrive.
       for (const start of Object.values(c.world.streets)) {
         let street = start, steps = 0;
-        while (street.id !== target && steps++ < 20) {
+        while (street.id !== target && steps++ < 30) {
           const g = R.guide(c, street, 200);
           assert.notStrictEqual(g.kind, 'door');
           street = g.street;
         }
         assert.strictEqual(street.id, target, `${x.id}: from ${start.id} to ${target}`);
-        assert.ok(steps <= 9, `${start.id} took ${steps} stretches`);
+        assert.ok(steps <= 14, `${start.id} took ${steps} stretches`);
       }
     }
   }
-});
-
-test('a straight run to an address needs few decisions', () => {
-  const c = fresh(), route = R.routes(c.world, 'start', R.addressStreet(c));
-  assert.ok(route.path.length <= 3, route.path.join());
 });
 
 test('playtest jumps land in any city at any address with the map open', () => {
@@ -79,7 +75,7 @@ test('playtest jumps land in any city at any address with the map open', () => {
     for (let d = 0; d < 3; d++) {
       const c = R.jumpTo(i, d);
       assert.strictEqual(c.phase, 'map');
-      assert.strictEqual(R.addressStreet(c), `${x.areas[d].id}.door`);
+      assert.strictEqual(R.addressStreet(c), MAPS[x.id].addresses[d]);
       assert.strictEqual(Object.keys(c.world.reached).length, Object.keys(c.world.nodes).length);
       assert.strictEqual(R.ready(c.pies[x.id]).length, x.final ? 8 : 6);
     }
@@ -90,7 +86,7 @@ test('every street is keep-going or a side turn, one of each at most', () => {
   for (const x of C.CITIES) {
     const { nodes, streets } = R.network(x);
     for (const n of Object.values(nodes)) assert.ok(n.keep, n.id);
-    for (const s of Object.values(streets)) assert.ok(nodes[s.from] && nodes[s.to], s.id);
+    for (const s of Object.values(streets)) if (s.id !== 'lead') assert.ok(nodes[s.from] && nodes[s.to], s.id);
   }
 });
 
@@ -124,19 +120,19 @@ test('each delivery uses a slice and only the third finishes the city', () => {
 
 test('the delivery target moves through the areas in order', () => {
   const c = fresh();
-  assert.strictEqual(R.addressStreet(c), 'wallstreet.door');
+  assert.strictEqual(R.addressStreet(c), MAPS.newyork.addresses[0]);
   deliver(c);
-  assert.strictEqual(R.addressStreet(c), 'centralpark.door');
+  assert.strictEqual(R.addressStreet(c), MAPS.newyork.addresses[1]);
 });
 
 test('a junction reached on a losing slice stays reached', () => {
-  const c = fresh(), street = c.world.streets.lead;
-  R.reach(c.world, street);
+  const c = fresh(), first = c.world.streets[c.world.nodes[MAPS.newyork.start].keep];
+  R.reach(c.world, first);
   lose(c);
-  assert.ok(c.world.reached['wallstreet.0']);
-  const d = R.deployment(c.world, 'wallstreet.0');
-  assert.strictEqual(d.street, 'lead');
-  assert.ok(d.x < street.turnAt);
+  assert.ok(c.world.reached[first.to]);
+  const d = R.deployment(c.world, first.to);
+  assert.strictEqual(d.street, first.id);
+  assert.ok(d.x < first.turnAt);
 });
 
 test('running out of slices is a city game over, and the world resets', () => {
@@ -229,7 +225,7 @@ test('a bribe buys this attempt only', () => {
 });
 
 test('a photo brings local teenagers next attempt and changes no speeds', () => {
-  const c = fresh(), street = c.world.streets['wallstreet.main'], before = street.enemies.length;
+  const c = fresh(), street = Object.values(c.world.streets).find(s => s.length > 3000), before = street.enemies.length;
   street.filmed = 1500;
   lose(c);
   assert.strictEqual(street.enemies.length, before + C.PHOTO_ARRIVALS.length);
@@ -238,7 +234,7 @@ test('a photo brings local teenagers next attempt and changes no speeds', () => 
 });
 
 test('a killer that survives keeps growing and keeps the topping it took', () => {
-  const c = fresh(), street = c.world.streets['wallstreet.main'], e = street.enemies.find(x => x.type === 'teen');
+  const c = fresh(), street = Object.values(c.world.streets).find(s => s.enemies.some(x => x.type === 'teen')), e = street.enemies.find(x => x.type === 'teen');
   R.finishRun(c, R.ready(pie(c))[0], { outcome: 'dead', x: 100, street: street.id, killer: { street: street.id, id: e.id } });
   assert.strictEqual(e.power, 1);
   assert.deepStrictEqual(e.toppings, ['pepperoni']);
@@ -246,12 +242,13 @@ test('a killer that survives keeps growing and keeps the topping it took', () =>
 });
 
 test('broken shortcut boxes stay broken and open the turn', () => {
-  const c = fresh(), lead = c.world.streets.lead;
-  assert.strictEqual(R.junction(c.world, lead).open, false);
-  assert.ok(R.breakGate(c, 'wallstreet.alley'));
-  assert.strictEqual(R.junction(c.world, lead).open, true);
+  const c = fresh(), gate = Object.values(c.world.streets).find(s => s.gated);
+  const before = Object.values(c.world.streets).find(s => s.to === gate.from);
+  assert.strictEqual(R.junction(c.world, before).open, false);
+  assert.ok(R.breakGate(c, gate.id));
+  assert.strictEqual(R.junction(c.world, before).open, true);
   lose(c);
-  assert.strictEqual(R.junction(c.world, lead).open, true);
+  assert.strictEqual(R.junction(c.world, before).open, true);
 });
 
 test('each receipt spells the name differently', () => {

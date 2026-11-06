@@ -12,8 +12,8 @@
   <canvas id="stage" width="1280" height="720"></canvas>
   <div id="controls" class="hidden">
     <button id="pauseBtn" class="corner">❚❚</button>
-    <button id="turnBtn" data-key="turn" class="turn off"></button>
-    <div class="pad">
+    <div class="pad move">
+      <button id="turnBtn" data-key="turn" class="turn dim">TURN</button>
       <button data-key="left">◀</button>
       <button data-key="right">▶</button>
     </div>
@@ -31,6 +31,7 @@
   </div></div></div>
   <div id="overlay" class="hidden"></div>
   <div id="turn">Turn your phone sideways</div>
+  <script src="js/maps.js"></script>
   <script src="js/content.js"></script>
   <script src="js/rules.js"></script>
   <script src="js/sound.js"></script>

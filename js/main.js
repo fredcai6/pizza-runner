@@ -143,7 +143,7 @@
   // Every slice starts here: the full map, the address, and any checkpoint reached so far.
   function mapScreen() {
     const city = R.currentCity(camp), world = camp.world, pie = camp.pies[city.id];
-    let node = M.closest(camp) || 'start', chosen = null;
+    let node = M.closest(camp), chosen = null;
     const render = () => {
       const list = R.ready(pie);
       const groups = [...new Set(list.map(s => `${s.style}|${s.topping}`))].map(k => list.find(s => `${s.style}|${s.topping}` === k));
@@ -245,9 +245,7 @@
     $('giveBtn').textContent = label || '';
     $('giveBtn').classList.toggle('off', !label);
     const offer = run && !run.done && run.offer;
-    $('turnBtn').textContent = offer ? (run.best ? `TURN HERE: ${offer.name}` : `Side street: ${offer.name}`) : '';
-    $('turnBtn').classList.toggle('off', !offer);
-    $('turnBtn').classList.toggle('best', !!offer && run.best);
+    $('turnBtn').classList.toggle('dim', !offer);
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };

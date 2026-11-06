@@ -1,0 +1,43 @@
+{
+ "rev": {
+  "sha": "2970646fedeb0920c42fb1717b9238aa98ce1b13",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "far": {
+   "run": "lincolnpark/layers",
+   "model": "klein",
+   "shot": "far",
+   "seed": 1,
+   "seam_start_x": 52
+  },
+  "mid": {
+   "run": "lincolnpark/layers",
+   "model": "klein",
+   "shot": "mid",
+   "seed": 2,
+   "shifted_by": -40,
+   "seam_start_x": 210
+  },
+  "near": {
+   "run": "lincolnpark/layers",
+   "model": "klein",
+   "shot": "near",
+   "seed": 4,
+   "seam_start_x": 181
+  },
+  "ground": {
+   "run": "lincolnpark/props",
+   "model": "klein",
+   "shot": "ground",
+   "seed": 1
+  },
+  "door": {
+   "run": "lincolnpark/props",
+   "model": "klein",
+   "shot": "door",
+   "seed": 2
+  }
+ }
+}

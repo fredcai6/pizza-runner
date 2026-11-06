@@ -1,31 +1,25 @@
 // The city map: drawn like streets, with one-way arrows, where the slice is, and the way to the address.
 (function (root) {
   const C = root.PR_CONTENT, R = root.PR_RULES;
-  const AREA = { x: 110, gap: 390, w: 290, top: 120, bottom: 540, ring: 620 };
-  const PARKS = { centralpark: '#9bbf7a', lincolnpark: '#9bbf7a', mall: '#a9c98a', beach: '#ecd9a0' };
+  const MAPS = root.PR_MAPS;
 
-  const corners = i => {
-    const L = AREA.x + i * AREA.gap, R_ = L + AREA.w, T = AREA.top, B = AREA.bottom, mid = (T + B) / 2;
-    return { L, R: R_, T, B, mid, a0: [L, B], a1: [L + AREA.w * 0.55, T], a2: [R_, mid] };
-  };
+  // Every city's roads are stretched to fill the sheet, so no map huddles in one corner.
+  const fits = {};
+  function fit(city) {
+    if (fits[city.id]) return fits[city.id];
+    const m = MAPS[city.id], pts = [...Object.values(m.nodes).map(n => [n.x, n.y]), ...m.streets.flatMap(s => s.via || [])];
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
+    const sx = 1130 / (Math.max(...xs) - x0), sy = 540 / (Math.max(...ys) - y0);
+    return (fits[city.id] = ([x, y]) => [Math.round(75 + (x - x0) * sx), Math.round(100 + (y - y0) * sy)]);
+  }
 
   // Each stretch as the line of road it follows on the map, corner by corner.
-  function line(city, street) {
-    if (street.id === 'lead') return [[30, AREA.bottom], corners(0).a0];
-    const i = street.area, c = corners(i), n = city.areas.length;
-    switch (street.role) {
-      case 'main': return [c.a0, [c.L, c.T], c.a1];
-      case 'door': return [c.a1, [c.R, c.T], c.a2];
-      case 'alley': return [c.a0, c.a1];
-      case 'cut': return [c.a1, [c.a1[0], c.mid], c.a2];
-      case 'loop': return [c.a2, [c.R, c.B], c.a0];
-      default: {
-        const out = c.R + 50;
-        if (i < n - 1) return [c.a2, [out, c.mid], [out, c.B], corners(i + 1).a0];
-        const home = corners(0).L;
-        return [c.a2, [out, c.mid], [out, AREA.ring], [home, AREA.ring], [home, c.B]];
-      }
-    }
+  function line(city, street, world) {
+    const m = MAPS[city.id], def = m.streets.find(s => s.id === street.id), f = fit(city);
+    const node = id => f([m.nodes[id].x, m.nodes[id].y]);
+    if (!def) return [[node(m.start)[0] - 34, node(m.start)[1]], node(m.start)];
+    if (def.back) return line(city, world.streets[def.back], world).slice().reverse();
+    return [node(def.from), ...(def.via || []).map(f), node(def.to)];
   }
 
   const spans = pts => pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
@@ -55,51 +49,57 @@
   }
 
   function roadLabel(pts, text) {
-    const p = along(pts, 0.5), flat = Math.abs(p.angle) < 20 || Math.abs(p.angle) > 160;
-    const off = flat ? [0, -19] : [19, 0], turn = flat ? 0 : 90;
-    return `<text class="roadname" transform="translate(${p.x + off[0]} ${p.y + off[1]}) rotate(${turn})">${text}</text>`;
+    const p = along(pts, 0.5);
+    let turn = p.angle;
+    if (turn > 90) turn -= 180;
+    if (turn < -90) turn += 180;
+    const r = turn * Math.PI / 180;
+    return `<text class="roadname" transform="translate(${p.x + Math.sin(r) * 19} ${p.y - Math.cos(r) * 19}) rotate(${turn})">${text}</text>`;
   }
 
   // picked is the checkpoint chosen, live is the slice out on the street right now.
   function svg(camp, { picked, live } = {}) {
-    const city = R.currentCity(camp), world = camp.world, out = [], all = Object.values(world.streets);
+    const city = R.currentCity(camp), world = camp.world, out = [], m = MAPS[city.id];
+    const all = Object.values(world.streets).filter(s => s.id !== 'lead');
     const paper = root.PR_SPRITES.layer(`maps/${city.id}`);
     out.push(`<svg class="citymap" viewBox="0 0 1280 720">${paper ? `<image href="${paper.src}" width="1280" height="720" preserveAspectRatio="none"/>` : ''}`);
+    const f = fit(city);
+    out.push('<rect class="wash" width="1280" height="720"/>');
+    for (const k of m.features) out.push(`<polygon class="${k.kind}" points="${k.points.map(p => f(p).join(',')).join(' ')}"/>`);
     city.areas.forEach((a, i) => {
-      const c = corners(i), tint = PARKS[a.id] || a.palette.top;
-      out.push(`<rect class="block" x="${c.L - 26}" y="${c.T - 26}" width="${AREA.w + 52}" height="${AREA.bottom - AREA.top + 52}" fill="${tint}"/>`);
-      if (!PARKS[a.id]) for (let k = 1; k < 7; k++) {
-        out.push(`<path class="grid" d="M${c.L - 26 + k * 48} ${c.T - 26} V${c.B + 26} M${c.L - 26} ${c.T - 26 + k * 66} H${c.R + 26}"/>`);
-      }
-      out.push(`<text class="areaname" x="${c.L + AREA.w / 2}" y="62">${a.name}</text>`);
+      const ns = Object.values(m.nodes).filter(n => n.area === i).map(n => f([n.x, n.y])), x = ns.reduce((t, n) => t + n[0], 0) / ns.length, y = ns.reduce((t, n) => t + n[1], 0) / ns.length;
+      out.push(`<text class="areaname" x="${x}" y="${y}">${a.name}</text>`);
     });
-    const lines = Object.fromEntries(all.map(s => [s.id, line(city, s)]));
-    for (const s of all) out.push(`<path class="casing" d="${path(lines[s.id])}"/>`);
-    for (const s of all) {
+    for (const l of m.landmarks) { const [x, y] = f([l.x, l.y]); out.push(`<text class="landmark" x="${x}" y="${y}">${l.name}</text>`); }
+    const lines = Object.fromEntries(Object.values(world.streets).map(s => [s.id, line(city, s, world)]));
+    const drawn = all.filter(s => s.role !== 'back');
+    for (const s of drawn) out.push(`<path class="casing" d="${path(lines[s.id])}"/>`);
+    for (const s of drawn) {
       const blocked = s.gated && !world.opened[s.id];
       out.push(`<path class="road${world.known[s.id] ? ' known' : ''}${blocked ? ' blocked' : ''}" d="${path(lines[s.id])}"/>`);
       out.push(arrows(lines[s.id], 'arrow'));
     }
-    // The way to the address, from wherever the next slice starts.
+    // A faint dotted line to the address, from wherever the next slice starts.
     const target = R.addressStreet(camp), from = live ? world.streets[live.street].to : picked;
     const here = live && live.street === target && live.x < world.streets[target].door;
     const route = here ? { path: [target] } : from ? R.routes(world, from, target) : null;
-    if (route) {
-      if (live && !here) out.push(`<path class="route" d="${path(lines[live.street])}"/>`);
-      route.path.forEach(id => { out.push(`<path class="route" d="${path(lines[id])}"/>`); out.push(arrows(lines[id], 'routearrow')); });
+    if (route) route.path.forEach(id => out.push(`<path class="routeline" d="${path(lines[id])}"/>`));
+    // A road split into stretches or two directions still gets its name just once.
+    const named = new Set();
+    for (const s of drawn.slice().sort((a, b) => b.length - a.length)) {
+      if (world.known[s.id] && !named.has(s.name)) { named.add(s.name); out.push(roadLabel(lines[s.id], s.name)); }
     }
-    for (const s of all) if (world.known[s.id] || (route && route.path.includes(s.id))) out.push(roadLabel(lines[s.id], s.name));
     // Every address is marked from the start.
     city.areas.forEach((a, i) => {
-      const s = world.streets[`${a.id}.door`], p = along(lines[s.id], s.door / s.length);
+      const s = world.streets[m.addresses[i]], p = along(lines[s.id], s.door / s.length);
       const state = i < world.delivery ? 'done' : i === world.delivery ? 'active' : 'later';
       out.push(`<g class="addr ${state}" transform="translate(${p.x} ${p.y})"><circle r="27"/><text y="10">${state === 'done' ? '✓' : i + 1}</text></g>`);
       if (state === 'active') out.push(`<text class="pinlabel" x="${p.x}" y="${p.y + 60}">${a.customer}</text>`);
     });
     for (const id of Object.keys(world.reached)) {
-      const p = id === 'start' ? { x: 30, y: AREA.bottom } : corners(world.nodes[id].area)[`a${world.nodes[id].slot}`], x = p.x ?? p[0], y = p.y ?? p[1], on = id === picked;
+      const [x, y] = f([m.nodes[id].x, m.nodes[id].y]), on = id === picked;
       out.push(`<g class="check${on ? ' on' : ''}${picked === undefined ? ' still' : ''}" data-node="${id}"><circle class="hit" cx="${x}" cy="${y}" r="42"/><circle class="dot" cx="${x}" cy="${y}" r="${on ? 22 : 15}"/></g>`);
-      if (on) out.push(`<text class="nodename" x="${x}" y="${y + (y > 400 ? 52 : -34)}">${world.nodes[id].name}</text>`);
+      if (on) out.push(`<text class="nodename" x="${x}" y="${y + (y < 150 ? 52 : -34)}">${world.nodes[id].name}</text>`);
     }
     if (world.lastSeen && !live) {
       const s = world.streets[world.lastSeen.street], p = along(lines[s.id], world.lastSeen.x / s.length);
@@ -109,10 +109,9 @@
       const s = world.streets[live.street], p = along(lines[s.id], live.x / s.length);
       out.push(`<g class="you" transform="translate(${p.x} ${p.y})"><circle r="24"/><text y="9">🍕</text></g><text class="youlabel" x="${p.x}" y="${p.y - 34}">YOU</text>`);
     }
-    out.push(`<g class="legend"><circle cx="40" cy="692" r="11" class="k-route"/><text x="58" y="699" text-anchor="start">Way to the address</text>
-      <circle cx="306" cy="692" r="11" class="k-addr"/><text x="324" y="699" text-anchor="start">Address</text>
-      <circle cx="470" cy="692" r="11" class="k-check"/><text x="488" y="699" text-anchor="start">${live ? 'Checkpoints' : 'Tap to start here'}</text>
-      <text x="720" y="700" class="k-lost" text-anchor="start">${live ? '🍕 You are here' : '✕ Last slice ended here'}</text></g></svg>`);
+    out.push(`<g class="legend"><circle cx="40" cy="692" r="11" class="k-addr"/><text x="58" y="699">Address</text>
+      <circle cx="200" cy="692" r="11" class="k-check"/><text x="218" y="699">${live ? 'Checkpoints' : 'Tap to start here'}</text>
+      <text x="470" y="700">${live ? '🍕 You are here' : '✕ Last slice ended here'}</text></g></svg>`);
     return out.join('');
   }
 
@@ -122,7 +121,7 @@
     let best = null, steps = Infinity;
     for (const id of Object.keys(world.reached)) {
       const route = R.routes(world, id, target);
-      if (route && route.steps < steps) { best = id; steps = route.steps; }
+      if (route && route.d < steps) { best = id; steps = route.d; }
     }
     return best;
   }

@@ -37,7 +37,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await click('Box it');
   await page.locator('#screen .citymap').waitFor();
   await shot('05-map');
-  ok('map shows the address and one checkpoint', await page.locator('.addr.active').count() === 1 && await page.locator('.check').count() === 1);
+  ok('map shows the address and one checkpoint', await page.locator('#screen .addr.active').count() === 1 && await page.locator('#screen .check').count() === 1);
   await click('Deploy');
 
   await page.waitForTimeout(150);
@@ -63,28 +63,27 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await page.locator('.mapback').click();
   await click('Resume');
 
-  // Reach the junction, see the prompt, break nothing, carry on past: a real keep-going.
+  // Reach the junction, carry on past it: a real keep-going, then a real turn at the next one offering one.
   await page.evaluate(() => { const r = __pr.run; r.p.x = r.street.turnAt - 340; });
   await page.waitForTimeout(120);
-  ok('junction unlocks a checkpoint', await page.evaluate(() => !!__pr.camp.world.reached['wallstreet.0']));
-  await page.evaluate(() => { const r = __pr.run; r.p.x = r.street.turnAt - 100; }); await page.waitForTimeout(80);
-  await shot('10-junction');
-  await page.evaluate(() => { const r = __pr.run; r.p.x = r.street.length - r.p.w - 6; __pr.input.right = true; });
+  ok('junction unlocks a checkpoint', await page.evaluate(() => Object.keys(__pr.camp.world.reached).length === 1 + 0 || !!__pr.camp.world.reached[__pr.run.street.to]));
+  ok('TURN sits greyed out when no turn is available', await page.evaluate(() => { const r = __pr.run; r.p.x = 400; r.junctionStep(); return !r.offer; }));
+  await page.evaluate(() => { const r = __pr.run; const next = r.junction.keep.id; r.p.x = r.street.length - r.p.w - 6; __pr.input.right = true; __pr.want = next; });
   await page.waitForTimeout(900);
-  ok('keep going moves onto the next stretch', await page.evaluate(() => __pr.run.street.id === 'wallstreet.main'));
-  await page.evaluate(() => { __pr.input.right = false; __pr.run.p.x = __pr.run.street.turnAt - 100; __pr.run.junctionStep(); });
-  ok('a side turn is on offer', await page.evaluate(() => __pr.run.offer && __pr.run.offer.id === 'wallstreet.cut'));
+  ok('keep going moves onto the next stretch', await page.evaluate(() => __pr.run.street.id === __pr.want));
+  await page.evaluate(() => { __pr.input.right = false; const r = __pr.run, w = r.world; const s = Object.values(w.streets).find(x => { const j = PR_RULES.junction(w, x); return j.turn && j.open; }); r.enter(s.id, 300); r.p.x = r.street.turnAt - 100; r.junctionStep(); __pr.want = r.offer && r.offer.id; });
   await page.waitForTimeout(150);
-  ok('turn button shows the street', /William/.test(await page.locator('#turnBtn').innerText()), await page.locator('#turnBtn').innerText());
+  ok('a side turn is on offer', await page.evaluate(() => !!__pr.want));
+  ok('TURN lights up', !(await page.locator('#turnBtn.dim').count()));
   await page.keyboard.press('ArrowDown');
   await page.waitForTimeout(700);
-  ok('turning changes street', await page.evaluate(() => __pr.run.street.id === 'wallstreet.cut'));
-  await page.evaluate(() => __pr.run.end('dead', __pr.run.street.enemies[0].id));
+  ok('turning changes street', await page.evaluate(() => __pr.run.street.id === __pr.want));
+  await page.evaluate(() => __pr.run.end('dead', (__pr.run.actors[0] || { e: {} }).e.id));
   await page.waitForTimeout(80); await shot('11-debrief');
   ok('debrief prints a receipt', (await page.locator('.stamp').innerText()) === 'Eaten');
   await click('Back to the map');
   await page.locator('#screen .citymap').waitFor(); await shot('12-map-second');
-  ok('two checkpoints to choose from after a loss', await page.locator('.check').count() >= 2);
+  ok('two checkpoints to choose from after a loss', await page.locator('#screen .check').count() >= 2);
   await page.reload();
   await click('Continue');
   await page.locator('#screen .citymap').waitFor();

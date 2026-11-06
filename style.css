@@ -99,15 +99,15 @@ h4 { margin-top: 12px; font: bold 13px system-ui, sans-serif; color: #2a1a10; }
 .citymap text { font-family: system-ui, sans-serif; text-anchor: middle; }
 .block { stroke: #1f1410; stroke-opacity: .25; stroke-width: 2; fill-opacity: .75; }
 .grid { stroke: #fff; stroke-opacity: .28; stroke-width: 3; fill: none; }
-.areaname { font-size: 40px; font-weight: 900; fill: #3a2413; paint-order: stroke; stroke: #f4e7cc; stroke-width: 7px; }
-.casing { fill: none; stroke: #1f1410; stroke-width: 28; stroke-linejoin: round; stroke-linecap: round; }
-.road { fill: none; stroke: #c9c1ad; stroke-width: 21; stroke-linejoin: round; stroke-linecap: round; }
+.areaname { font-size: 34px; font-weight: 900; fill: #3a2413; fill-opacity: .55; letter-spacing: 3px; }
+.casing { fill: none; stroke: #1f1410; stroke-width: 20; stroke-linejoin: round; stroke-linecap: round; }
+.road { fill: none; stroke: #c9c1ad; stroke-width: 14; stroke-linejoin: round; stroke-linecap: round; }
 .road.known { stroke: #fff8e6; }
 .road.blocked { stroke: #b8843f; stroke-dasharray: 14 12; }
 .arrow { fill: #6b5a4a; }
 .route { fill: none; stroke: #ffc22e; stroke-width: 15; stroke-linejoin: round; stroke-linecap: round; }
 .routearrow { fill: #1f1410; }
-.roadname { font-size: 23px; font-weight: 800; fill: #1f1410; paint-order: stroke; stroke: #f4e7cc; stroke-width: 6px; }
+.roadname { font-size: 21px; font-weight: 800; fill: #1f1410; paint-order: stroke; stroke: #f4e7cc; stroke-width: 6px; }
 .check .hit { fill: transparent; }
 .check .dot { fill: #2f8f4f; stroke: #fff; stroke-width: 5; }
 .check.on .dot { fill: #fff; stroke: #2f8f4f; stroke-width: 9; }
@@ -145,6 +145,11 @@ h4 { margin-top: 12px; font: bold 13px system-ui, sans-serif; color: #2a1a10; }
 .mapactions .actions button { padding: 9px; font-size: 15px; }
 #screen:has(.mapscreen) { padding: 8px; }
 .listen { font: bold 18px system-ui, sans-serif; color: #c8321e; }
-#controls button.turn { position: absolute; left: 50%; transform: translateX(-50%); width: auto; min-width: 150px; max-width: 32vw; height: 46px; bottom: calc(6px + env(safe-area-inset-bottom)); padding: 0 16px; border-radius: 14px; pointer-events: auto; background: rgba(70,90,110,.8); font-size: 14px; }
-#controls button.turn.best { background: #ffc22e; color: #1f1410; border-color: #1f1410; font-size: 16px; animation: nudge .6s infinite alternate; }
-@keyframes nudge { to { transform: translateX(-50%) scale(1.08); } }
+.pad.move { position: relative; }
+#controls button.turn { position: absolute; left: 50%; transform: translateX(-50%); bottom: 76px; width: 74px; height: 42px; border-radius: 12px; background: rgba(40,100,170,.9); font-size: 13px; }
+#controls button.turn.dim { background: rgba(60,60,60,.5); color: rgba(255,255,255,.4); border-color: rgba(255,255,255,.25); }
+.wash { fill: #f1e4c4; fill-opacity: .86; }
+.water { fill: #8fc6dc; fill-opacity: 1; stroke: #5a93ad; stroke-width: 3; }
+.park { fill: #a9c98a; fill-opacity: 1; stroke: #6f8f55; stroke-width: 3; }
+.landmark { font-size: 20px; font-style: italic; font-weight: 600; fill: #5a4632; }
+.routeline { fill: none; stroke: #c8321e; stroke-width: 5; stroke-dasharray: 3 11; stroke-linecap: round; }

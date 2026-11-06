@@ -1,6 +1,7 @@
 // Campaign rules with no drawing in them: what persists, what it costs, what gets recorded.
 (function (root) {
   const C = typeof module !== 'undefined' ? require('./content.js') : root.PR_CONTENT;
+  const MAPS = typeof module !== 'undefined' ? require('./maps.js').MAPS : root.PR_MAPS;
   const GROUND = 600;
   const SLICES = 6;
 
@@ -14,29 +15,22 @@
     };
   }
 
-  // A city is its street network: nodes joined by one-way stretches. Generated once per city
-  // attempt from the city's seed, then only ever changed by what happens on it.
+  // A city is its street network, real streets from js/maps.js, generated once per city attempt
+  // from the city's seed and then only ever changed by what happens on it.
   function network(city) {
-    const nodes = {}, streets = {}, n = city.areas.length;
-    nodes.start = { id: 'start', name: `${city.name} depot`, area: 0, slot: -1 };
-    city.areas.forEach((area, i) => area.nodes.forEach((name, slot) => { nodes[`${area.id}.${slot}`] = { id: `${area.id}.${slot}`, name, area: i, slot }; }));
-    city.areas.forEach((area, i) => {
-      C.STREET_ROLES.forEach((role, r) => {
-        const id = `${area.id}.${role.role}`;
-        const to = role.to === 'next' ? `${city.areas[(i + 1) % n].id}.0` : `${area.id}.${role.to}`;
-        streets[id] = { id, name: area.streets[r], role: role.role, area: i, from: `${area.id}.${role.from}`, to, length: Math.round(city.stretch * role.length), gated: !!role.gated };
-        const from = nodes[`${area.id}.${role.from}`];
-        from[role.turn ? 'turn' : 'keep'] = id;
-      });
-    });
-    streets.lead = { id: 'lead', name: 'Depot Road', role: 'lead', area: 0, from: 'start', to: `${city.areas[0].id}.0`, length: Math.round(city.stretch * 0.45), gated: false };
-    nodes.start.keep = 'lead';
+    const map = MAPS[city.id], nodes = {}, streets = {};
+    for (const [id, n] of Object.entries(map.nodes)) nodes[id] = { id, ...n };
+    for (const s of map.streets) {
+      streets[s.id] = { id: s.id, name: s.name, area: s.area, from: s.from, to: s.to, role: s.gated ? 'alley' : s.back ? 'back' : 'street', length: Math.round(city.stretch * s.length), gated: !!s.gated, spot: s.door };
+      nodes[s.from][s.turn ? 'turn' : 'keep'] = s.id;
+    }
+    streets.lead = { id: 'lead', name: nodes[map.start].name, role: 'lead', area: nodes[map.start].area, from: null, to: map.start, length: Math.round(city.stretch * 0.4), gated: false };
     return { nodes, streets };
   }
 
   function generateStreet(city, def, addressed) {
     const r = rng(city.seed * 977 + [...def.id].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) | 0, 7));
-    const { length, role } = def, quiet = role === 'alley' || role === 'lead';
+    const { length, role } = def, quiet = role === 'alley' || role === 'lead' || length < 1800;
     const turnAt = length - 420, stop = length - 900;
     const platforms = [];
     for (let x = 700; x < stop; x += 460 + Math.floor(r() * 300)) platforms.push({ x, y: GROUND - (r() < 0.5 ? 135 : 215), w: 220 + Math.floor(r() * 160) });
@@ -62,27 +56,27 @@
       if (Math.abs(x - fires[0]?.x) < 200) continue;
       if (r() < 0.65) boxes.push({ x, w: 84, h: 84, broken: false }); else barricades.push({ x, w: 80, h: 100 });
     }
-    return { ...def, turnAt, platforms: [...platforms, ...ledges], enemies, drains, pickups, fires, boxes, barricades, nextId: id, door: addressed === undefined ? null : Math.round(length * 0.72), address: addressed === undefined ? null : addressed, dead: [], filmed: null };
+    return { ...def, turnAt, platforms: [...platforms, ...ledges], enemies, drains, pickups, fires, boxes, barricades, nextId: id, door: addressed === undefined ? null : Math.round(length * def.spot), address: addressed === undefined ? null : addressed, dead: [], filmed: null };
   }
 
   function newWorld(city, attempt = 0) {
     const { nodes, streets } = network(city);
     const built = {};
     for (const [id, def] of Object.entries(streets)) {
-      const area = city.areas.findIndex(a => id === `${a.id}.door`);
+      const area = MAPS[city.id].addresses.indexOf(id);
       built[id] = generateStreet(city, def, area < 0 ? undefined : area);
     }
-    return { city: city.id, attempt, nodes, streets: built, delivery: 0, run: 0, reached: { start: 'lead' }, known: { lead: true }, opened: {}, checkpoint: 'start' };
+    return { city: city.id, attempt, nodes, streets: built, delivery: 0, run: 0, reached: { [MAPS[city.id].start]: 'lead' }, known: { lead: true }, opened: {}, checkpoint: MAPS[city.id].start };
   }
 
   // The stretch a checkpoint deploys onto: the road that led up to it, just before the junction,
   // so both choices at that junction are still ahead.
   function deployment(world, node) {
     const street = world.streets[world.reached[node]];
-    return { street: street.id, x: node === 'start' ? 140 : Math.max(140, street.turnAt - 620) };
+    return { street: street.id, x: street.id === 'lead' ? 140 : Math.max(140, street.turnAt - 620) };
   }
 
-  const addressStreet = (camp, city = currentCity(camp)) => `${city.areas[camp.world.delivery].id}.door`;
+  const addressStreet = (camp, city = currentCity(camp)) => MAPS[city.id].addresses[camp.world.delivery];
 
   // What a junction offers right now. A blocked shortcut stays on offer once its boxes are gone.
   function junction(world, street) {
@@ -100,23 +94,23 @@
 
   function travel(world, streetId) { world.known[streetId] = true; }
 
-  // The fewest stretches from a node to a street, following one-way streets. Shortcuts count once open.
+  // The shortest way from a node to a street, following one-way streets. Shortcuts count once open.
   function routes(world, from, target) {
-    const seen = new Set(), queue = [[from, []]];
-    while (queue.length) {
-      const [node, path] = queue.shift();
-      if (seen.has(node)) continue;
-      seen.add(node);
+    const dist = { [from]: 0 }, how = { [from]: [] }, open = new Set([from]), done = new Set();
+    let best = null;
+    while (open.size) {
+      const node = [...open].reduce((a, b) => (dist[b] < dist[a] ? b : a));
+      open.delete(node); done.add(node);
       const n = world.nodes[node];
       for (const s of [n.keep, n.turn].filter(Boolean)) {
         const street = world.streets[s];
         if (street.gated && !world.opened[s]) continue;
-        const way = [...path, s];
-        if (s === target) return { steps: way.length, first: way[0], path: way };
-        queue.push([street.to, way]);
+        const d = dist[node] + street.length, way = [...how[node], s];
+        if (s === target && (!best || d < best.d)) best = { d, path: way, first: way[0], steps: way.length };
+        if (!done.has(street.to) && (dist[street.to] === undefined || d < dist[street.to])) { dist[street.to] = d; how[street.to] = way; open.add(street.to); }
       }
     }
-    return null;
+    return best;
   }
 
   // What to do next from here, on the way to the current address.
@@ -125,7 +119,7 @@
     if (street.id === target && x < street.door) return { kind: 'door', left: street.door - x };
     const j = junction(world, street), route = routes(world, street.to, target);
     const turn = !!j.turn && j.open && route.first === j.turn.id;
-    return { kind: turn ? 'turn' : 'keep', street: turn ? j.turn : j.keep, left: street.turnAt - x };
+    return { kind: turn ? 'turn' : 'keep', street: turn ? j.turn : j.keep, left: (turn ? street.turnAt : street.length) - x };
   }
 
   function newCampaign() {

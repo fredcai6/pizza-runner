@@ -211,8 +211,6 @@
       const inZone = cx > street.turnAt + TURN_ZONE[0] && cx < street.turnAt + TURN_ZONE[1] && !!j.turn;
       this.offer = inZone && j.open ? j.turn : null;
       this.heading = R.guide(this.camp, street, cx);
-      this.best = !!this.offer && this.heading.kind === 'turn';
-      this.inZone = inZone || cx > street.turnAt - 420;
       if (this.heading.kind === 'door' && this.heading.left < 700 && !this.warned) { this.warned = true; this.say(`${this.area0().customer}'s door, ${C.BARKS.almost}`); }
       if (inZone && !j.open && !this.warned) { this.warned = true; this.say(C.BARKS.gate); }
       if (p.x + p.w >= street.length - 2 && !this.wipe) this.go(j.keep.id);
@@ -718,33 +716,26 @@
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
     }
 
-    // The corner: a crosswalk, a sign with the real street names, and the way to the address picked out in gold.
+    // The corner: a crosswalk and a sign with the real street names. Reading it is the player's job.
     drawJunction() {
-      const { ctx, street, junction: j, frame, cam, heading } = this, x = street.turnAt;
+      const { ctx, street, junction: j, frame, cam } = this, x = street.turnAt;
       if (x < cam - 500 || x > cam + W + 500) return;
-      const turnBest = heading && heading.kind === 'turn', pulse = 0.6 + Math.sin(frame / 6) * 0.4;
-      ctx.fillStyle = turnBest ? `rgba(255,215,106,${0.5 + pulse * 0.4})` : 'rgba(255,255,255,0.55)';
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
       for (let i = 0; i < 8; i++) ctx.fillRect(x - 170 + i * 48, GROUND + 4, 28, 60);
       if (j.turn && j.turn.gated && !j.open) {
         if (!S.prop(ctx, 'props/box-pile', x, GROUND)) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
-      const label = (text, y, color, best) => {
-        ctx.font = `bold ${best ? 28 : 21}px system-ui, sans-serif`; ctx.textAlign = 'left';
-        const w = ctx.measureText(text).width + 22, h = best ? 42 : 32;
-        ctx.fillStyle = best ? '#ffd76a' : color; ctx.fillRect(x + 160, y, w, h);
-        if (best) { ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 4; ctx.strokeRect(x + 160, y, w, h); }
-        ctx.fillStyle = best ? '#1f1410' : '#fff'; ctx.fillText(text, x + 171, y + h - 11);
+      const label = (text, y, color) => {
+        ctx.font = 'bold 21px system-ui, sans-serif'; ctx.textAlign = 'left';
+        const w = ctx.measureText(text).width + 22;
+        ctx.fillStyle = color; ctx.fillRect(x + 160, y, w, 32);
+        ctx.fillStyle = '#fff'; ctx.fillText(text, x + 171, y + 23);
       };
-      label(`${j.keep.name} ▶`, GROUND - 244, '#4a5a4a', !turnBest);
-      if (j.turn) label(`▲ ${j.turn.name}`, GROUND - 196, j.open ? '#4a5a6a' : '#6b5a4a', turnBest);
-      if (turnBest) {
-        ctx.fillStyle = '#ffd76a'; ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 6; ctx.font = 'bold 110px system-ui, sans-serif'; ctx.textAlign = 'center';
-        const y = GROUND - 170 + Math.sin(frame / 6) * 12;
-        ctx.strokeText('▲', x, y); ctx.fillText('▲', x, y);
-      }
+      label(`${j.keep.name} ▶`, GROUND - 232, '#2f6b3f');
+      if (j.turn) label(`▲ ${j.turn.name}`, GROUND - 194, j.open ? '#2b5f8a' : '#6b5a4a');
       // A sly lookout in Chicago, before the ninjas are anyone's problem.
-      if (this.city.watchers && street.role === 'main' && this.p.x < x - 500) {
+      if (this.city.watchers && street.turn !== null && street.length > 3500 && this.p.x < x - 500) {
         S.draw(ctx, 'ninja', S.has('ninja', 'crouch') ? 'crouch' : 'walk', frame * 16.7, x + 150, GROUND - 200, 118);
       }
     }
@@ -808,10 +799,8 @@
         ctx.fillStyle = active ? '#ffd76a' : '#6b5a4a'; ctx.fillRect(x - 42, GROUND - 150, 84, 150);
       }
       if (active) {
-        // A column of light you can see from down the street.
-        ctx.fillStyle = `rgba(255,215,106,${0.16 + Math.sin(frame / 10) * 0.05})`; ctx.fillRect(x - 70, 0, 140, GROUND);
-        ctx.fillStyle = '#ffd76a'; ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 6; ctx.font = 'bold 84px system-ui, sans-serif'; ctx.textAlign = 'center';
-        const y = GROUND - 200 + Math.sin(frame / 7) * 12;
+        ctx.fillStyle = '#ffd76a'; ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 5; ctx.font = 'bold 52px system-ui, sans-serif'; ctx.textAlign = 'center';
+        const y = GROUND - 190 + Math.sin(frame / 7) * 9;
         ctx.strokeText('▼', x, y); ctx.fillText('▼', x, y);
       } else if (street.address < world.delivery) {
         ctx.fillStyle = '#b8843f'; ctx.fillRect(x + 66, GROUND - 16, 62, 16);
@@ -863,26 +852,21 @@
       ctx.globalAlpha = 1;
     }
 
-    // The homing line: one instruction, always, for how to get to the current address.
+    // A little GPS: how far, and the next thing to do. The street signs do the rest.
     guideBar() {
-      const { ctx, heading: h, junction: j, frame } = this;
+      const { ctx, heading: h } = this;
       if (!h) return;
-      const cx = this.p.x + this.p.w / 2, urgent = h.kind === 'door' ? h.left < 900 : h.left < 700;
-      const past = h.kind === 'turn' && cx > this.street.turnAt + TURN_ZONE[1];
+      const cx = this.p.x + this.p.w / 2, past = h.kind === 'turn' && cx > this.street.turnAt + TURN_ZONE[1];
+      const feet = n => `${Math.max(0, Math.round(n / 10) * 10).toLocaleString()} ft`;
       let text;
-      if (h.kind === 'door') text = `▶ Straight on to ${this.area0().customer}'s door`;
+      if (h.kind === 'door') text = `${feet(h.left)} to ${this.area0().customer}`;
       else if (past) text = C.BARKS.missed;
-      else if (h.kind === 'turn') text = this.best ? `▲ TURN HERE: ${h.street.name}` : `▲ Next corner, turn onto ${h.street.name}`;
-      else text = urgent && j.turn ? `▶ KEEP GOING onto ${h.street.name}` : `▶ Stay straight, then ${h.street.name}`;
-      ctx.font = 'bold 26px system-ui, sans-serif'; ctx.textAlign = 'center';
-      const w = ctx.measureText(text).width + 44, x = 640 + 70, flash = this.best && frame % 30 < 15;
-      ctx.fillStyle = flash ? '#fff1b8' : urgent ? '#ffd76a' : 'rgba(0,0,0,0.72)'; ctx.fillRect(x - w / 2, 16, w, 50);
-      ctx.fillStyle = urgent ? '#1f1410' : '#ffd76a'; ctx.fillText(text, x, 51);
-      if (h.left > 0 && !past) {
-        const span = h.kind === 'door' ? this.street.door : this.street.turnAt, f = 1 - Math.min(1, h.left / span);
-        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x - w / 2, 66, w, 8);
-        ctx.fillStyle = '#ffd76a'; ctx.fillRect(x - w / 2, 66, w * f, 8);
-      }
+      else if (h.kind === 'turn') text = `${feet(h.left)} to the turn onto ${h.street.name}`;
+      else text = `${feet(h.left)}, then ${h.street.name}`;
+      ctx.font = 'bold 22px system-ui, sans-serif'; ctx.textAlign = 'center';
+      const w = ctx.measureText(text).width + 36, x = 740;
+      ctx.fillStyle = 'rgba(0,0,0,0.68)'; ctx.fillRect(x - w / 2, 16, w, 42);
+      ctx.fillStyle = '#fff'; ctx.fillText(text, x, 45);
     }
 
     hud() {
