@@ -18,5 +18,42 @@
   "turtle": [
     "idle",
     "walk"
+  ],
+  "ninja": [
+    "idle",
+    "walk",
+    "throw"
+  ],
+  "mutant": [
+    "idle",
+    "walk"
+  ],
+  "slice-naples": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special"
+  ],
+  "slice-thin": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special"
+  ],
+  "slice-deep": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special"
+  ],
+  "slice-jumbo": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special"
   ]
 }

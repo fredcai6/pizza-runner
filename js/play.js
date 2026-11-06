@@ -142,7 +142,7 @@
         case 'dash': this.smash = 26; break;
         case 'flare':
           this.heat -= 2;
-          this.bursts.push({ x: p.x + 36, y: p.y + 48, r: 190, t: 16, color: 'rgba(255,120,30,0.45)' });
+          this.bursts.push({ x: p.x + 36, y: p.y + 48, r: 190, t: 16, color: '#ff8a2a' });
           for (const a of this.actors) if (Math.hypot(a.x - p.x, a.y - 50 - p.y) < 225 && !R.peaceful(a.e, this.street.run)) this.hit(a, true);
           break;
         case 'pound':
@@ -157,7 +157,7 @@
       const { p } = this;
       const reach = 230 * (this.style.scale || 1);
       A.play('smash');
-      this.bursts.push({ x: p.x + 36, y: GROUND, r: reach, t: 14, color: 'rgba(255,230,180,0.5)' });
+      this.bursts.push({ x: p.x + 36, y: GROUND, r: reach, t: 14, color: '#f3e2bd' });
       for (const a of this.actors) if (Math.abs(a.x - p.x) < reach && a.y > GROUND - 110 && !R.peaceful(a.e, this.street.run)) this.hit(a, true);
     }
 
@@ -174,7 +174,7 @@
           for (const s of [-1, 1]) this.shots.push({ x, y: GROUND - 22, vx: 14 * s, vy: 0, color: t.color, life: 45, wave: true });
           break;
         case 'leap': p.vy = -27; p.grounded = false; break;
-        case 'reheat': this.heat = Math.min(this.heatMax, this.heat + 28); this.bursts.push({ x, y, r: 80, t: 12, color: 'rgba(80,200,90,0.4)' }); break;
+        case 'reheat': this.heat = Math.min(this.heatMax, this.heat + 28); this.bursts.push({ x, y, r: 80, t: 12, color: '#7fd46a' }); break;
         case 'aura': this.aura = !this.aura; return;
       }
       this.spend(1);
@@ -232,7 +232,7 @@
     attack(a) {
       if (--a.cd > 0) return;
       const e = a.e, dx = this.p.x - a.x;
-      a.cd = 110;
+      a.cd = 110; a.threw = this.frame + 30;
       if (Math.abs(dx) > 760) return;
       if (e.type === 'ninja') this.note('ninja', e.toppings.length ? 'debt' : 'throws');
       const t = e.toppings.length ? e.toppings[this.frame % e.toppings.length] : null;
@@ -263,7 +263,7 @@
     // Turtles only break to a smash. Everything else goes down to anything.
     hit(a, smash = false) {
       if (a.e.type === 'turtle' && !smash) { this.note('turtle', 'armored'); return; }
-      this.bursts.push({ x: a.x, y: a.y - 40, r: 48, t: 10, color: 'rgba(255,255,255,0.6)' });
+      this.bursts.push({ x: a.x, y: a.y - 40, r: 48, t: 10, color: '#ffffff' });
       A.play('smash');
       this.shake = 10; this.freeze = 3;
       this.defeat(a);
@@ -383,10 +383,22 @@
       ctx.fillStyle = 'rgba(235,225,205,0.45)';
       for (const d of this.dust) dot(ctx, d.x, d.y, d.r * (d.t / 22));
       this.drawPlayer();
-      for (const b of this.bursts) { ctx.fillStyle = b.color; dot(ctx, b.x, b.y, b.r * (1 - b.t / 22)); }
+      for (const b of this.bursts) this.drawBurst(b);
       ctx.restore();
       ctx.restore();
       this.hud();
+    }
+
+    // Bursts are hard pixel shards flying out, in keeping with the art, not soft discs.
+    drawBurst(b) {
+      const { ctx } = this, life = b.t / (b.life || (b.life = b.t)), reach = b.r * (1 - life * life);
+      const size = Math.max(4, Math.round(b.r / 14));
+      const count = Math.round(10 + b.r / 8);
+      ctx.fillStyle = b.color;
+      for (let i = 0; i < count; i++) {
+        const angle = i * 2.399, far = reach * (0.45 + ((i * 37) % 11) / 18);
+        ctx.fillRect(Math.round(b.x + Math.cos(angle) * far) - size / 2, Math.round(b.y + Math.sin(angle) * far) - size / 2, size, size);
+      }
     }
 
     scenery(pal) {
@@ -440,7 +452,7 @@
       const { ctx } = this, e = a.e;
       const calm = R.peaceful(e, this.street.run) || a.distracted;
       ctx.globalAlpha = calm ? 0.65 : 1;
-      const anim = calm ? 'idle' : 'walk';
+      const anim = calm ? 'idle' : a.threw > this.frame && S.has(e.type, 'throw') ? 'throw' : 'walk';
       if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, a.dir)) {
         ctx.font = `${a.size}px serif`; ctx.textAlign = 'center'; ctx.fillText(FACE[e.type], a.x, a.y - 4);
       }

@@ -1,0 +1,14 @@
+{
+ "rev": {
+  "sha": "91eec1417764c62208e4b42eb0b7551d7104687d",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "city": "chicago",
+  "barricade": 1,
+  "barrel": 2,
+  "barrel_out": 2,
+  "door": 4
+ }
+}

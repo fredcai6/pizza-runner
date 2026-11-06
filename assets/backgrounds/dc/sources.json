@@ -1,0 +1,31 @@
+{
+ "rev": {
+  "sha": "bff2222efdec18e5684ea1c3f6e8ae502bf61be7",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "far": {
+   "run": "dc/layers",
+   "model": "klein",
+   "shot": "far",
+   "seed": 3,
+   "seam_start_x": 177
+  },
+  "mid": {
+   "run": "dc/layers",
+   "model": "klein",
+   "shot": "mid",
+   "seed": 2,
+   "shifted_by": -55,
+   "seam_start_x": 100
+  },
+  "near": {
+   "run": "dc/layers",
+   "model": "klein",
+   "shot": "near",
+   "seed": 1,
+   "seam_start_x": 54
+  }
+ }
+}

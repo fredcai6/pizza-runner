@@ -1,6 +1,6 @@
 {
  "rev": {
-  "sha": "dba610b1dabc92df070e60c3ea1e9d126b8d46d5",
+  "sha": "91eec1417764c62208e4b42eb0b7551d7104687d",
   "dirty": true,
   "comfy": "v0.44.0"
  },
@@ -8,7 +8,7 @@
   "picked_seeds": {
    "fifth/table": 2,
    "fifth/box": 4,
-   "second/platform": 2,
+   "platform": "hand-built tile (forge backgrounds/props/build.py: platform_tile)",
    "fourth/barricade": 1,
    "second/barrel": 1,
    "second/barrel_out": 1,
