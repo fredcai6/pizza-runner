@@ -155,10 +155,13 @@
     sky.addColorStop(0, pal.skyTop); sky.addColorStop(1, pal.skyBottom);
     ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
     const art = n => (S.layer(`${city.id}/${area.id}/${n}`) ? `${city.id}/${area.id}/${n}` : `${city.id}/${n}`);
+    // Everyone stands a little higher here, clear of the dialogue box on a phone.
+    ctx.save(); ctx.translate(0, -90);
     S.tile(ctx, art('far'), drift, 0.2, W);
     S.tile(ctx, art('mid'), drift, 0.5, W);
-    ctx.fillStyle = pal.ground; ctx.fillRect(0, 600, W, 120);
+    ctx.fillStyle = pal.ground; ctx.fillRect(0, 600, W, 210);
     S.ground(ctx, `${city.id}/${area.id}/ground`, drift, 600, W);
+    S.ground(ctx, `${city.id}/${area.id}/ground`, drift, 720, W);
     const name = art('door');
     if (S.layer(name)) {
       const image = S.layer(name), scale = image.height > 240 ? 1 : 2;
@@ -177,6 +180,7 @@
     if (!S.draw(ctx, who, 'idle', ms, 760, 610, height, -1)) placeholderAlewife(ctx, 760, 610, 300);
     const style = view.slice && view.slice.style ? view.slice.style : (city.style || 'ny');
     S.draw(ctx, `slice-${style}`, 'idle', ms, 380, 610, C.STYLES[style].height) || P.drawSlice(ctx, 380, 540, style, null, '#ffcc33', 2.4);
+    ctx.restore();
   }
 
   // Plays shots of lines over the canvas. Tap to advance.
