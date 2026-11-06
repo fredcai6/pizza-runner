@@ -112,31 +112,25 @@
   }
 
   function pieBuilder(city) {
-    const { a: menuA, b: menuB } = city.menu;
-    const pick = { a: menuA[0], b: menuB[0] };
+    let pick = city.menu[0];
     const render = () => {
-      if (city.menu.whole) {
-        show(`<h2>Build your pie</h2><p>This order is pepperoni. Just pepperoni.</p><p class="blurb">${C.TOPPINGS[pick.a].blurb}</p>`, [['Box it', () => box(city, pick)]]);
+      if (city.menu.length === 1) {
+        show(`<h2>Build your pie</h2><p>This order is ${C.TOPPINGS[pick].name.toLowerCase()}. Just ${C.TOPPINGS[pick].name.toLowerCase()}.</p><p class="blurb">${C.TOPPINGS[pick].blurb}</p>`, [['Box it', () => box(city, pick)]]);
         return;
       }
-      const col = (side, menu) => `<div class="side"><h3>${side === 'a' ? 'Slices 1-3' : 'Slices 4-6'}</h3>${menu.map(t => {
-        const on = pick[side] === t;
-        return `<button class="top${on ? ' on' : ''}" data-side="${side}" data-t="${t}"><i style="background:${C.TOPPINGS[t].color}"></i>${C.TOPPINGS[t].name}</button>`;
-      }).join('')}</div>`;
-      show(`<h2>Build your pie</h2><div class="pie">${col('a', menuA)}${col('b', menuB)}</div>
-        <p class="blurb">${C.TOPPINGS[pick.a].blurb}${pick.a !== pick.b ? ' ' + C.TOPPINGS[pick.b].blurb : ''}</p>`,
-        [['Box it', () => box(city, pick)]]);
-      screen.querySelectorAll('.top').forEach(b => { b.onclick = () => { pick[b.dataset.side] = b.dataset.t; render(); }; });
+      show(`<h2>Pick the topping</h2><div class="side">${city.menu.map(t => `<button class="top${pick === t ? ' on' : ''}" data-t="${t}"><i style="background:${C.TOPPINGS[t].color}"></i>${C.TOPPINGS[t].name}</button>`).join('')}</div>
+        <p class="blurb">${C.TOPPINGS[pick].blurb}</p>`, [['Box it', () => box(city, pick)]]);
+      screen.querySelectorAll('.top').forEach(b => { b.onclick = () => { pick = b.dataset.t; render(); }; });
     };
     render();
   }
 
   function box(city, pick) {
-    R.placeOrder(camp, pick.a, pick.b);
+    R.placeOrder(camp, pick);
     save();
     // This receipt was printed before she chose. Nobody mentions it.
     if (city.predicts) {
-      const r = { ...R.printOrder(camp), lines: [`${C.TOPPINGS[pick.a].name} / ${C.TOPPINGS[pick.b].name}`, `PRINTED ${C.PRINTER_CLOCK}, BEFORE YOU CHOSE`] };
+      const r = { ...R.printOrder(camp), lines: [C.TOPPINGS[pick].name, `PRINTED ${C.PRINTER_CLOCK}, BEFORE YOU CHOSE`] };
       show(`<h2>This was already in the printer</h2>${B.receiptHtml(r)}`, [['...okay', route]]);
     } else route();
   }

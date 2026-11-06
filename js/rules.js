@@ -131,15 +131,11 @@
 
   const currentCity = camp => C.CITIES[camp.cityIndex];
 
-  function allowed(city, a, b) {
-    return city.menu.a.includes(a) && city.menu.b.includes(b);
-  }
-
-  // Half-and-half is the most a pie can be: three slices of each side.
-  function buildPie(city, a, b) {
+  // A pie is one topping, all six slices.
+  function buildPie(city, topping) {
     const slices = [];
-    for (let i = 0; i < SLICES; i++) slices.push({ id: i, style: city.style, topping: i < SLICES / 2 ? a : b, status: 'ready' });
-    return { city: city.id, a, b, slices };
+    for (let i = 0; i < SLICES; i++) slices.push({ id: i, style: city.style, topping, status: 'ready' });
+    return { city: city.id, topping, slices };
   }
 
   function startCity(camp, pie) {
@@ -149,16 +145,16 @@
     camp.phase = 'map';
   }
 
-  function placeOrder(camp, a, b) {
+  function placeOrder(camp, topping) {
     const city = currentCity(camp);
-    if (!allowed(city, a, b)) throw new Error(`${a}/${b} is not on the ${city.id} menu`);
-    startCity(camp, buildPie(city, a, b));
+    if (!city.menu.includes(topping)) throw new Error(`${topping} is not on the ${city.id} menu`);
+    startCity(camp, buildPie(city, topping));
   }
 
-  // Long Beach is always the same eight: two of each earlier pizza, one per chosen half.
+  // Long Beach is always the same eight: two of each earlier pizza, with the topping chosen there.
   function finaleRoster(camp) {
     const slices = C.CITIES.filter(c => !c.final).flatMap(c => camp.reserves[c.id]);
-    return { city: 'california', a: null, b: null, slices: slices.map((s, id) => ({ id, ...s, status: 'ready' })) };
+    return { city: 'california', topping: null, slices: slices.map((s, id) => ({ id, ...s, status: 'ready' })) };
   }
 
   function startFinale(camp) { startCity(camp, finaleRoster(camp)); }
@@ -208,12 +204,11 @@
     camp.cityIndex = cityIndex;
     camp.test = true;
     C.CITIES.slice(0, cityIndex).forEach(c => {
-      const { a, b } = c.menu, pie = buildPie(c, a[0], b[b.length - 1]);
-      camp.pies[c.id] = pie;
-      camp.reserves[c.id] = [pie.a, pie.b].map(topping => ({ style: c.style, topping, from: c.id }));
+      camp.pies[c.id] = buildPie(c, c.menu[0]);
+      camp.reserves[c.id] = [0, 1].map(() => ({ style: c.style, topping: c.menu[0], from: c.id }));
     });
     const city = C.CITIES[cityIndex];
-    if (city.final) startFinale(camp); else placeOrder(camp, city.menu.a[0], city.menu.b[city.menu.b.length - 1]);
+    if (city.final) startFinale(camp); else placeOrder(camp, city.menu[0]);
     const world = camp.world;
     world.delivery = delivery;
     for (const s of Object.values(world.streets)) {
@@ -279,7 +274,7 @@
   function leaveCity(camp) {
     const city = currentCity(camp), pie = camp.pies[city.id];
     if (city.final) { camp.phase = 'ending'; return; }
-    camp.reserves[city.id] = [pie.a, pie.b].map(topping => ({ style: city.style, topping, from: city.id }));
+    camp.reserves[city.id] = [0, 1].map(() => ({ style: city.style, topping: pie.topping, from: city.id }));
     camp.world = null;
     camp.cityIndex++;
     camp.phase = 'briefing';
@@ -345,7 +340,7 @@
     return {
       pizzas: C.CITIES.filter(c => !c.final).map(city => {
         const pie = camp.pies[city.id];
-        return { city: city.id, style: city.style, a: pie ? pie.a : null, b: pie ? pie.b : null, left: pie ? ready(pie).length : 6, used: !!pie };
+        return { city: city.id, style: city.style, topping: pie ? pie.topping : null, left: pie ? ready(pie).length : 6, used: !!pie };
       }),
       receipts: camp.receipts.length,
       notes: C.THEORY.filter(t => t.from <= camp.cityIndex).length,
@@ -371,6 +366,6 @@
     return { name: file.name, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, allowed, buildPie, placeOrder, finaleRoster, startFinale, ready, peaceful, learn, bribe, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, peaceful, learn, bribe, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);

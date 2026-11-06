@@ -12,53 +12,27 @@
     polaroid: { from: [1090, 262, 1.9], to: [1090, 252, 2.4] },
   };
 
-  const OUTLINE = [30, 16, 48];
-  const pieCache = {};
+  const OUTLINE_CSS = '#1e1030';
+  const SPOTS = { ny: [[-16, 84], [14, 74], [0, 50]], deep: [[-26, 120], [24, 112], [0, 76]], jumbo: [[-46, 170], [40, 160], [0, 104]], naples: [[-12, 70], [12, 62], [0, 42]] };
+  let spots = SPOTS;
+  fetch('assets/backgrounds/hq/recruit-spots.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) spots = j; }).catch(() => {});
 
-  // Pies are drawn once to a small canvas, then hardened to match the painted art: no soft
-  // edges, plus the same dark outline every sprite has.
-  function pieImage(r, z) {
-    const key = [z.style, z.left, z.a, z.b, z.used].join();
-    if (pieCache[key]) return pieCache[key];
-    const art = S.layer(`hq/pie-${z.style}`);
-    if (art) r = art.width / 2;
-    const size = Math.ceil(r * 2 + 8), c = size / 2, canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const g = canvas.getContext('2d', { willReadFrequently: true });
-    const from = -Math.PI / 2;
-    for (let i = 0; i < z.left; i++) {
-      const a0 = from + i * Math.PI / 3, a1 = a0 + Math.PI / 3;
-      if (art) {
-        g.save(); g.beginPath(); g.moveTo(c, c); g.arc(c, c, r + 2, a0 + 0.015, a1 - 0.015); g.clip();
-        g.drawImage(art, c - art.width / 2, c - art.height / 2);
-        if (z.used) { g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(255,190,50,.3)'; g.fillRect(0, 0, size, size); }
-        g.restore();
-      } else {
-        g.fillStyle = '#c98a44'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r, a0 + 0.02, a1 - 0.02); g.fill();
-        g.fillStyle = z.used ? '#f6c945' : '#d9d0ae'; g.beginPath(); g.moveTo(c, c); g.arc(c, c, r - 7, a0 + 0.02, a1 - 0.02); g.fill();
-      }
-      const t = i < 3 ? z.a : z.b;
-      if (t) {
-        g.fillStyle = C.TOPPINGS[t].color;
-        const mid = (a0 + a1) / 2;
-        dot(g, c + Math.cos(mid) * r * 0.6, c + Math.sin(mid) * r * 0.6, r * 0.13);
+  // The recruits stand on the table: plain and cold at first, then wearing their topping
+  // once they have been out. The row of wedges beneath shows the slices still left.
+  function recruit(ctx, x, foot, z, ms) {
+    const plain = `recruit-${z.style}`, st = C.STYLES[z.style];
+    if (!S.draw(ctx, plain, 'idle', ms, x, foot, st.height)) S.draw(ctx, `slice-${z.style}`, 'idle', ms, x, foot, st.height) || P.drawSlice(ctx, x, foot - 50, z.style, null, '#d9d0ae', 2);
+    if (z.topping) {
+      const art = S.layer(`props/shot-${z.topping}`);
+      for (const [dx, up] of spots[z.style]) {
+        if (art) { ctx.imageSmoothingEnabled = false; ctx.drawImage(art, x + dx - 11, foot - up - 11, 22, 22); }
+        else { ctx.fillStyle = C.TOPPINGS[z.topping].color; dot(ctx, x + dx, foot - up, 9); }
       }
     }
-    const data = g.getImageData(0, 0, size, size), px = data.data, solid = [];
-    for (let i = 3, n = 0; i < px.length; i += 4, n++) { solid[n] = px[i] > 127; px[i] = solid[n] ? 255 : 0; }
-    for (let n = 0; n < solid.length; n++) {
-      const edge = !solid[n] && (solid[n - 1] || solid[n + 1] || solid[n - size] || solid[n + size]);
-      if (edge) { px.set([...OUTLINE, 255], n * 4); }
+    for (let i = 0; i < 6; i++) {
+      ctx.fillStyle = OUTLINE_CSS; ctx.fillRect(x - 45 + i * 16, foot + 8, 12, 12);
+      ctx.fillStyle = i < z.left ? '#ffcc33' : '#4a3a3a'; ctx.fillRect(x - 43 + i * 16, foot + 10, 8, 8);
     }
-    g.putImageData(data, 0, 0);
-    return (pieCache[key] = canvas);
-  }
-
-  function pie(ctx, x, y, r, z) {
-    if (!S.prop(ctx, 'hq/box', x, 504)) {
-      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x - r - 8, y - r - 8, 2 * r + 16, 2 * r + 16);
-    }
-    if (z.left) { const image = pieImage(r, z); ctx.imageSmoothingEnabled = false; ctx.drawImage(image, x - image.width / 2, y - image.height / 2); }
   }
 
   // The board draws itself, including the photo of itself, so later evidence shows up at every depth.
@@ -138,7 +112,7 @@
       ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
       ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
     }
-    hq.pizzas.forEach((z, i) => pie(ctx, 470 + i * 196, 432, 49, z));
+    hq.pizzas.forEach((z, i) => recruit(ctx, 470 + i * 196, 480, z, ms + i * 400));
     oldTimer(ctx, 300, 410, ms, view.mood);
     layer(ctx, 'hq/front', camX, -0.18);
     ctx.fillStyle = 'rgba(255,235,190,0.28)';

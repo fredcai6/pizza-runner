@@ -14,7 +14,7 @@
   // height is the art's height. w and h are the body it collides with.
   const STYLES = {
     ny: { name: 'Slice', speed: 7.4, accel: 0.9, decel: 1.1, jump: 23, gravity: 1.05, fall: 1.05, maxFall: 24, spring: 0.22, damp: 0.72, heatDecay: 1, heatMax: 100, height: 124, w: 72, h: 96, blurb: 'A classic. Pepperoni is all the power you need.' },
-    deep: { name: 'Deep Dish', speed: 5.7, accel: 0.32, decel: 0.42, jump: 19.5, gravity: 1.3, fall: 1.7, maxFall: 30, spring: 0.16, damp: 0.7, heatDecay: 1, heatMax: 100, height: 170, w: 104, h: 132, stomp: true, special: 'pound', specialName: 'SLAM', blurb: 'Enormously heavy. Slow to start, slow to stop, barely leaves the ground. SLAM from the air.' },
+    deep: { name: 'Deep Dish', speed: 5.7, accel: 0.32, decel: 0.42, jump: 19.5, gravity: 1.3, fall: 1.7, maxFall: 30, spring: 0.16, damp: 0.7, heatDecay: 1, heatMax: 100, height: 170, w: 104, h: 132, stomp: true, sauce: true, special: 'pound', specialName: 'SLAM', blurb: 'Enormously heavy. Slow to start, slow to stop, barely leaves the ground. SLAM from the air.' },
     jumbo: { name: 'Jumbo', speed: 6.5, accel: 0.42, decel: 0.3, jump: 22, gravity: 1, fall: 0.3, maxFall: 6.5, spring: 0.09, damp: 0.86, flop: 1, heatDecay: 1, heatMax: 100, height: 240, w: 150, h: 186, special: 'pound', specialName: 'FLOP', blurb: 'Far too big. Drifts down like a wet napkin. FLOP flattens whatever is underneath.' },
     naples: { name: 'Margherita', speed: 9.6, accel: 1.5, decel: 1.5, jump: 23, gravity: 1.05, fall: 1.1, maxFall: 24, spring: 0.3, damp: 0.66, heatDecay: 1.55, heatMax: 100, height: 104, w: 60, h: 80, special: 'dash', specialName: 'DASH', blurb: 'Small, quick, and cools fast. DASH barrels through anything.' },
   };
@@ -23,7 +23,7 @@
   const CITIES = [
     {
       id: 'newyork', name: 'New York', style: 'ny', seed: 23, stretch: 3900, gap: 720,
-      menu: { whole: true, a: ['pepperoni'], b: ['pepperoni'] },
+      menu: ['pepperoni'],
       mix: ['teen', 'teen', 'turtle', 'teen', 'turtle'], pickups: ['pepperoni'],
       areas: [
         { id: 'wallstreet', name: "Wall Street", palette: { skyTop: '#8fa3bb', skyBottom: '#e6d9c6', ground: '#6d6a68', top: '#8d8983' },
@@ -55,7 +55,7 @@
     },
     {
       id: 'chicago', name: 'Chicago', style: 'deep', seed: 53, stretch: 3200, gap: 620,
-      menu: { a: ['sausage', 'pepperoni', 'mushroom'], b: ['sausage', 'pepperoni', 'mushroom'] },
+      menu: ['sausage', 'pepperoni', 'mushroom'],
       mix: ['teen', 'turtle', 'mutant', 'teen', 'turtle'], pickups: ['jalapeno', 'pepperoni'], watchers: true,
       areas: [
         { id: 'loop', name: "The Loop", palette: { skyTop: '#7f98b3', skyBottom: '#d4dde0', ground: '#49545c', top: '#6c7a83' },
@@ -82,7 +82,7 @@
     },
     {
       id: 'dc', name: 'Washington, DC', style: 'jumbo', seed: 41, stretch: 3500, gap: 600,
-      menu: { a: ['pepperoni', 'garlic', 'mushroom'], b: ['pepperoni', 'garlic', 'mushroom'] },
+      menu: ['pepperoni', 'garlic', 'mushroom'],
       mix: ['ninja', 'teen', 'turtle', 'mutant', 'teen', 'ninja'], pickups: ['pineapple', 'jalapeno'],
       areas: [
         { id: 'georgetown', name: "Georgetown", palette: { skyTop: '#c4b5a8', skyBottom: '#f1e3cf', ground: '#7c5a4b', top: '#a18072' },
@@ -109,7 +109,7 @@
     },
     {
       id: 'naples', name: 'Naples', style: 'naples', seed: 37, stretch: 4600, gap: 640, predicts: true,
-      menu: { a: ['basil', 'garlic', 'pepperoni'], b: ['basil', 'garlic', 'pepperoni'] },
+      menu: ['basil', 'garlic', 'pepperoni'],
       mix: ['mutant', 'turtle', 'ninja', 'teen', 'mutant', 'ninja'], pickups: ['jalapeno', 'sausage'],
       areas: [
         { id: 'harbor', name: "The Harbor", palette: { skyTop: '#8fc3d6', skyBottom: '#f6dfb2', ground: '#7a6650', top: '#a58f73' },

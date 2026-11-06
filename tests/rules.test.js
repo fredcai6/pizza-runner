@@ -6,11 +6,11 @@ const C = require('../js/content.js');
 const { MAPS } = require('../js/maps.js');
 const city = c => R.currentCity(c);
 const pie = c => c.pies[city(c).id];
-const order = (c, a, b) => { const m = city(c).menu; R.placeOrder(c, a || m.a[0], b || m.b[0]); };
+const order = (c, a) => R.placeOrder(c, a || city(c).menu[0]);
 const fresh = () => { const c = R.newCampaign(); order(c); return c; };
 const lose = c => R.finishRun(c, R.ready(pie(c))[0], { outcome: 'cold', x: 100 });
 const deliver = c => { R.finishRun(c, R.ready(pie(c))[0], { outcome: 'delivered', x: 100 }); R.afterDoor(c); };
-const finishCity = (c, a, b) => { if (!city(c).final) order(c, a, b); else R.startFinale(c); for (let i = 0; i < city(c).areas.length; i++) deliver(c); R.leaveCity(c); };
+const finishCity = (c, a) => { if (!city(c).final) order(c, a); else R.startFinale(c); for (let i = 0; i < city(c).areas.length; i++) deliver(c); R.leaveCity(c); };
 
 test('the route runs New York to Long Beach with four city pizzas', () => {
   assert.deepStrictEqual(C.CITIES.map(x => x.id), ['newyork', 'chicago', 'dc', 'naples', 'california']);
@@ -20,8 +20,8 @@ test('the route runs New York to Long Beach with four city pizzas', () => {
 
 test('New York is pepperoni only, with no special move', () => {
   const c = R.newCampaign();
-  assert.throws(() => R.placeOrder(c, 'pepperoni', 'garlic'));
-  R.placeOrder(c, 'pepperoni', 'pepperoni');
+  assert.throws(() => R.placeOrder(c, 'garlic'));
+  R.placeOrder(c, 'pepperoni');
   assert.ok(pie(c).slices.every(s => s.topping === 'pepperoni'));
   assert.strictEqual(C.STYLES.ny.special, undefined);
 });
@@ -174,9 +174,9 @@ test('winning on the last slice wins', () => {
 test('Long Beach is exactly eight slices, two from each city, same on every retry', () => {
   const c = R.newCampaign();
   finishCity(c);
-  finishCity(c, 'sausage', 'sausage');
-  finishCity(c, 'pepperoni', 'garlic');
-  finishCity(c, 'basil', 'garlic');
+  finishCity(c, 'sausage');
+  finishCity(c, 'garlic');
+  finishCity(c, 'basil');
   assert.strictEqual(city(c).id, 'california');
   R.startFinale(c);
   const first = JSON.stringify(pie(c).slices);
@@ -257,6 +257,12 @@ test('each receipt spells the name differently', () => {
   assert.strictEqual(new Set(c.receipts.map(r => r.to)).size, 3);
 });
 
+test('a pie is one topping, all six slices', () => {
+  const c = fresh();
+  assert.strictEqual(pie(c).slices.length, 6);
+  assert.ok(pie(c).slices.every(s => s.topping === 'pepperoni'));
+});
+
 test('notes appear only once the behavior is seen', () => {
   const c = fresh();
   assert.strictEqual(R.enemyFile(c, 'mutant').notes.length, 0);
@@ -280,6 +286,6 @@ test('a used-up pie is taped over as deep undercover', () => {
 test('every topping named by a city exists', () => {
   for (const x of C.CITIES) {
     for (const t of x.pickups) assert.ok(C.TOPPINGS[t], t);
-    if (x.menu) for (const t of [...x.menu.a, ...x.menu.b]) assert.ok(C.TOPPINGS[t], t);
+    if (x.menu) for (const t of x.menu) assert.ok(C.TOPPINGS[t], t);
   }
 });

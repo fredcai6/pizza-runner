@@ -21,7 +21,7 @@
       this.coyote = 0; this.buffer = 0; this.bounced = false;
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
-      this.bursts = []; this.dust = [];
+      this.bursts = []; this.dust = []; this.sauce = [];
       this.look = 0; this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
       this.toppingGone = false; this.done = false; this.nearby = null; this.offer = null;
       this.wipe = 0; this.pending = null; this.removed = 0; this.found = 0; this.taken = new Set(); this.warned = false;
@@ -40,7 +40,7 @@
       this.ledge = street.platforms.find(l => l.ledge && l.w > 1000) || street.platforms.find(l => l.ledge) || { y: GROUND - 330 };
       this.junction = R.junction(this.world, street);
       this.actors = street.enemies.filter(e => e.alive).map(e => this.actor(e));
-      this.shots = []; this.foes = []; this.drops = []; this.temp = [];
+      this.shots = []; this.foes = []; this.drops = []; this.temp = []; this.sauce = [];
       this.p.x = x; this.p.y = GROUND - this.p.h; this.p.vy = 0; this.p.vx *= 0.5; this.p.grounded = true;
       this.cam = this.camera(); this.warned = false;
     }
@@ -150,6 +150,7 @@
 
       if (p.grounded && !wasGrounded) this.landed(fall);
       this.stride();
+      this.sauceStep();
       this.dust = this.dust.filter(d => { d.x += d.vx; d.y += d.vy; d.vy += 0.05; return --d.t > 0; });
 
       this.heat -= st.heatDecay / 60;
@@ -189,6 +190,29 @@
       if (st.stomp && fall > 8) { this.jolt(0.34); A.play('smash'); }
       else if (st.flop) this.jolt(0.16);
       this.bounced = false;
+    }
+
+    // Deep Dish is so full of sauce it leaves a trail.
+    sauceStep() {
+      const { p, style: st } = this;
+      for (const d of this.sauce) {
+        if (d.pool) { d.t--; continue; }
+        d.vy += 0.5; d.x += d.vx; d.y += d.vy;
+        if (d.y >= GROUND) { d.y = GROUND; d.pool = true; d.t = 240; d.w = 10 + (d.seed % 3) * 8; }
+      }
+      this.sauce = this.sauce.filter(d => !d.pool || d.t > 0);
+      if (!st.sauce || this.frame % (Math.abs(p.vx) > 1 ? 7 : 40)) return;
+      const seed = this.frame * 7919 % 97, side = p.x + p.w * (0.2 + (seed % 7) / 10);
+      this.sauce.push({ x: side, y: p.y + p.h * (0.45 + (seed % 4) / 10), vx: -p.vx * 0.15, vy: 1, seed });
+    }
+
+    drawSauce() {
+      const { ctx } = this;
+      ctx.fillStyle = '#b3201a';
+      for (const d of this.sauce) {
+        if (d.pool) ctx.fillRect(Math.round(d.x - d.w / 2), GROUND + 2, d.w, 5);
+        else ctx.fillRect(Math.round(d.x) - 3, Math.round(d.y) - 5, 6, 10);
+      }
     }
 
     // A heavy pizza's every step lands on the street.
@@ -667,6 +691,7 @@
       if (this.aura) { ctx.fillStyle = 'rgba(180,200,90,0.22)'; dot(ctx, this.p.x + this.p.w / 2, this.p.y + this.p.h / 2, 170 + Math.sin(f / 6) * 8); }
       ctx.fillStyle = 'rgba(235,225,205,0.45)';
       for (const d of this.dust) dot(ctx, d.x, d.y, d.r * (d.t / 22));
+      this.drawSauce();
       this.drawPlayer();
       for (const b of this.bursts) this.drawBurst(b);
       this.drawParty();
