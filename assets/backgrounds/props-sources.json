@@ -1,0 +1,20 @@
+{
+ "rev": {
+  "sha": "91eec1417764c62208e4b42eb0b7551d7104687d",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "picked_seeds": {
+   "fifth/table": 2,
+   "fifth/box": 4,
+   "platform": "hand-built tile (forge backgrounds/props/build.py: platform_tile)",
+   "fourth/barricade": 1,
+   "second/barrel": 1,
+   "second/barrel_out": 1,
+   "third/door": 3
+  },
+  "table_height_px": 209,
+  "box_anchor": "bottom-centre of box.png sits at (x, 504)"
+ }
+}

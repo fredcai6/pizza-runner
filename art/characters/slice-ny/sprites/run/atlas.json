@@ -1,0 +1,19 @@
+{
+ "frame": {
+  "w": 140,
+  "h": 124
+ },
+ "count": 8,
+ "frame_ms": 70,
+ "loop": true,
+ "rev": {
+  "sha": "b2379fd15896386154a6d3cc50b2af1e908a2e11",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "source": {
+  "rig": "characters/slice-ny/rig/run.toml",
+  "body": "characters/slice-ny/sprites/idle/sheet.png",
+  "gait": "run"
+ }
+}

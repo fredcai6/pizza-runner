@@ -1,0 +1,49 @@
+{
+ "rev": {
+  "sha": "dba610b1dabc92df070e60c3ea1e9d126b8d46d5",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "back3": [
+   {
+    "shot": "back",
+    "seed": 3
+   }
+  ],
+  "props2": [
+   {
+    "shot": "boxes",
+    "seed": 3
+   },
+   {
+    "shot": "table",
+    "seed": 2
+   },
+   {
+    "shot": "shelf",
+    "seed": 2
+   },
+   {
+    "shot": "boxes",
+    "seed": 1
+   }
+  ],
+  "board": {
+   "outer_rect": [
+    700,
+    70,
+    520,
+    350
+   ],
+   "frame": 12,
+   "inner_rect": [
+    712,
+    82,
+    496,
+    326
+   ],
+   "floor_line_y": 480
+  }
+ }
+}

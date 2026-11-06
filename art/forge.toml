@@ -1,0 +1,2 @@
+importer = "../scripts/import-sprites.py"
+assets = "../assets"

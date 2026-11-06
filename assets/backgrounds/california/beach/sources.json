@@ -1,0 +1,43 @@
+{
+ "rev": {
+  "sha": "328b196a24dae5bbb3c4c3506781e61c75ecf5e4",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "far": {
+   "run": "beach/layers",
+   "model": "klein",
+   "shot": "far",
+   "seed": 1,
+   "seam_start_x": 1
+  },
+  "mid": {
+   "run": "beach/layers",
+   "model": "klein",
+   "shot": "mid",
+   "seed": 4,
+   "shifted_by": -55,
+   "seam_start_x": 115
+  },
+  "near": {
+   "run": "beach/layers",
+   "model": "klein",
+   "shot": "near",
+   "seed": 4,
+   "seam_start_x": 79
+  },
+  "ground": {
+   "run": "beach/props",
+   "model": "klein",
+   "shot": "ground",
+   "seed": 1
+  },
+  "door": {
+   "run": "beach/props",
+   "model": "klein",
+   "shot": "door",
+   "seed": 1
+  }
+ }
+}

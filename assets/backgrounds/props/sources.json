@@ -1,0 +1,29 @@
+{
+ "rev": {
+  "sha": "f26b022d0f12321f4c3dca4c5b86e8c90673e8cd",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "run": "shared/props",
+ "seeds": {
+  "box": 1,
+  "box_broken": 1,
+  "drain": 1,
+  "sign": 1,
+  "star": 1,
+  "pickup_pepperoni": 1,
+  "shot_pepperoni": 1,
+  "pickup_jalapeno": 1,
+  "shot_jalapeno": 1,
+  "pickup_garlic": 1,
+  "shot_garlic": 1,
+  "pickup_mushroom": 1,
+  "shot_mushroom": 1,
+  "pickup_basil": 1,
+  "shot_basil": 1,
+  "pickup_pineapple": 1,
+  "shot_pineapple": 1,
+  "pickup_sausage": 1,
+  "shot_sausage": 1
+ }
+}

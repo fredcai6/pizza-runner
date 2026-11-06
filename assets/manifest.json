@@ -1,0 +1,121 @@
+{
+  "slice-ny": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "fall"
+  ],
+  "old-timer": [
+    "idle",
+    "talk",
+    "squint"
+  ],
+  "teen": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
+  ],
+  "turtle": [
+    "idle",
+    "walk",
+    "munch",
+    "stun"
+  ],
+  "ninja": [
+    "idle",
+    "walk",
+    "throw",
+    "leap",
+    "crouch",
+    "hurt"
+  ],
+  "mutant": [
+    "run",
+    "idle",
+    "bite"
+  ],
+  "slice-naples": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special",
+    "fall"
+  ],
+  "slice-deep": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special",
+    "fall"
+  ],
+  "slice-jumbo": [
+    "idle",
+    "run",
+    "jump",
+    "cold",
+    "special",
+    "fall"
+  ],
+  "alewife": [
+    "idle",
+    "wave"
+  ],
+  "customer-california-beach": [
+    "idle"
+  ],
+  "customer-california-downtown": [
+    "idle"
+  ],
+  "customer-chicago-lincolnpark": [
+    "idle"
+  ],
+  "customer-chicago-loop": [
+    "idle"
+  ],
+  "customer-chicago-wickerpark": [
+    "idle"
+  ],
+  "customer-dc-federal": [
+    "idle"
+  ],
+  "customer-dc-georgetown": [
+    "idle"
+  ],
+  "customer-dc-mall": [
+    "idle"
+  ],
+  "customer-naples-center": [
+    "idle"
+  ],
+  "customer-naples-harbor": [
+    "idle"
+  ],
+  "customer-naples-hillside": [
+    "idle"
+  ],
+  "customer-newyork-brooklyn": [
+    "idle"
+  ],
+  "customer-newyork-centralpark": [
+    "idle"
+  ],
+  "customer-newyork-wallstreet": [
+    "idle"
+  ],
+  "recruit-ny": [
+    "idle"
+  ],
+  "recruit-deep": [
+    "idle"
+  ],
+  "recruit-jumbo": [
+    "idle"
+  ],
+  "recruit-naples": [
+    "idle"
+  ]
+}

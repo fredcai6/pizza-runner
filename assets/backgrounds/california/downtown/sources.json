@@ -1,0 +1,43 @@
+{
+ "rev": {
+  "sha": "328b196a24dae5bbb3c4c3506781e61c75ecf5e4",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "far": {
+   "run": "downtown/layers",
+   "model": "klein",
+   "shot": "far",
+   "seed": 1,
+   "seam_start_x": 117
+  },
+  "mid": {
+   "run": "downtown/layers",
+   "model": "klein",
+   "shot": "mid",
+   "seed": 3,
+   "shifted_by": -55,
+   "seam_start_x": 116
+  },
+  "near": {
+   "run": "downtown/layers",
+   "model": "klein",
+   "shot": "near",
+   "seed": 2,
+   "seam_start_x": 134
+  },
+  "ground": {
+   "run": "downtown/props",
+   "model": "klein",
+   "shot": "ground",
+   "seed": 4
+  },
+  "door": {
+   "run": "downtown/props",
+   "model": "klein",
+   "shot": "door",
+   "seed": 2
+  }
+ }
+}
