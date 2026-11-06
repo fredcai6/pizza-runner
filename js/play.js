@@ -359,7 +359,7 @@
       if (!far) this.scenery(pal);
       S.tile(ctx, `${city.id}/mid`, cam, 0.5, W);
       ctx.save(); ctx.translate(-Math.round(cam), 0);
-      ctx.fillStyle = pal.ground; ctx.fillRect(cam - 30, GROUND, W + 60, H - GROUND);
+      ctx.fillStyle = pal.ground; ctx.fillRect(cam - 30, GROUND, W + 60, H - GROUND + 40);
       ctx.fillStyle = pal.top; ctx.fillRect(cam - 30, GROUND, W + 60, 12);
       ctx.restore();
       S.tile(ctx, `${city.id}/near`, cam, 1, W);
