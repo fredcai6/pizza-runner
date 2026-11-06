@@ -13,8 +13,7 @@
   };
 
   const OUTLINE_CSS = '#1e1030';
-  const SPOTS = { ny: [[-16, 84], [14, 74], [0, 50]], deep: [[-26, 120], [24, 112], [0, 76]], jumbo: [[-46, 170], [40, 160], [0, 104]], naples: [[-12, 70], [12, 62], [0, 42]] };
-  let spots = SPOTS;
+  let spots = { ny: [], deep: [], jumbo: [], naples: [] };
   fetch('assets/backgrounds/hq/recruit-spots.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) spots = j; }).catch(() => {});
 
   // The recruits stand on the table: plain and cold at first, then wearing their topping
@@ -24,9 +23,9 @@
     if (!S.draw(ctx, plain, 'idle', ms, x, foot, st.height)) S.draw(ctx, `slice-${z.style}`, 'idle', ms, x, foot, st.height) || P.drawSlice(ctx, x, foot - 50, z.style, null, '#d9d0ae', 2);
     if (z.topping) {
       const art = S.layer(`props/shot-${z.topping}`);
-      for (const [dx, up] of spots[z.style]) {
-        if (art) { ctx.imageSmoothingEnabled = false; ctx.drawImage(art, x + dx - 11, foot - up - 11, 22, 22); }
-        else { ctx.fillStyle = C.TOPPINGS[z.topping].color; dot(ctx, x + dx, foot - up, 9); }
+      for (const [dx, dy] of spots[z.style]) {
+        if (art) { ctx.imageSmoothingEnabled = false; ctx.drawImage(art, x + dx - 11, foot + dy - 11, 22, 22); }
+        else { ctx.fillStyle = C.TOPPINGS[z.topping].color; dot(ctx, x + dx, foot + dy, 9); }
       }
     }
     for (let i = 0; i < 6; i++) {
