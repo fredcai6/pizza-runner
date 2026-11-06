@@ -4,7 +4,8 @@
     "run",
     "jump",
     "fold",
-    "cold"
+    "cold",
+    "fall"
   ],
   "old-timer": [
     "idle",
@@ -13,16 +14,23 @@
   ],
   "teen": [
     "idle",
-    "walk"
+    "walk",
+    "film",
+    "flee"
   ],
   "turtle": [
     "idle",
-    "walk"
+    "walk",
+    "munch",
+    "stun"
   ],
   "ninja": [
     "idle",
     "walk",
-    "throw"
+    "throw",
+    "leap",
+    "crouch",
+    "hurt"
   ],
   "mutant": [
     "run",
@@ -34,7 +42,8 @@
     "run",
     "jump",
     "cold",
-    "special"
+    "special",
+    "fall"
   ],
   "slice-thin": [
     "idle",
@@ -62,5 +71,47 @@
   "alewife": [
     "idle",
     "wave"
+  ],
+  "customer-california-beach": [
+    "idle"
+  ],
+  "customer-california-downtown": [
+    "idle"
+  ],
+  "customer-chicago-lincolnpark": [
+    "idle"
+  ],
+  "customer-chicago-loop": [
+    "idle"
+  ],
+  "customer-chicago-wickerpark": [
+    "idle"
+  ],
+  "customer-dc-federal": [
+    "idle"
+  ],
+  "customer-dc-georgetown": [
+    "idle"
+  ],
+  "customer-dc-mall": [
+    "idle"
+  ],
+  "customer-naples-center": [
+    "idle"
+  ],
+  "customer-naples-harbor": [
+    "idle"
+  ],
+  "customer-naples-hillside": [
+    "idle"
+  ],
+  "customer-newyork-brooklyn": [
+    "idle"
+  ],
+  "customer-newyork-centralpark": [
+    "idle"
+  ],
+  "customer-newyork-wallstreet": [
+    "idle"
   ]
 }

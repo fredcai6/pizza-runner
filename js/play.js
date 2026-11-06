@@ -754,11 +754,16 @@
       ctx.fillStyle = C.TOPPINGS[topping].color; dot(ctx, x, y, 17);
     }
 
+    // Thrown toppings spin as they fly.
     drawShot(s, r) {
-      const { ctx } = this;
-      const art = s.topping && S.layer(`props/shot-${s.topping}`);
-      if (art && S.prop(ctx, `props/shot-${s.topping}`, s.x, s.y + art.height / 2)) return;
-      ctx.fillStyle = s.color; dot(ctx, s.x, s.y, r);
+      const { ctx } = this, art = s.topping && S.layer(`props/shot-${s.topping}`);
+      if (!art) { ctx.fillStyle = s.color; dot(ctx, s.x, s.y, r); return; }
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.translate(Math.round(s.x), Math.round(s.y));
+      ctx.rotate(Math.floor(this.frame / 3) * Math.PI / 4);
+      ctx.drawImage(art, -art.width / 2, -art.height / 2);
+      ctx.restore();
     }
 
     // Bursts are hard pixel shards flying out, in keeping with the art, not soft discs.
