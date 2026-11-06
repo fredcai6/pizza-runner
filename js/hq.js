@@ -111,7 +111,8 @@
       ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
       ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
     }
-    hq.pizzas.forEach((z, i) => recruit(ctx, 470 + i * 196, 480, z, ms + i * 400));
+    // The camera leans over the table for the board, so the recruits are out of shot.
+    if (view.comp !== 'board' && view.comp !== 'polaroid') hq.pizzas.forEach((z, i) => recruit(ctx, 470 + i * 196, 480, z, ms + i * 400));
     oldTimer(ctx, 300, 410, ms, view.mood);
     layer(ctx, 'hq/front', camX, -0.18);
     ctx.fillStyle = 'rgba(255,235,190,0.28)';
@@ -180,7 +181,7 @@
       ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
       const line = shot.lines[l], talking = now - lineAt < Math.min(2400, line.text.length * 42);
       view.mood = line.mood || (line.who === 'old' && talking ? 'talk' : 'idle');
-      view.camX = x;
+      view.camX = x; view.comp = shot.comp;
       if (shot.comp === 'door') door(ctx, view, now);
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
