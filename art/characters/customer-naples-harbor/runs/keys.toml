@@ -5,4 +5,4 @@ height = 1024
 comfy_args = ["--reserve-vram", "1.5"]
 template = "{action}"
 [shots.idle_a]
-prompt = "Chunky pixel-art style game character, late-1990s platformer, bold dark violet outline, saturated colours, cel shading, cartoony and affectionate. Full body, head to feet, standing facing the viewer in three-quarter view, feet on the ground: a weathered fisherman in a flat cap and rolled trousers, a stubbly face, holding up a big fish by its tail, proud grin. Broad cartoony proportions, slightly big head. No text, no logos, no lettering on clothing. Flat solid magenta background."
+prompt = "Chunky pixel-art style game character, late-1990s platformer, bold dark violet outline, saturated colours, cel shading, cartoony and affectionate. Full body, head to feet, standing facing the viewer in three-quarter view, feet on the ground: a cheerful stout Italian fisherwoman in a flat cap, rolled khaki work shirt and rubber boots, dark curls, holding up a big silver fish by the tail, laughing. Cartoony proportions, slightly big head. No text, no logos, no lettering on clothing. Flat solid magenta background."

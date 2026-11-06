@@ -16,8 +16,9 @@ def main(character, anim, name, game_anim):
     source = FORGE / character / "sprites" / anim
     target = ASSETS / "sprites" / name / game_anim
     target.mkdir(parents=True, exist_ok=True)
-    for file in ("sheet.png", "atlas.json"):
-        shutil.copy(source / file, target / file)
+    for file in ("sheet.png", "atlas.json", "mask.png"):
+        if (source / file).exists():
+            shutil.copy(source / file, target / file)
     manifest_path = ASSETS / "manifest.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
     anims = manifest.setdefault(name, [])

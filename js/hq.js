@@ -10,8 +10,17 @@
     oldtimer: { from: [300, 400, 2.1], to: [300, 380, 2.35] },
     pies: { from: [560, 520, 1.7], to: [720, 520, 1.7] },
     polaroid: { from: [1090, 262, 1.9], to: [1090, 252, 2.4] },
+    boardTeen: { from: [1000, 180, 2.5], to: [1040, 175, 2.9] },
+    boardTurtle: { from: [1110, 175, 2.9], to: [1150, 175, 2.9] },
+    boardTease: { from: [1030, 300, 3], to: [1160, 300, 3], ms: 1500 },
+    ny: { from: [470, 372, 2.1], to: [470, 362, 2.35] },
+    deep: { from: [666, 372, 1.9], to: [666, 362, 2.1] },
+    jumbo: { from: [862, 350, 1.6], to: [862, 340, 1.75] },
+    naples: { from: [1058, 390, 1.9], to: [1058, 380, 2.1] },
   };
 
+  // These shots lean over the table, so the recruits are out of the picture.
+  const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle', 'boardTease']);
   const OUTLINE_CSS = '#1e1030';
   let spots = { ny: [], deep: [], jumbo: [], naples: [] };
   fetch('assets/backgrounds/hq/recruit-spots.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) spots = j; }).catch(() => {});
@@ -21,12 +30,10 @@
   function recruit(ctx, x, foot, z, ms) {
     const plain = `recruit-${z.style}`, st = C.STYLES[z.style];
     if (!S.draw(ctx, plain, 'idle', ms, x, foot, st.height)) S.draw(ctx, `slice-${z.style}`, 'idle', ms, x, foot, st.height) || P.drawSlice(ctx, x, foot - 50, z.style, null, '#d9d0ae', 2);
-    if (z.topping) {
-      const art = S.layer(`props/shot-${z.topping}`);
-      for (const [dx, dy] of spots[z.style]) {
-        if (art) { ctx.imageSmoothingEnabled = false; ctx.drawImage(art, x + dx - 11, foot + dy - 11, 22, 22); }
-        else { ctx.fillStyle = C.TOPPINGS[z.topping].color; dot(ctx, x + dx, foot + dy, 9); }
-      }
+    const art = z.topping && S.layer(P.pieceArt(z.topping, z.style));
+    if (art) {
+      ctx.imageSmoothingEnabled = false;
+      for (const [dx, dy] of spots[z.style]) ctx.drawImage(art, Math.round(x + dx - art.width / 2), Math.round(foot + dy - art.height / 2));
     }
     for (let i = 0; i < 6; i++) {
       ctx.fillStyle = OUTLINE_CSS; ctx.fillRect(x - 45 + i * 16, foot + 8, 12, 12);
@@ -34,10 +41,22 @@
     }
   }
 
-  // The board draws itself, including the photo of itself, so later evidence shows up at every depth.
-  function board(ctx, x, y, w, h, hq, depth = 0) {
-    // The top level sits on the painted cork. Only the board inside the photo draws its own.
-    if (depth > 0 || !S.layer('hq/back')) {
+  // Dossier photos on the cork, as fractions of the board.
+  const DOSSIERS = [['teen', 0.56, 0.06], ['turtle', 0.78, 0.06], ['ninja', 0.56, 0.48], ['mutant', 0.78, 0.48]];
+
+  function dossier(ctx, type, x, y, w, h) {
+    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(x, y, w, h);
+    const ix = x + w * 0.07, iy = y + h * 0.06, iw = w * 0.86, ih = h * 0.74;
+    ctx.fillStyle = '#6d5a4c'; ctx.fillRect(ix, iy, iw, ih);
+    ctx.save(); ctx.beginPath(); ctx.rect(ix, iy, iw, ih); ctx.clip();
+    S.draw(ctx, type, 'idle', 0, ix + iw / 2, iy + ih * 1.02, ih * 0.98);
+    ctx.restore();
+    ctx.fillStyle = '#c41e1e'; dot(ctx, x + w / 2, y + 2, Math.max(2, w * 0.05));
+  }
+
+  // The board is live evidence on the painted cork: receipts, his notes, the dossiers.
+  function board(ctx, x, y, w, h, hq) {
+    if (!S.layer('hq/back')) {
       ctx.fillStyle = '#4a3020'; ctx.fillRect(x - w * 0.03, y - h * 0.04, w * 1.06, h * 1.08);
       ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
     }
@@ -48,26 +67,23 @@
     }
     for (let i = 0; i < hq.notes; i++) {
       ctx.fillStyle = '#ffe66b';
-      ctx.fillRect(x + w * (0.05 + i * 0.09), y + h * 0.72, w * 0.075, h * 0.17);
+      ctx.fillRect(x + w * (0.05 + i * 0.07), y + h * 0.72, w * 0.06, h * 0.17);
     }
+    for (const [type, fx, fy] of DOSSIERS) dossier(ctx, type, x + w * fx, y + h * fy, w * 0.19, h * 0.38);
     if (hq.notes > 1) {
       ctx.strokeStyle = '#c41e1e'; ctx.lineWidth = Math.max(0.5, w * 0.005); ctx.beginPath();
-      for (let i = 0; i < hq.notes; i++) ctx.lineTo(x + w * (0.09 + i * 0.09), y + h * (i % 2 ? 0.72 : 0.76));
-      ctx.lineTo(x + w * 0.74, y + h * 0.3);
+      for (let i = 0; i < hq.notes; i++) ctx.lineTo(x + w * (0.08 + i * 0.07), y + h * (i % 2 ? 0.72 : 0.76));
+      ctx.lineTo(x + w * 0.655, y + h * 0.1);
       ctx.stroke();
     }
+    if (!hq.alewife) return;
     const px = x + w * 0.56, py = y + h * 0.08, pw = w * 0.38, ph = h * 0.62;
     ctx.fillStyle = '#f7f4ea'; ctx.fillRect(px, py, pw, ph);
     const ix = px + pw * 0.06, iy = py + ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
-    if (hq.alewife && depth === 0) {
-      ctx.fillStyle = '#2a2230'; ctx.fillRect(ix, iy, iw, ih);
-      const photo = S.layer('hq/alewife-polaroid');
-      if (photo) { ctx.imageSmoothingEnabled = false; ctx.drawImage(photo, ix, iy, iw, ih); }
-      else S.draw(ctx, 'alewife', 'idle', 0, ix + iw / 2, iy + ih, ih * 0.92) || placeholderAlewife(ctx, ix + iw / 2, iy + ih, ih * 0.9);
-    } else {
-      ctx.fillStyle = '#6d5a4c'; ctx.fillRect(ix, iy, iw, ih);
-      if (depth < 3) board(ctx, ix + iw * 0.1, iy + ih * 0.12, iw * 0.8, ih * 0.76, { ...hq, alewife: false }, depth + 1);
-    }
+    ctx.fillStyle = '#2a2230'; ctx.fillRect(ix, iy, iw, ih);
+    const photo = S.layer('hq/alewife-polaroid');
+    if (photo) { ctx.imageSmoothingEnabled = false; ctx.drawImage(photo, ix, iy, iw, ih); }
+    else S.draw(ctx, 'alewife', 'idle', 0, ix + iw / 2, iy + ih, ih * 0.92) || placeholderAlewife(ctx, ix + iw / 2, iy + ih, ih * 0.9);
   }
 
   function placeholderAlewife(ctx, x, foot, h) {
@@ -85,6 +101,13 @@
     y -= breath + talk;
     ctx.strokeStyle = '#3a2413'; ctx.lineWidth = 5;
     ctx.beginPath(); ctx.moveTo(x - 24, y - 42); ctx.lineTo(x - 6, y - 36); ctx.moveTo(x + 28, y - 42); ctx.lineTo(x + 10, y - 36); ctx.stroke();
+  }
+
+  // Everyone but the recruit in focus drops into the dark.
+  function spotlight(ctx, x, y, size) {
+    const inner = size * 0.55 + 20, glow = ctx.createRadialGradient(x, y, inner, x, y, inner + 70);
+    glow.addColorStop(0, 'rgba(8,6,20,0)'); glow.addColorStop(1, 'rgba(8,6,20,0.72)');
+    ctx.fillStyle = glow; ctx.fillRect(-100, -100, W + 200, H + 200);
   }
 
   // Layers shift against the camera at different rates, so the room has real depth.
@@ -111,10 +134,11 @@
       ctx.fillStyle = '#5e4128'; ctx.fillRect(100, 470, 1080, 34);
       ctx.fillStyle = '#3e2a19'; ctx.fillRect(140, 504, 34, 216); ctx.fillRect(1106, 504, 34, 216);
     }
-    // The camera leans over the table for the board, so the recruits are out of shot.
-    if (view.comp !== 'board' && view.comp !== 'polaroid') hq.pizzas.forEach((z, i) => recruit(ctx, 470 + i * 196, 480, z, ms + i * 400));
+    if (!OVER_TABLE.has(view.comp)) hq.pizzas.forEach((z, i) => recruit(ctx, 470 + i * 196, 480, z, ms + i * 400));
     oldTimer(ctx, 300, 410, ms, view.mood);
     layer(ctx, 'hq/front', camX, -0.18);
+    const star = hq.pizzas.findIndex(z => z.style === view.comp);
+    if (star >= 0) spotlight(ctx, 470 + star * 196, 400, C.STYLES[view.comp].height);
     ctx.fillStyle = 'rgba(255,235,190,0.28)';
     for (let i = 0; i < 26; i++) {
       const x = (i * 197 + ms * (0.006 + (i % 5) * 0.002)) % W, y = (i * 113 + Math.sin(ms / 2000 + i) * 26 + ms * 0.004) % 620;
@@ -153,35 +177,82 @@
     const who = final ? 'alewife' : `customer-${city.id}-${area.id}`, height = final ? 340 : 300;
     if (!S.draw(ctx, who, 'idle', ms, 760, 610, height, -1)) placeholderAlewife(ctx, 760, 610, 300);
     const style = view.slice && view.slice.style ? view.slice.style : (city.style || 'ny');
-    S.draw(ctx, `slice-${style}`, 'idle', ms, 380, 610, C.STYLES[style].height) || P.drawSlice(ctx, 380, 540, style, null, '#ffcc33', 2.4);
+    const worn = view.slice && view.slice.topping, dress = worn ? { piece: P.pieceArt(worn, style), count: view.slice.left } : null;
+    S.draw(ctx, `slice-${style}`, 'idle', ms, 380, 610, C.STYLES[style].height, 1, 1, { dress }) || P.drawSlice(ctx, 380, 540, style, worn, '#ffcc33', 2.4);
     ctx.restore();
   }
 
-  // Plays shots of lines over the canvas. Tap to advance.
+  const TYPE_MS = 26, THUMP_MS = 380;
+  const escape = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  // **bold** marks emphasis. Returns the spans, and how many letters they hold.
+  function spans(text) {
+    const parts = text.split(/\*\*/).map((t, i) => ({ t, bold: i % 2 === 1 }));
+    return { parts, total: parts.reduce((n, p) => n + p.t.length, 0) };
+  }
+
+  function typed({ parts }, n) {
+    let html = '';
+    for (const { t, bold } of parts) {
+      const part = escape(t.slice(0, Math.max(0, n)));
+      html += bold ? `<b>${part}</b>` : part;
+      n -= t.length;
+    }
+    return html;
+  }
+
+  // A card across the shot, Ocean's Eleven style, when a recruit is introduced.
+  function nameCard(ctx, [name, title], age) {
+    const slide = 1 - Math.min(1, age / 260) ** 3;
+    ctx.save(); ctx.translate(-560 * slide, 0);
+    ctx.fillStyle = 'rgba(16,14,36,0.92)'; ctx.fillRect(0, 54, 560, 112);
+    ctx.fillStyle = '#ffd76a'; ctx.fillRect(0, 54, 560, 5); ctx.fillRect(0, 161, 560, 5);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffd76a'; ctx.font = 'bold 54px "Pixelify Sans", monospace'; ctx.fillText(name, 34, 116);
+    ctx.fillStyle = '#fff'; ctx.font = '26px "Pixelify Sans", monospace'; ctx.fillText(title, 36, 148);
+    ctx.restore();
+  }
+
+  // Plays shots of lines over the canvas. A tap finishes the line, the next tap moves on.
   function play(canvas, dialog, shots, view, onDone) {
-    const ctx = canvas.getContext('2d');
-    let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start;
+    const ctx = canvas.getContext('2d'), A = root.PR_SOUND;
+    let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9;
+    let script = null, shown = 0, full = false;
     const text = dialog.querySelector('.line'), name = dialog.querySelector('.who');
-    const NAMES = { old: 'The Old Timer', recruit: 'Recruit', customer: view.customer || 'Customer', alewife: 'DJ Alewife' };
+    const nameOf = who => C.SPEAKERS[who] || view.customer || 'Customer';
     const show = () => {
       const line = shots[s].lines[l];
-      name.textContent = NAMES[line.who]; text.textContent = line.text;
-      dialog.classList.remove('hidden');
-      root.PR_SOUND.play('print');
+      name.textContent = nameOf(line.who);
+      script = spans(line.text); shown = 0; full = false;
+      text.innerHTML = ''; text.dataset.full = line.text.replace(/\*\*/g, '');
+      dialog.classList.remove('hidden', 'done');
+      if (line.thump) { thumpAt = performance.now(); A.play('smash'); }
+    };
+    const type = now => {
+      if (full) return;
+      const n = Math.min(script.total, Math.floor((now - lineAt) / TYPE_MS));
+      if (n === shown) return;
+      const line = shots[s].lines[l], plain = script.parts.map(p => p.t).join('');
+      if (n % 2 === 0 && /\S/.test(plain[n - 1] || '')) A.dit(line.who);
+      shown = n; text.innerHTML = typed(script, n);
+      if (n === script.total) { full = true; dialog.classList.add('done'); }
     };
     const frame = now => {
       if (stopped) return;
-      const shot = shots[s], t = Math.min(1, (now - start) / 6000), cam = CAMERAS[shot.comp] || CAMERAS.wide;
+      const shot = shots[s], cam = CAMERAS[shot.comp] || CAMERAS.wide, t = Math.min(1, (now - start) / (cam.ms || 6000));
       const eased = t * t * (3 - 2 * t);
       const [x, y, z0] = cam.from.map((v, i) => v + (cam.to[i] - v) * eased);
+      type(now);
       // Each new line punches in a little, and each new shot whips into place.
       const punch = Math.max(0, 1 - (now - lineAt) / 220), z = z0 * (1 + 0.035 * punch * punch);
       const whip = Math.max(0, 1 - (now - cutAt) / 240) ** 2 * 260;
+      const thump = Math.max(0, 1 - (now - thumpAt) / THUMP_MS) ** 2 * 26;
       ctx.save();
       ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-      const line = shot.lines[l], talking = now - lineAt < Math.min(2400, line.text.length * 42);
-      view.mood = line.mood || (line.who === 'old' && talking ? 'talk' : 'idle');
+      const line = shot.lines[l];
+      view.mood = line.mood || (line.who === 'old' && !full ? 'talk' : 'idle');
       view.camX = x; view.comp = shot.comp;
+      if (thump) ctx.translate(Math.sin(now / 21) * thump, Math.cos(now / 17) * thump);
       if (shot.comp === 'door') door(ctx, view, now);
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
@@ -192,9 +263,11 @@
       const edge = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 800);
       edge.addColorStop(0, 'rgba(0,0,0,0)'); edge.addColorStop(1, 'rgba(0,0,0,0.6)');
       ctx.fillStyle = edge; ctx.fillRect(0, 0, W, H);
+      if (shot.card) nameCard(ctx, shot.card, now - cutAt);
       raf = requestAnimationFrame(frame);
     };
     const advance = () => {
+      if (!full) { shown = script.total; full = true; text.innerHTML = typed(script, shown); dialog.classList.add('done'); return; }
       l++;
       lineAt = performance.now();
       if (l >= shots[s].lines.length) { l = 0; s++; start = cutAt = lineAt; }
@@ -210,5 +283,5 @@
     raf = requestAnimationFrame(frame);
   }
 
-  root.PR_HQ = { play, board };
+  root.PR_HQ = { play };
 })(window);

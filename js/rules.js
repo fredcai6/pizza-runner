@@ -239,6 +239,7 @@
     world.lastOutcome = result.outcome;
     world.lastSeen = result.street ? { street: result.street, x: result.x } : null;
     world.lastStyle = slice.style;
+    world.lastTopping = result.topping; world.lastLeft = result.left;
     world.filmedLast = Object.values(world.streets).some(s => s.filmed != null);
     reinforceFilmed(world);
     slice.status = delivered ? 'delivered' : 'lost';
@@ -253,7 +254,7 @@
       const killer = killerOf(world, result.killer);
       if (killer) {
         killer.power++;
-        if (slice.topping && !result.toppingGone && (killer.type === 'ninja' || killer.type === 'teen')) killer.toppings.push(slice.topping);
+        if (result.topping && (killer.type === 'ninja' || killer.type === 'teen')) killer.toppings.push(result.topping);
       }
     }
     if (!ready(pie).length) camp.undercover.push({ city: city.id, attempt: world.attempt });
@@ -332,8 +333,13 @@
     };
   }
 
-  // A word from the old timer on the map screen, between slices.
-  const dispatch = camp => C.RETURNS.find(c => c.when(ledger(camp))).lines;
+  const sceneStyle = camp => currentCity(camp).style || 'ny';
+
+  // A word on the map screen, between slices.
+  function dispatch(camp) {
+    const style = camp.world.lastStyle || sceneStyle(camp);
+    return C.RETURNS.find(c => c.when(ledger(camp))).lines.map(l => (l.by ? { who: style, text: l.by[style] } : l));
+  }
 
   // What HQ shows. The four recruits exist from the start, cold and plain, until their orders come in.
   function headquarters(camp) {
@@ -363,7 +369,7 @@
 
   function enemyFile(camp, type) {
     const file = C.ENEMIES[type];
-    return { name: file.name, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
+    return { name: file.name, claim: file.claim, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
   const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, peaceful, learn, bribe, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };

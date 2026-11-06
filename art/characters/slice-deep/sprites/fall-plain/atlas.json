@@ -1,0 +1,1 @@
+{"frame": {"w": 230, "h": 170}, "count": 2, "frame_ms": 90, "loop": true, "rev": {"sha": "2e295b36cbefcdbf45c6aa4eef03638dd57f6fac", "dirty": true, "comfy": "v0.44.0"}, "source": {"run": "keys3", "model": "qwen-edit", "cell": 4.44375, "poses": ["fall/1", "fall/3"]}, "seats": [[[104, 83], [121, 56], [123, 104]], [[100, 93], [116, 65], [120, 113]]]}

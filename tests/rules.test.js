@@ -235,7 +235,7 @@ test('a photo brings local teenagers next attempt and changes no speeds', () => 
 
 test('a killer that survives keeps growing and keeps the topping it took', () => {
   const c = fresh(), street = Object.values(c.world.streets).find(s => s.enemies.some(x => x.type === 'teen')), e = street.enemies.find(x => x.type === 'teen');
-  R.finishRun(c, R.ready(pie(c))[0], { outcome: 'dead', x: 100, street: street.id, killer: { street: street.id, id: e.id } });
+  R.finishRun(c, R.ready(pie(c))[0], { outcome: 'dead', x: 100, street: street.id, topping: 'pepperoni', killer: { street: street.id, id: e.id } });
   assert.strictEqual(e.power, 1);
   assert.deepStrictEqual(e.toppings, ['pepperoni']);
   assert.strictEqual(street.dead.length, 1);
@@ -287,5 +287,23 @@ test('every topping named by a city exists', () => {
   for (const x of C.CITIES) {
     for (const t of x.pickups) assert.ok(C.TOPPINGS[t], t);
     if (x.menu) for (const t of x.menu) assert.ok(C.TOPPINGS[t], t);
+  }
+});
+
+test('the story keeps its secrets', () => {
+  const said = [...C.CITIES.flatMap(c => c.briefing.flatMap(b => b.lines)), ...C.RETURNS.flatMap(r => r.lines)];
+  assert.ok(!said.some(l => /being eaten/i.test(l.text || '')));
+  const stale = C.CITIES.map(c => c.briefing.flatMap(b => b.lines).findIndex(l => /too stale/.test(l.text)));
+  assert.deepStrictEqual(stale.slice(0, 4), [-1, -1, -1, -1]);
+  const last = C.CITIES.at(-1).briefing.flatMap(b => b.lines).at(-1);
+  assert.strictEqual(last.text, "I'm too stale for this shit.");
+});
+
+test('every speaker and every pizza has a voice', () => {
+  for (const city of C.CITIES) for (const b of city.briefing) for (const l of b.lines) assert.ok(C.SPEAKERS[l.who], l.who);
+  const events = Object.keys(C.QUIPS.ny);
+  for (const style of ['ny', 'deep', 'jumbo', 'naples']) {
+    assert.deepStrictEqual(Object.keys(C.QUIPS[style]), events);
+    for (const r of C.RETURNS) for (const l of r.lines) if (l.by) assert.ok(l.by[style]);
   }
 });

@@ -95,9 +95,15 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       const s = scene(0, 'ny', 'pepperoni');
       s.street.pickups.push({ x: 420, y: GROUND - 60, topping: 'jalapeno' });
       s.run.p.x = 380; s.steps(2);
-      ok('a pickup takes over', s.run.held() === 'jalapeno' && s.run.left() === 3);
+      ok('a pickup is three uses', s.run.held() === 'jalapeno' && s.run.left() === 3);
       for (let i = 0; i < 3; i++) { s.input.q.power = true; s.steps(3); }
-      ok('three uses later the slice has its own back', s.run.held() === 'pepperoni' && s.run.left() === 14, s.run.left());
+      ok('used up, the slice is plain cheese', s.run.held() === null && s.run.left() === 0, s.run.left());
+      const fresh = scene(0, 'ny', 'pepperoni');
+      ok('a slice starts with three', fresh.run.left() === 3, fresh.run.left());
+      fresh.input.q.power = true; fresh.steps(3);
+      fresh.street.pickups.push({ x: 420, y: GROUND - 60, topping: 'jalapeno' });
+      fresh.run.p.x = 380; fresh.steps(2);
+      ok('a new topping replaces the old one', fresh.run.held() === 'jalapeno' && fresh.run.left() === 3 && fresh.run.topping === 'jalapeno');
       const s2 = scene(0, 'ny', 'pepperoni');
       s2.street.boxes.push({ x: 560, w: 84, h: 84, broken: false });
       s2.input.q.power = true; s2.steps(30);

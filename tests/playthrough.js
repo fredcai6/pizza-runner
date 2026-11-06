@@ -41,7 +41,7 @@ const pilot = () => {
   for (let guard = 0; Date.now() - started < 50 * 60000; guard++) {
     if (await page.locator('.card').count()) break;
     if (await page.locator('#dialog:not(.hidden)').count()) {
-      const line = await page.locator('#dialog .line').innerText();
+      const line = await page.locator('#dialog .line').getAttribute('data-full');
       await page.waitForTimeout(600 + Math.min(1800, line.length * 34));
       await page.locator('#dialog').click({ timeout: 1000 }).catch(() => {});
       continue;
