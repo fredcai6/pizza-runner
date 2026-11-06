@@ -58,6 +58,7 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
     }
     { // Mutant: warns, chases from behind, leaves after one bite.
       const s = scene(1, 'ny', 'pepperoni', [{ type: 'mutant', x: 300, drain: 300 }]);
+      s.street.length = 20000; s.street.turnAt = 19000;
       s.run.p.x = 420; s.steps(4);
       ok('mutant peeks from the drain', s.run.actors[0].state === 'peek', s.run.actors[0].state);
       s.input.right = true; s.steps(420);
