@@ -24,6 +24,11 @@ test('New York is pepperoni only', () => {
   assert.ok(pie(c).slices.every(s => s.topping === 'pepperoni'));
 });
 
+test('New York has no special move', () => {
+  assert.strictEqual(C.STYLES.ny.special, undefined);
+  for (const [k, v] of Object.entries(C.STYLES)) if (k !== 'ny') assert.ok(v.special && v.specialName);
+});
+
 test('a pie is half and half, three slices a side', () => {
   const p = R.buildPie(C.CITIES[1], 'sausage', 'mushroom');
   assert.deepStrictEqual(p.slices.map(s => s.topping), ['sausage', 'sausage', 'sausage', 'mushroom', 'mushroom', 'mushroom']);

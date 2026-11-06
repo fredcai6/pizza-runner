@@ -16,7 +16,7 @@
       this.charges = base;
       this.heat = this.heatMax = this.style.heatMax;
       this.p = { x: 140, y: GROUND - 96, vx: 0, vy: 0, w: 72, h: 96, grounded: true, facing: 1 };
-      this.invuln = 0; this.specialCd = 0; this.smash = 0; this.pounding = false; this.folded = 0;
+      this.invuln = 0; this.specialCd = 0; this.smash = 0; this.pounding = false;
       this.aura = false; this.auraTick = 0;
       this.shots = []; this.foes = []; this.drops = []; this.bursts = []; this.dust = [];
       this.shake = 0; this.freeze = 0; this.land = 0; this.look = 0;
@@ -51,7 +51,6 @@
       let s = this.style.speed;
       if (this.heat / this.heatMax < 0.3) s *= 0.8;
       if (this.smash > 0 && this.style.special === 'dash') s *= 2;
-      if (this.folded > 0) s *= 1.35;
       return s;
     }
 
@@ -66,7 +65,6 @@
       if (this.invuln > 0) this.invuln--;
       if (this.specialCd > 0) this.specialCd--;
       if (this.smash > 0) this.smash--;
-      if (this.folded > 0) this.folded--;
 
       p.vx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
       if (p.vx) p.facing = p.vx;
@@ -137,12 +135,11 @@
     }
 
     special() {
-      if (this.specialCd > 0) return;
+      if (!this.style.special || this.specialCd > 0) return;
       const { p } = this;
       this.specialCd = 75;
       switch (this.style.special) {
         case 'dash': this.smash = 26; break;
-        case 'fold': this.smash = 30; this.folded = 34; break;
         case 'flare':
           this.heat -= 2;
           this.bursts.push({ x: p.x + 36, y: p.y + 48, r: 190, t: 16, color: 'rgba(255,120,30,0.45)' });
@@ -248,8 +245,7 @@
 
     touching(a) {
       const { p } = this, half = a.size / 2;
-      const pH = this.folded > 0 ? p.h * 0.5 : p.h;
-      return p.x + p.w - 6 > a.x - half && p.x + 6 < a.x + half && p.y + p.h > a.y - a.size && p.y + (p.h - pH) < a.y;
+      return p.x + p.w - 6 > a.x - half && p.x + 6 < a.x + half && p.y + p.h > a.y - a.size && p.y < a.y;
     }
 
     collide(a) {
@@ -322,7 +318,7 @@
       for (const f of this.foes) {
         f.x += f.vx; f.y += f.vy; f.life--;
         if (f.bounce) { f.vy += 0.55; if (f.y > GROUND - 14) { f.y = GROUND - 14; f.vy = -11; } }
-        if (f.x > p.x && f.x < p.x + p.w && f.y > p.y && f.y < p.y + p.h && this.folded <= 0) {
+        if (f.x > p.x && f.x < p.x + p.w && f.y > p.y && f.y < p.y + p.h) {
           this.hurt(9, f.owner, f.x); f.life = 0;
         }
       }
@@ -459,12 +455,12 @@
       const f = this.heat / this.heatMax;
       const cheese = f > 0.6 ? '#ffcc33' : f > 0.3 ? '#e8bc55' : '#c9b48a';
       const landing = this.land / 12, stretch = !p.grounded ? Math.min(0.14, Math.abs(p.vy) * 0.008) : 0;
-      const squash = this.folded > 0 ? 0.55 : 1 - landing * 0.25 + stretch, scale = this.style.scale || 1;
+      const squash = 1 - landing * 0.25 + stretch, scale = this.style.scale || 1;
       const cold = f <= 0.3 && p.grounded && !p.vx;
-      const anim = this.folded > 0 ? 'fold' : !p.grounded ? 'jump' : p.vx ? 'run' : cold ? 'cold' : 'idle';
+      const anim = this.smash > 0 && S.has(sliceArt(this.slice.style), 'special') ? 'special' : !p.grounded ? 'jump' : p.vx ? 'run' : cold ? 'cold' : 'idle';
       // One-shot animations play from their own start.
       if (anim !== this.anim) { this.anim = anim; this.animFrame = this.frame; }
-      if (!S.draw(ctx, sliceArt(this.slice.style), anim, (this.frame - this.animFrame) * 16.7, p.x + 36, p.y + p.h, HERO * scale, p.facing, this.folded > 0 ? 1 : squash)) {
+      if (!S.draw(ctx, sliceArt(this.slice.style), anim, (this.frame - this.animFrame) * 16.7, p.x + 36, p.y + p.h, HERO * scale, p.facing, squash)) {
         drawSlice(ctx, p.x + 36, p.y + 48 + (1 - squash) * 36, this.slice.style, this.topping, cheese, 2.15 * scale, false, p.facing, squash);
       }
       if (this.smash > 0) { ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(p.x + 36, p.y + 48, 62 * scale, 0, 7); ctx.stroke(); }

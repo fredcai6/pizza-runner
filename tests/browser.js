@@ -46,6 +46,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   ok('touch jump works', await page.evaluate(() => __pr.run.p.y < 450));
   await page.keyboard.down('ArrowRight'); await page.waitForTimeout(1800); await page.keyboard.up('ArrowRight');
   await shot('05-street');
+  ok('New York shows no special button', !(await page.locator('#specialBtn').isVisible()));
   ok('slice moved', await page.evaluate(() => __pr.run.p.x > 400));
   await page.keyboard.press('Escape');
   const before = await page.evaluate(() => __pr.run.frame);

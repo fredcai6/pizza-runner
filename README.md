@@ -15,7 +15,7 @@ character: anything missing keeps its placeholder.
 
 | Art name | Animations it can use |
 |---|---|
-| `slice-ny`, `slice-deep`, `slice-jumbo`, `slice-naples`, `slice-thin` | `idle` `run` `jump` `fold` `cold` |
+| `slice-ny`, `slice-deep`, `slice-jumbo`, `slice-naples`, `slice-thin` | `idle` `run` `jump` `cold`, plus `special` except New York |
 | `teen`, `turtle`, `ninja`, `mutant` | `idle` `walk` |
 | `old-timer`, `customer`, `alewife` | `idle` |
 

@@ -32,7 +32,7 @@
   function roster(camp) {
     return `<div class="roster">${R.roster(camp).map(r => {
       const s = C.STYLES[r.style], city = C.CITIES.find(c => c.id === r.city).name;
-      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${s.name}</b><span>${city}</span><span>${s.specialName}</span>${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
+      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${s.name}</b><span>${city}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
     }).join('')}</div>`;
   }
 

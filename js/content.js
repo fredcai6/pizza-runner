@@ -12,7 +12,7 @@
   };
 
   const STYLES = {
-    ny: { name: 'Slice', speed: 7.2, jump: 23, heatDecay: 1.0, heatMax: 100, special: 'fold', specialName: 'FOLD', blurb: 'Folds in half to slide through trouble and smash shells.' },
+    ny: { name: 'Slice', speed: 7.2, jump: 23, heatDecay: 1.0, heatMax: 100, blurb: 'A classic. Pepperoni is all the power you need.' },
     deep: { name: 'Deep Dish', speed: 5.9, jump: 22, heatDecay: 0.7, heatMax: 120, special: 'pound', specialName: 'POUND', blurb: 'Slow and heavy, and holds heat longest. POUND from the air.' },
     jumbo: { name: 'Jumbo', speed: 6.7, jump: 22, heatDecay: 0.9, heatMax: 110, special: 'pound', specialName: 'FLOP', scale: 1.2, blurb: 'Far too big. FLOP flattens whatever is underneath.' },
     naples: { name: 'Margherita', speed: 7, jump: 23, heatDecay: 1.5, heatMax: 135, special: 'flare', specialName: 'FLARE', blurb: 'Starts the hottest. FLARE spends heat to burn everything nearby.' },

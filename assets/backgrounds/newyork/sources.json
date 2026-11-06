@@ -1,31 +1,57 @@
 {
  "rev": {
-  "sha": "b5e368d7d167701408de65f34499b5f74e25cab2",
+  "sha": "dba610b1dabc92df070e60c3ea1e9d126b8d46d5",
   "dirty": true,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "newyork/layers",
+   "run": "newyork/layers2",
    "model": "klein",
    "shot": "far",
-   "seed": 2,
-   "seam_start_x": 37
+   "seed": 4,
+   "seam_start_x": 131
   },
   "mid": {
-   "run": "newyork/layers",
+   "run": "newyork/mid3",
    "model": "klein",
    "shot": "mid",
-   "seed": 1,
-   "shifted_by": -62,
-   "seam_start_x": 109
+   "seed": 3,
+   "erased_text_boxes": [
+    [
+     688,
+     395,
+     933,
+     426
+    ],
+    [
+     938,
+     393,
+     954,
+     420
+    ],
+    [
+     1430,
+     395,
+     1662,
+     426
+    ],
+    [
+     1300,
+     592,
+     1338,
+     608
+    ]
+   ],
+   "shifted_by": -36,
+   "seam_start_x": 36
   },
   "near": {
-   "run": "newyork/layers",
+   "run": "newyork/layers2",
    "model": "klein",
    "shot": "near",
    "seed": 1,
-   "seam_start_x": 77
+   "seam_start_x": 78
   }
  }
 }

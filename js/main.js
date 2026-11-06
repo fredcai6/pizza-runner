@@ -111,7 +111,9 @@
     const city = R.currentCity(camp), street = camp.streets[city.id];
     screen.classList.add('hidden');
     controls.classList.remove('hidden');
-    $('specialBtn').textContent = C.STYLES[slice.style].specialName;
+    const special = C.STYLES[slice.style].specialName;
+    $('specialBtn').textContent = special || '';
+    $('specialBtn').classList.toggle('off', !special);
     run = new P.Run(canvas, input, { camp, city, street, slice, onEnd: result => debrief(slice, result) });
     if (debug) window.__pr.run = run;
     run.start();

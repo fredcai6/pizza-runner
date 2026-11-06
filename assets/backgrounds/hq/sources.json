@@ -1,20 +1,20 @@
 {
  "rev": {
-  "sha": "b5e368d7d167701408de65f34499b5f74e25cab2",
+  "sha": "dba610b1dabc92df070e60c3ea1e9d126b8d46d5",
   "dirty": true,
   "comfy": "v0.44.0"
  },
  "layers": {
-  "back2": [
+  "back3": [
    {
     "shot": "back",
     "seed": 3
    }
   ],
-  "props": [
+  "props2": [
    {
     "shot": "boxes",
-    "seed": 2
+    "seed": 3
    },
    {
     "shot": "table",
@@ -22,7 +22,7 @@
    },
    {
     "shot": "shelf",
-    "seed": 1
+    "seed": 2
    },
    {
     "shot": "boxes",

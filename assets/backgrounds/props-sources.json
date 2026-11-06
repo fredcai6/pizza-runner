@@ -1,20 +1,20 @@
 {
  "rev": {
-  "sha": "d441e4fbeb32a07d2665422e452861ca7c413edd",
+  "sha": "dba610b1dabc92df070e60c3ea1e9d126b8d46d5",
   "dirty": true,
   "comfy": "v0.44.0"
  },
  "layers": {
   "picked_seeds": {
-   "third/table": 2,
-   "third/box": 4,
+   "fifth/table": 2,
+   "fifth/box": 4,
    "second/platform": 2,
    "fourth/barricade": 1,
    "second/barrel": 1,
    "second/barrel_out": 1,
    "third/door": 3
   },
-  "table_height_px": 204,
+  "table_height_px": 209,
   "box_anchor": "bottom-centre of box.png sits at (x, 504)"
  }
 }
