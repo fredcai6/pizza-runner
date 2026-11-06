@@ -410,7 +410,7 @@
           if (a.rise >= 1) { a.state = 'chase'; this.note('mutant', 'chases'); }
           break;
         case 'chase': {
-          const speed = Math.max(this.style.speed * 1.22, 7.5);
+          const speed = Math.max(this.style.speed * 1.35, 8);
           a.dir = Math.sign(cx - a.x) || 1;
           a.x += a.dir * Math.min(speed, Math.abs(cx - a.x));
           break;

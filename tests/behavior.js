@@ -60,8 +60,9 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       const s = scene(1, 'ny', 'pepperoni', [{ type: 'mutant', x: 300, drain: 300 }]);
       s.run.p.x = 420; s.steps(4);
       ok('mutant peeks from the drain', s.run.actors[0].state === 'peek', s.run.actors[0].state);
-      s.input.right = true; s.steps(320);
-      ok('it catches up and bites once', s.run.heat < 85 && s.run.heat > 70, s.run.heat);
+      s.input.right = true; s.steps(420);
+      ok('it catches up and bites once', s.run.heat < 80 && s.run.heat > 65, s.run.heat);
+      s.input.right = false; s.steps(40);
       ok('then it is gone for good', !s.street.enemies[0].alive && s.run.actors.length === 0);
       const s2 = scene(1, 'ny', 'pepperoni', [{ type: 'mutant', x: 300, drain: 300 }]);
       s2.run.p.x = 460; s2.steps(78); s2.run.p.facing = -1; s2.input.q.power = true; s2.steps(60);
