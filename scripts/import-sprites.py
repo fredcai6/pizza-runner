@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Copy one sprite-forge animation into assets/ and list it in the manifest.
+"""Copy one finished animation into assets/ and list it in the manifest.
 
 Usage: import-sprites.py FORGE_CHARACTER ANIM GAME_NAME GAME_ANIM
-Example: import-sprites.py derek nod old-timer idle
+Example: import-sprites.py teen pg-run teen walk
 """
 import json, shutil, sys
 from pathlib import Path
 
-FORGE = Path.home() / "projects/sprite-forge/characters"
-ASSETS = Path(__file__).resolve().parent.parent / "assets"
+ROOT = Path(__file__).resolve().parent.parent
+FORGE = ROOT / "art/characters"
+ASSETS = ROOT / "assets"
 
 
 def main(character, anim, name, game_anim):
