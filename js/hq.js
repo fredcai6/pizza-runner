@@ -128,7 +128,7 @@
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, pal.skyTop); sky.addColorStop(1, pal.skyBottom);
     ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    const art = n => (S.layer(`${city.id}/${area.id}/${n}`) ? `${city.id}/${area.id}/${n}` : `${city.id}/${n}`);
+    const art = n => `${city.id}/${area.id}/${n}`;
     // Everyone stands a little higher here, clear of the dialogue box on a phone.
     ctx.save(); ctx.translate(0, -90);
     S.tile(ctx, art('far'), drift, 0.2, W);

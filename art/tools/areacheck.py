@@ -2,7 +2,7 @@
 import json, sys
 from pathlib import Path
 from PIL import Image
-A = Path.home() / "projects/probable-octo-funicular/assets"
+A = Path(__file__).resolve().parents[2] / "assets"
 B = A / "backgrounds" / sys.argv[1]
 x0 = int(sys.argv[3]) if len(sys.argv) > 3 else 400
 def L(p): return Image.open(p).convert("RGBA")

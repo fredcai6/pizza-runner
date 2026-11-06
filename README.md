@@ -23,6 +23,6 @@ character: anything missing keeps its placeholder.
 | `mutant` | `idle` `run` `bite` |
 | `old-timer`, `alewife`, `customer-CITY-AREA` | `idle` |
 
-Paintings load per city from `assets/backgrounds/CITY/AREA/`, falling back to `CITY/`.
+Paintings load per city from `assets/backgrounds/CITY/AREA/`. Art sources are in `art/`.
 
 Add `?debug=1` to expose game state as `window.__pr`.

@@ -645,10 +645,7 @@
     }
 
     // Drawing
-    art(name) {
-      const here = `${this.city.id}/${this.area.id}/${name}`;
-      return S.layer(here) ? here : `${this.city.id}/${name}`;
-    }
+    art(name) { return `${this.city.id}/${this.area.id}/${name}`; }
 
     draw() {
       const { ctx, cam, area } = this, pal = area.palette, t = this.trauma * this.trauma, f = this.frame;
