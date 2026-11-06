@@ -2,7 +2,7 @@
 (function (root) {
   const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND;
   const W = 1280, H = 720, GROUND = R.GROUND;
-  const HIT = 12, BITE = 16, TALK_RANGE = 180, TURN_ZONE = [-240, 80];
+  const HIT = 12, BITE = 16, TALK_RANGE = 180, TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
   const SIZE = { turtle: 92, teen: 118, mutant: 120, ninja: 118 };
   const CHOMP = 170, STUN = 150, WIPE = 22;
@@ -167,6 +167,7 @@
       this.look += (p.facing * 170 - this.look) * 0.04;
       this.cam += (this.camera() - this.cam) * 0.16;
       if (this.done) return;
+      if (this.god) this.heat = this.heatMax;
       if (this.heat <= 0) return this.end('cold');
       this.doorStep();
     }
@@ -209,6 +210,10 @@
       if (cx > street.turnAt - 320 && R.reach(this.world, street)) { this.found++; this.say(`${C.BARKS.checkpoint} ${j.name}`); A.play('note'); }
       const inZone = cx > street.turnAt + TURN_ZONE[0] && cx < street.turnAt + TURN_ZONE[1] && !!j.turn;
       this.offer = inZone && j.open ? j.turn : null;
+      this.heading = R.guide(this.camp, street, cx);
+      this.best = !!this.offer && this.heading.kind === 'turn';
+      this.inZone = inZone || cx > street.turnAt - 420;
+      if (this.heading.kind === 'door' && this.heading.left < 700 && !this.warned) { this.warned = true; this.say(`${this.area0().customer}'s door, ${C.BARKS.almost}`); }
       if (inZone && !j.open && !this.warned) { this.warned = true; this.say(C.BARKS.gate); }
       if (p.x + p.w >= street.length - 2 && !this.wipe) this.go(j.keep.id);
     }
@@ -713,26 +718,33 @@
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
     }
 
+    // The corner: a crosswalk, a sign with the real street names, and the way to the address picked out in gold.
     drawJunction() {
-      const { ctx, street, junction: j, frame, cam } = this, x = street.turnAt;
-      if (x < cam - 400 || x > cam + W + 400) return;
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      const { ctx, street, junction: j, frame, cam, heading } = this, x = street.turnAt;
+      if (x < cam - 500 || x > cam + W + 500) return;
+      const turnBest = heading && heading.kind === 'turn', pulse = 0.6 + Math.sin(frame / 6) * 0.4;
+      ctx.fillStyle = turnBest ? `rgba(255,215,106,${0.5 + pulse * 0.4})` : 'rgba(255,255,255,0.55)';
       for (let i = 0; i < 8; i++) ctx.fillRect(x - 170 + i * 48, GROUND + 4, 28, 60);
       if (j.turn && j.turn.gated && !j.open) {
-        if (!S.prop(ctx, 'props/box-pile', x, GROUND)) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); ctx.strokeStyle = '#2a1830'; ctx.lineWidth = 5; ctx.strokeRect(x - 87, GROUND - 117, 174, 114); }
+        if (!S.prop(ctx, 'props/box-pile', x, GROUND)) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
-      const label = (text, y, color) => {
-        ctx.font = 'bold 21px system-ui, sans-serif'; ctx.textAlign = 'left';
-        const w = ctx.measureText(text).width + 22;
-        ctx.fillStyle = color; ctx.fillRect(x + 160, y, w, 32);
-        ctx.fillStyle = '#fff'; ctx.fillText(text, x + 171, y + 23);
+      const label = (text, y, color, best) => {
+        ctx.font = `bold ${best ? 28 : 21}px system-ui, sans-serif`; ctx.textAlign = 'left';
+        const w = ctx.measureText(text).width + 22, h = best ? 42 : 32;
+        ctx.fillStyle = best ? '#ffd76a' : color; ctx.fillRect(x + 160, y, w, h);
+        if (best) { ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 4; ctx.strokeRect(x + 160, y, w, h); }
+        ctx.fillStyle = best ? '#1f1410' : '#fff'; ctx.fillText(text, x + 171, y + h - 11);
       };
-      label(`${j.keep.name} ▶`, GROUND - 232, '#2f6b3f');
-      if (j.turn) label(`▲ ${j.turn.name}`, GROUND - 194, j.open ? '#2b5f8a' : '#6b5a4a');
-      if (this.offer) { ctx.fillStyle = '#ffd76a'; ctx.font = 'bold 40px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('▲', x, GROUND - 150 + Math.sin(frame / 6) * 8); }
+      label(`${j.keep.name} ▶`, GROUND - 244, '#4a5a4a', !turnBest);
+      if (j.turn) label(`▲ ${j.turn.name}`, GROUND - 196, j.open ? '#4a5a6a' : '#6b5a4a', turnBest);
+      if (turnBest) {
+        ctx.fillStyle = '#ffd76a'; ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 6; ctx.font = 'bold 110px system-ui, sans-serif'; ctx.textAlign = 'center';
+        const y = GROUND - 170 + Math.sin(frame / 6) * 12;
+        ctx.strokeText('▲', x, y); ctx.fillText('▲', x, y);
+      }
       // A sly lookout in Chicago, before the ninjas are anyone's problem.
-      if (this.city.watchers && street.role === 'next' && this.p.x < x - 500) {
+      if (this.city.watchers && street.role === 'main' && this.p.x < x - 500) {
         S.draw(ctx, 'ninja', S.has('ninja', 'crouch') ? 'crouch' : 'walk', frame * 16.7, x + 150, GROUND - 200, 118);
       }
     }
@@ -753,7 +765,8 @@
 
     drawShot(s, r) {
       const { ctx } = this;
-      if (s.topping && S.prop(ctx, `props/shot-${s.topping}`, s.x, s.y + 14)) return;
+      const art = s.topping && S.layer(`props/shot-${s.topping}`);
+      if (art && S.prop(ctx, `props/shot-${s.topping}`, s.x, s.y + art.height / 2)) return;
       ctx.fillStyle = s.color; dot(ctx, s.x, s.y, r);
     }
 
@@ -795,8 +808,11 @@
         ctx.fillStyle = active ? '#ffd76a' : '#6b5a4a'; ctx.fillRect(x - 42, GROUND - 150, 84, 150);
       }
       if (active) {
-        ctx.fillStyle = '#ffd76a'; ctx.font = 'bold 44px system-ui, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('▼', x, GROUND - 190 + Math.sin(frame / 7) * 9);
+        // A column of light you can see from down the street.
+        ctx.fillStyle = `rgba(255,215,106,${0.16 + Math.sin(frame / 10) * 0.05})`; ctx.fillRect(x - 70, 0, 140, GROUND);
+        ctx.fillStyle = '#ffd76a'; ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 6; ctx.font = 'bold 84px system-ui, sans-serif'; ctx.textAlign = 'center';
+        const y = GROUND - 200 + Math.sin(frame / 7) * 12;
+        ctx.strokeText('▼', x, y); ctx.fillText('▼', x, y);
       } else if (street.address < world.delivery) {
         ctx.fillStyle = '#b8843f'; ctx.fillRect(x + 66, GROUND - 16, 62, 16);
       }
@@ -847,6 +863,28 @@
       ctx.globalAlpha = 1;
     }
 
+    // The homing line: one instruction, always, for how to get to the current address.
+    guideBar() {
+      const { ctx, heading: h, junction: j, frame } = this;
+      if (!h) return;
+      const cx = this.p.x + this.p.w / 2, urgent = h.kind === 'door' ? h.left < 900 : h.left < 700;
+      const past = h.kind === 'turn' && cx > this.street.turnAt + TURN_ZONE[1];
+      let text;
+      if (h.kind === 'door') text = `▶ Straight on to ${this.area0().customer}'s door`;
+      else if (past) text = C.BARKS.missed;
+      else if (h.kind === 'turn') text = this.best ? `▲ TURN HERE: ${h.street.name}` : `▲ Next corner, turn onto ${h.street.name}`;
+      else text = urgent && j.turn ? `▶ KEEP GOING onto ${h.street.name}` : `▶ Stay straight, then ${h.street.name}`;
+      ctx.font = 'bold 26px system-ui, sans-serif'; ctx.textAlign = 'center';
+      const w = ctx.measureText(text).width + 44, x = 640 + 70, flash = this.best && frame % 30 < 15;
+      ctx.fillStyle = flash ? '#fff1b8' : urgent ? '#ffd76a' : 'rgba(0,0,0,0.72)'; ctx.fillRect(x - w / 2, 16, w, 50);
+      ctx.fillStyle = urgent ? '#1f1410' : '#ffd76a'; ctx.fillText(text, x, 51);
+      if (h.left > 0 && !past) {
+        const span = h.kind === 'door' ? this.street.door : this.street.turnAt, f = 1 - Math.min(1, h.left / span);
+        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x - w / 2, 66, w, 8);
+        ctx.fillStyle = '#ffd76a'; ctx.fillRect(x - w / 2, 66, w * f, 8);
+      }
+    }
+
     hud() {
       const { ctx, world, city } = this;
       ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 16, 372, 74);
@@ -857,14 +895,15 @@
       const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'no topping';
       ctx.fillText(`${this.style.name}: ${t}`, 28, 76);
       // Addresses done, and the street we are on.
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(410, 16, 340, 36);
-      city.areas.forEach((a, i) => { ctx.fillStyle = i < world.delivery ? '#7fd46a' : i === world.delivery ? '#ffd76a' : '#555'; dot(ctx, 432 + i * 26, 34, 9); });
-      ctx.fillStyle = '#fff'; ctx.font = '19px sans-serif'; ctx.fillText(this.street.name, 512, 41);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 96, 372, 36);
+      city.areas.forEach((a, i) => { ctx.fillStyle = i < world.delivery ? '#7fd46a' : i === world.delivery ? '#ffd76a' : '#555'; dot(ctx, 38 + i * 26, 114, 9); });
+      ctx.fillStyle = '#fff'; ctx.font = '19px sans-serif'; ctx.fillText(this.street.name, 118, 121);
+      this.guideBar();
       if (this.barkT > 0) {
         ctx.font = 'italic 26px Georgia, serif'; ctx.textAlign = 'center';
         const w = ctx.measureText(this.bark).width + 40;
-        ctx.fillStyle = 'rgba(255,248,225,0.93)'; ctx.fillRect(W / 2 - w / 2, 96, w, 46);
-        ctx.fillStyle = '#2a1a10'; ctx.fillText(this.bark, W / 2, 128);
+        ctx.fillStyle = 'rgba(255,248,225,0.93)'; ctx.fillRect(W / 2 - w / 2 + 110, 92, w, 46);
+        ctx.fillStyle = '#2a1a10'; ctx.fillText(this.bark, W / 2 + 110, 124);
       }
     }
   }

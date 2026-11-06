@@ -47,6 +47,45 @@ test('every address can be reached from every junction, shortcuts closed', () =>
   }
 });
 
+test('guidance always points at the address, and stays honest after a missed turn', () => {
+  for (const x of C.CITIES) {
+    const c = R.newCampaign(); c.cityIndex = C.CITIES.indexOf(x);
+    if (x.final) { c.world = R.newWorld(x); } else order(c);
+    for (let d = 0; d < x.areas.length; d++) {
+      c.world.delivery = d;
+      const target = R.addressStreet(c);
+      // Follow only the guidance from every street in the city: it must always arrive.
+      for (const start of Object.values(c.world.streets)) {
+        let street = start, steps = 0;
+        while (street.id !== target && steps++ < 20) {
+          const g = R.guide(c, street, 200);
+          assert.notStrictEqual(g.kind, 'door');
+          street = g.street;
+        }
+        assert.strictEqual(street.id, target, `${x.id}: from ${start.id} to ${target}`);
+        assert.ok(steps <= 9, `${start.id} took ${steps} stretches`);
+      }
+    }
+  }
+});
+
+test('a straight run to an address needs few decisions', () => {
+  const c = fresh(), route = R.routes(c.world, 'start', R.addressStreet(c));
+  assert.ok(route.path.length <= 3, route.path.join());
+});
+
+test('playtest jumps land in any city at any address with the map open', () => {
+  C.CITIES.forEach((x, i) => {
+    for (let d = 0; d < 3; d++) {
+      const c = R.jumpTo(i, d);
+      assert.strictEqual(c.phase, 'map');
+      assert.strictEqual(R.addressStreet(c), `${x.areas[d].id}.door`);
+      assert.strictEqual(Object.keys(c.world.reached).length, Object.keys(c.world.nodes).length);
+      assert.strictEqual(R.ready(c.pies[x.id]).length, x.final ? 8 : 6);
+    }
+  });
+});
+
 test('every street is keep-going or a side turn, one of each at most', () => {
   for (const x of C.CITIES) {
     const { nodes, streets } = R.network(x);

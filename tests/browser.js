@@ -60,7 +60,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   ok('enemy polaroids start unknown', (await page.locator('.polaroid').first().innerText()).includes('???'));
   await page.locator('.tab.close').click();
   await click('Map'); await shot('09-pause-map');
-  await page.locator('.tab.close').click();
+  await page.locator('.mapback').click();
   await click('Resume');
 
   // Reach the junction, see the prompt, break nothing, carry on past: a real keep-going.
@@ -75,7 +75,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await page.evaluate(() => { __pr.input.right = false; __pr.run.p.x = __pr.run.street.turnAt - 100; __pr.run.junctionStep(); });
   ok('a side turn is on offer', await page.evaluate(() => __pr.run.offer && __pr.run.offer.id === 'wallstreet.cut'));
   await page.waitForTimeout(150);
-  ok('turn button shows the street', /Cut|William/.test(await page.locator('#turnBtn').innerText()), await page.locator('#turnBtn').innerText());
+  ok('turn button shows the street', /William/.test(await page.locator('#turnBtn').innerText()), await page.locator('#turnBtn').innerText());
   await page.keyboard.press('ArrowDown');
   await page.waitForTimeout(700);
   ok('turning changes street', await page.evaluate(() => __pr.run.street.id === 'wallstreet.cut'));

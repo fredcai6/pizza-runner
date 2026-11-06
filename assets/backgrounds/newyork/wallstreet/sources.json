@@ -1,0 +1,43 @@
+{
+ "rev": {
+  "sha": "a0e153a3cc7324de134061d200ec58b6aa332a4b",
+  "dirty": true,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "far": {
+   "run": "wallstreet/layers",
+   "model": "klein",
+   "shot": "far",
+   "seed": 2,
+   "seam_start_x": 107
+  },
+  "mid": {
+   "run": "wallstreet/layers",
+   "model": "klein",
+   "shot": "mid",
+   "seed": 5,
+   "shifted_by": -50,
+   "seam_start_x": 55
+  },
+  "near": {
+   "run": "wallstreet/layers",
+   "model": "klein",
+   "shot": "near",
+   "seed": 4,
+   "seam_start_x": 106
+  },
+  "ground": {
+   "run": "wallstreet/props",
+   "model": "klein",
+   "shot": "ground",
+   "seed": 1
+  },
+  "door": {
+   "run": "wallstreet/props",
+   "model": "klein",
+   "shot": "door",
+   "seed": 2
+  }
+ }
+}

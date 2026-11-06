@@ -41,6 +41,23 @@
       await window.screen.orientation?.lock?.('landscape');
     } catch { /* The browser said no. The game plays fine in a window. */ }
   }
+  // Playtest menu: add ?playtest=1 to the address once and it stays on. ?playtest=0 turns it off.
+  const asked = new URLSearchParams(location.search).get('playtest');
+  if (asked !== null) localStorage.setItem('pizzaRunnerPlaytest', asked);
+  const playtest = localStorage.getItem('pizzaRunnerPlaytest') === '1';
+  let god = false;
+
+  function playtestMenu() {
+    if (run) { run.stop(); run = null; }
+    $('pause').classList.add('hidden');
+    const rows = C.CITIES.map((city, i) => `<div class="jumprow"><b>${city.name}</b>${city.areas.map((a, n) => `<button class="warp" data-city="${i}" data-at="${n}">${n + 1}. ${a.name}</button>`).join('')}</div>`).join('');
+    show(`<h2>Playtest</h2>${rows}<p class="tally">Jumping starts that city fresh with the whole map open. It replaces the saved game.</p>`,
+      [[god ? 'Never go cold: on' : 'Never go cold: off', () => { god = !god; playtestMenu(); }, 'quiet'],
+       ['See the door and ending scenes', () => { camp = R.jumpTo(4, 2); camp.phase = 'ending'; save(); route(); }, 'quiet'],
+       ['Back to title', title, 'quiet']]);
+    screen.querySelectorAll(".warp").forEach(b => { b.onclick = () => { camp = R.jumpTo(+b.dataset.city, +b.dataset.at); save(); route(); }; });
+  }
+
   const fullButton = () => (canFull ? [['Full screen', goFull, 'quiet']] : []);
 
   function title() {
@@ -50,6 +67,7 @@
       if (canFull && matchMedia('(pointer: coarse)').matches) goFull();
       camp = R.newCampaign(); save(); route();
     }]);
+    if (playtest) acts.push(['Playtest', playtestMenu, 'quiet']);
     show('<h1>PIZZA RUNNER</h1><p class="sub">You have been deployed.</p>', [...acts, ...fullButton()]);
   }
 
@@ -132,7 +150,7 @@
       chosen = chosen && chosen.status === 'ready' ? chosen : groups[0];
       const line = world.run ? R.dispatch(camp).map(l => l.text).join(' ') : '';
       const n = (s) => list.filter(x => x.style === s.style && x.topping === s.topping).length;
-      show(`<div class="mapscreen">${M.svg(camp, node)}<div class="mapside">
+      show(`<div class="mapscreen">${M.svg(camp, { picked: node })}<div class="mapside">
         <h2>${city.name}</h2>
         <p class="tally">Address ${world.delivery + 1} of ${city.areas.length}. ${list.length} slice${list.length === 1 ? '' : 's'} left.</p>
         ${line ? `<p class="dispatch">${line}</p>` : ''}
@@ -155,6 +173,7 @@
     $('specialBtn').textContent = special || '';
     $('specialBtn').classList.toggle('off', !special);
     run = new P.Run(canvas, input, { camp, city, world, slice, start: R.deployment(world, node), onEnd: result => debrief(slice, result) });
+    run.god = god;
     if (debug) window.__pr.run = run;
     run.start();
   }
@@ -211,9 +230,11 @@
   $('pauseBoardBtn').onclick = () => B.open(overlay, camp, () => overlay.classList.add('hidden'));
   $('pauseMapBtn').onclick = () => {
     overlay.classList.remove('hidden');
-    overlay.innerHTML = `<div class="board">${M.svg(camp, null)}<div class="tabs"><button class="tab close">Back</button></div></div>`;
-    overlay.querySelector('.close').onclick = () => overlay.classList.add('hidden');
+    overlay.innerHTML = `<div class="mapview">${M.svg(camp, { live: { street: run.street.id, x: run.p.x } })}<button class="mapback">◀ Back to the street</button></div>`;
+    overlay.querySelector('.mapback').onclick = () => overlay.classList.add('hidden');
   };
+  $('pausePlaytestBtn').onclick = playtestMenu;
+  $('pausePlaytestBtn').classList.toggle('hidden', !playtest);
   $('fullBtn').onclick = goFull;
   $('fullBtn').classList.toggle('hidden', !canFull);
   $('muteBtn').onclick = () => { A.toggle(); $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on'; };
@@ -224,8 +245,9 @@
     $('giveBtn').textContent = label || '';
     $('giveBtn').classList.toggle('off', !label);
     const offer = run && !run.done && run.offer;
-    $('turnBtn').textContent = offer ? `TURN: ${offer.name}` : '';
+    $('turnBtn').textContent = offer ? (run.best ? `TURN HERE: ${offer.name}` : `Side street: ${offer.name}`) : '';
     $('turnBtn').classList.toggle('off', !offer);
+    $('turnBtn').classList.toggle('best', !!offer && run.best);
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };

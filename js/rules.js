@@ -100,23 +100,32 @@
 
   function travel(world, streetId) { world.known[streetId] = true; }
 
-  // Every stretch reachable from a node, following one-way streets. Shortcuts count only once open.
+  // The fewest stretches from a node to a street, following one-way streets. Shortcuts count once open.
   function routes(world, from, target) {
-    const seen = new Set(), queue = [[from, 0, null]];
+    const seen = new Set(), queue = [[from, []]];
     while (queue.length) {
-      const [node, steps, first] = queue.shift();
+      const [node, path] = queue.shift();
       if (seen.has(node)) continue;
       seen.add(node);
       const n = world.nodes[node];
       for (const s of [n.keep, n.turn].filter(Boolean)) {
         const street = world.streets[s];
         if (street.gated && !world.opened[s]) continue;
-        const via = first || s;
-        if (s === target) return { steps: steps + 1, first: via };
-        queue.push([street.to, steps + 1, via]);
+        const way = [...path, s];
+        if (s === target) return { steps: way.length, first: way[0], path: way };
+        queue.push([street.to, way]);
       }
     }
     return null;
+  }
+
+  // What to do next from here, on the way to the current address.
+  function guide(camp, street, x) {
+    const world = camp.world, target = addressStreet(camp);
+    if (street.id === target && x < street.door) return { kind: 'door', left: street.door - x };
+    const j = junction(world, street), route = routes(world, street.to, target);
+    const turn = !!j.turn && j.open && route.first === j.turn.id;
+    return { kind: turn ? 'turn' : 'keep', street: turn ? j.turn : j.keep, left: street.turnAt - x };
   }
 
   function newCampaign() {
@@ -199,6 +208,27 @@
     return true;
   }
 
+  // A playtest shortcut: drop straight into any city at any address, everything before it done.
+  function jumpTo(cityIndex, delivery = 0) {
+    const camp = newCampaign();
+    camp.cityIndex = cityIndex;
+    camp.test = true;
+    C.CITIES.slice(0, cityIndex).forEach(c => {
+      const { a, b } = c.menu, pie = buildPie(c, a[0], b[b.length - 1]);
+      camp.pies[c.id] = pie;
+      camp.reserves[c.id] = [pie.a, pie.b].map(topping => ({ style: c.style, topping, from: c.id }));
+    });
+    const city = C.CITIES[cityIndex];
+    if (city.final) startFinale(camp); else placeOrder(camp, city.menu.a[0], city.menu.b[city.menu.b.length - 1]);
+    const world = camp.world;
+    world.delivery = delivery;
+    for (const s of Object.values(world.streets)) {
+      world.known[s.id] = true;
+      world.reached[s.to] = world.reached[s.to] || s.id;
+    }
+    return camp;
+  }
+
   // A photo brings a couple more local teenagers next attempt, near where it was taken.
   function reinforceFilmed(world) {
     for (const street of Object.values(world.streets)) {
@@ -218,6 +248,7 @@
     const delivered = result.outcome === 'delivered', here = result.street ? world.streets[result.street] : null;
     world.run++;
     world.lastOutcome = result.outcome;
+    world.lastSeen = result.street ? { street: result.street, x: result.x } : null;
     world.lastStyle = slice.style;
     world.filmedLast = Object.values(world.streets).some(s => s.filmed != null);
     reinforceFilmed(world);
@@ -346,6 +377,6 @@
     return { name: file.name, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, newCampaign, currentCity, allowed, buildPie, placeOrder, finaleRoster, startFinale, ready, peaceful, learn, bribe, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, allowed, buildPie, placeOrder, finaleRoster, startFinale, ready, peaceful, learn, bribe, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);
