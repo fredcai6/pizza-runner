@@ -8,7 +8,6 @@ html, body { height: 100%; background: #17110e; color: #2a1a10; overflow: hidden
 #controls button { width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); background: rgba(0,0,0,.42); color: #fff; font: bold 13px system-ui, sans-serif; touch-action: none; }
 #controls button.jump { width: 82px; height: 82px; background: rgba(214,60,30,.65); }
 #controls button.act { background: rgba(240,165,58,.5); }
-#controls button.ctx { width: 84px; border-radius: 16px; background: rgba(70,150,80,.8); }
 #controls button.off { visibility: hidden; }
 
 #screen, #overlay { position: fixed; inset: 0; overflow-y: auto; touch-action: pan-y; background: #f4e7cc; padding: 18px 16px calc(24px + env(safe-area-inset-bottom)); }

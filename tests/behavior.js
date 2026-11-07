@@ -22,7 +22,7 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       camp.world = R.newWorld(city, 1); camp.phase = 'map';
       const street = Object.values(camp.world.streets).filter(x => x.id !== 'lead').sort((a, b) => b.length - a.length)[0], id = street.id;
       Object.assign(street, { platforms: [], fires: [], boxes: [], barricades: [], pickups: [], drains: [], enemies: [] });
-      enemies.forEach((e, i) => street.enemies.push({ id: i, x: 900, y: GROUND, range: 40, alive: true, power: 0, toppings: [], bribed: -1, hits: 0, ...e }));
+      enemies.forEach((e, i) => street.enemies.push({ id: i, x: 900, y: GROUND, range: 40, alive: true, power: 0, toppings: [], hits: 0, ...e }));
       const input = { left: false, right: false, q: {}, take(k) { const v = this.q[k]; this.q[k] = false; return v; } };
       let result = null;
       const run = new P.Run(canvas, input, { camp, city, world: camp.world, slice: camp.pies[city.id].slices[0], start: { street: id, x: 300 }, onEnd: r => { result = r; } });
@@ -69,27 +69,44 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       s2.run.p.x = 460; s2.steps(78); s2.run.p.facing = -1; s2.input.q.power = true; s2.steps(60);
       ok('it catches thrown food and goes down', !s2.street.enemies[0].alive && s2.run.heat > 95, s2.run.heat);
     }
-    { // Ninja: three hits, across slices, and no head-bouncing.
+    { // Ninja: catches what you throw, bows, throws it back; the third time it runs. Hits last across slices.
       const s = scene(2, 'jumbo', 'pepperoni', [{ type: 'ninja', x: 720 }]);
       s.street.platforms.push({ x: 0, y: GROUND - 330, w: 3000, ledge: true }); s.run.enter(s.street.id, 300);
-      s.input.q.power = true; s.steps(40);
+      s.input.q.power = true; s.steps(20);
       const e = s.street.enemies[0];
-      ok('first hit sends it up to the fire escapes', e.hits === 1 && ['leap', 'perch'].includes(s.run.actors[0].state), s.run.actors[0].state);
+      ok('a thrown topping is caught, and it bows', e.hits === 1 && s.run.actors[0].state === 'bow' && s.run.actors[0].caught === 'pepperoni', s.run.actors[0].state);
+      s.run.invuln = 0;
+      for (let i = 0; i < 60 && !s.run.foes.some(f => f.topping === 'pepperoni'); i++) s.run.step();
+      ok('then throws it back', s.run.foes.some(f => f.topping === 'pepperoni'), s.run.foes.length);
+      s.steps(40);
+      ok('and it hits for a bite', s.run.bites === 1, s.run.bites);
+      ok('then it goes up to the fire escapes', ['leap', 'perch'].includes(s.run.actors[0].state), s.run.actors[0].state);
       s.steps(50);
       ok('it follows along up there', s.run.actors[0].y < GROUND - 200, s.run.actors[0].y);
       const again = new P.Run(canvas, s.input, { camp: s.camp, city: s.city, world: s.camp.world, slice: s.camp.pies.dc.slices[1], start: { street: s.street.id, x: 300 }, onEnd: () => {} });
       ok('a new slice finds its hit still counted', again.actors[0].e.hits === 1 && again.actors[0].state === 'perch');
       R.strike(s.camp, e);
       ok('and it has not left yet', e.alive);
-      again.hit(again.actors[0], 'shot');
-      ok('third hit and it is gone', !e.alive);
+      again.hit(again.actors[0], 'shot', 'pepperoni');
+      ok('the third time it runs off for good', !e.alive && again.actors[0].state === 'flee' && !again.foes.length, again.actors[0].state);
       const s2 = scene(2, 'ny', 'pepperoni', [{ type: 'ninja', x: 500 }]);
       s2.run.p.x = 470; s2.run.p.y = GROUND - 280; s2.run.p.vy = 6; s2.run.p.grounded = false; const heat = s2.run.heat; s2.steps(40);
       ok('jumping on a ninja hurts', s2.run.heat < heat - 5 && s2.street.enemies[0].alive, s2.run.heat);
-      const s3 = scene(2, 'ny', 'pepperoni', [{ type: 'ninja', x: 400 }]);
-      s3.run.nearby = s3.run.actors[0]; s3.input.q.give = true; s3.run.step();
-      const bribed = s3.street.enemies[0];
-      ok('a bribe costs the topping', s3.run.topping === null && bribed.toppings.length === 1);
+    }
+    { // Bites: each hit takes a chunk that heat can never come back past.
+      const s = scene(0, 'ny', 'pepperoni');
+      s.run.hurt(null, 0);
+      ok('a hit takes a bite and lowers the cap', s.run.bites === 1 && s.run.cap === 80 && s.run.heat <= 80, `${s.run.cap} ${s.run.heat}`);
+      s.street.fires.push({ x: 360, lit: true }); s.run.p.x = 300; s.steps(2);
+      ok('a fire cannot warm it past the bite', s.run.heat <= s.run.cap, `${s.run.heat} / ${s.run.cap}`);
+      for (let i = 0; i < 3; i++) { s.run.invuln = 0; s.run.hurt(null, 0); }
+      ok('four bites and it is still going', !s.run.done && s.run.bites === 4, s.run.heat);
+      s.run.invuln = 0; s.run.hurt(null, 0);
+      ok('the fifth finishes a fresh slice', s.run.done && s.result.outcome === 'dead' && s.result.bites === 5);
+      const s2 = scene(0, 'ny', 'pepperoni');
+      s2.run.heat = 45;
+      for (let i = 0; i < 3 && !s2.run.done; i++) { s2.run.invuln = 0; s2.run.hurt(null, 0); }
+      ok('a cooled slice goes in three', s2.run.done, s2.run.heat);
     }
     { // Pickups and boxes.
       const s = scene(0, 'ny', 'pepperoni');

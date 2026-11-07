@@ -39,7 +39,7 @@
     if (!quiet) {
       for (let x = 900; x < stop; x += city.gap + Math.floor(r() * 200)) {
         const type = city.mix[(id + Math.floor(r() * 2)) % city.mix.length];
-        const e = { id: id++, type, x, y: GROUND, range: 160, alive: true, power: 0, toppings: [], bribed: -1, hits: 0 };
+        const e = { id: id++, type, x, y: GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0 };
         if (type === 'mutant') { e.drain = x; drains.push(x); }
         enemies.push(e);
       }
@@ -125,7 +125,7 @@
   function newCampaign() {
     return {
       version: 3, cityIndex: 0, phase: 'briefing', pies: {}, world: null, reserves: {}, attempts: {}, receipts: [], seen: {}, papers: [],
-      undercover: [], counts: { bribed: 0, fed: 0, lost: 0, delivered: 0, distracted: 0, defeated: 0 },
+      undercover: [], counts: { fed: 0, lost: 0, delivered: 0, defeated: 0 },
     };
   }
 
@@ -160,7 +160,6 @@
   function startFinale(camp) { startCity(camp, finaleRoster(camp)); }
 
   const ready = pie => pie.slices.filter(s => s.status === 'ready');
-  const peaceful = (e, run) => e.bribed === run;
 
   function learn(camp, type, note) {
     const key = `${type}.${note}`;
@@ -169,7 +168,6 @@
     return true;
   }
 
-  function bribe(camp, world, enemy, topping) { enemy.toppings.push(topping); enemy.bribed = world.run; camp.counts.bribed++; }
   function feed(camp, enemy) { enemy.alive = false; camp.counts.fed++; }
 
   function defeat(camp, enemy) {
@@ -180,7 +178,7 @@
     return dropped;
   }
 
-  // A ninja keeps every hit between slices, and three drive it away.
+  // A ninja keeps every hit between slices, and the third drives it away.
   function strike(camp, enemy) {
     enemy.hits++;
     return enemy.hits >= C.NINJA_HITS ? defeat(camp, enemy) : null;
@@ -224,7 +222,7 @@
       if (street.filmed == null) continue;
       for (const offset of C.PHOTO_ARRIVALS) {
         const x = Math.max(500, Math.min(street.length - 900, street.filmed + offset));
-        street.enemies.push({ id: street.nextId++, type: 'teen', x, y: GROUND, range: 160, alive: true, power: 0, toppings: [], bribed: -1, hits: 0, arrived: true });
+        street.enemies.push({ id: street.nextId++, type: 'teen', x, y: GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0, arrived: true });
       }
       street.filmed = null;
     }
@@ -250,7 +248,7 @@
       world.delivery++;
     } else {
       camp.counts.lost++;
-      if (here) here.dead.push({ x: result.x, topping: slice.topping, style: slice.style });
+      if (here) here.dead.push({ x: result.x, topping: slice.topping, style: slice.style, bites: result.bites || 0 });
       const killer = killerOf(world, result.killer);
       if (killer) {
         killer.power++;
@@ -372,6 +370,6 @@
     return { name: file.name, claim: file.claim, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, peaceful, learn, bribe, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);
