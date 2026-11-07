@@ -206,3 +206,21 @@ h4 { margin-top: 12px; font: bold 13px system-ui, sans-serif; color: #2a1a10; }
 .stat { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 1px; }
 .stat i { display: inline-block; width: 100px; height: 10px; background: linear-gradient(90deg, #ffd76a calc(var(--v) * 20%), #3a2a48 0); border: 2px solid #fff; }
 @media (max-height: 480px) { .select { grid-template-columns: 1fr 1fr; padding: 8px; gap: 8px; } .select h2 { font-size: 18px; } .tile span { display: none; } .tile { aspect-ratio: 1.3; } .bigpie { max-height: 28vh; } .plate .blurb { font-size: 12px; } .fname { font-size: 18px; } .sheet:has(.select) { gap: 8px; } }
+
+/* The corkboard: loose pins, overlap, tilt, tape and yarn. */
+.page { background: radial-gradient(circle at 20% 15%, rgba(255,220,160,.25), transparent 45%), radial-gradient(rgba(70,40,15,.28) 1px, transparent 1.5px) 0 0 / 7px 7px, radial-gradient(rgba(255,230,180,.2) 1px, transparent 1.5px) 3px 4px / 11px 11px, #b98d5e; }
+.cork { position: relative; margin: 6px auto 0; }
+.cork .yarn { position: absolute; inset: 0; pointer-events: none; z-index: 9; overflow: visible; }
+.y-line { fill: none; stroke: #c41e1e; stroke-width: 3; stroke-linecap: round; }
+.y-shadow { fill: none; stroke: rgba(0,0,0,.3); stroke-width: 3.5; stroke-linecap: round; }
+.y-glint { fill: none; stroke: rgba(255,160,140,.55); stroke-width: 1; stroke-linecap: round; }
+.spot { position: absolute; transform: rotate(var(--tilt, 0deg)); transform-origin: 50% 8px; }
+.spot::before { content: ''; position: absolute; left: 50%; top: 2px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; z-index: 10; pointer-events: none; background: radial-gradient(circle at 35% 30%, #ff9d88 0 2px, #b3201c 3px 100%); box-shadow: 2px 3px 3px rgba(0,0,0,.45); }
+.spot.taped::after { content: ''; position: absolute; left: -10px; top: 14px; width: 46px; height: 14px; background: rgba(236,222,150,.75); transform: rotate(-38deg); z-index: 10; pointer-events: none; }
+.spot > * { margin: 0; }
+.spot .pin { width: 104px; padding: 16px 4px 10px; background: #f1e6c8; clip-path: polygon(0 0, 100% 0, 100% 94%, 92% 100%, 83% 94%, 75% 100%, 67% 94%, 58% 100%, 50% 94%, 42% 100%, 33% 94%, 25% 100%, 17% 94%, 8% 100%, 0 94%); box-shadow: none; transform: none; }
+.spot .paper { width: 150px; margin: 0; padding: 18px 8px 10px; transform: none; box-shadow: 2px 3px 4px rgba(0,0,0,.35); }
+.spot .polaroid { padding-top: 14px; }
+.spot .sticky { transform: none; }
+.spot .alias { display: block; padding: 16px 10px 4px; box-shadow: 1px 2px 3px rgba(0,0,0,.35); }
+.spot .agent { width: 170px; padding-top: 18px; box-shadow: 2px 3px 5px rgba(0,0,0,.4); }

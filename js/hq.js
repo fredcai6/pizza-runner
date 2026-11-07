@@ -97,49 +97,116 @@
     }
   }
 
-  // Dossier photos on the cork, as fractions of the board.
-  const DOSSIERS = [['teen', 0.56, 0.06], ['turtle', 0.78, 0.06], ['ninja', 0.56, 0.48], ['mutant', 0.78, 0.48]];
+  // Dossier photos on the cork, as fractions of the board, each a little off true: [type, fx, fy, tilt in degrees, dx, dy].
+  const DOSSIERS = [['teen', 0.555, 0.055, -3.5, 2, 0], ['turtle', 0.775, 0.085, 2.5, 0, 3], ['ninja', 0.575, 0.47, 3, -3, 0], ['mutant', 0.785, 0.5, -2.5, 0, -2]];
 
-  function dossier(ctx, type, x, y, w, h) {
-    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(x, y, w, h);
-    const ix = x + w * 0.07, iy = y + h * 0.06, iw = w * 0.86, ih = h * 0.74;
+  // The same scatter every frame: a small seeded generator.
+  const seeded = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  // A pin: shadow, red head, glint.
+  function pin(ctx, x, y, r) {
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; dot(ctx, x + r * 0.45, y + r * 0.55, r);
+    ctx.fillStyle = '#b3201c'; dot(ctx, x, y, r);
+    ctx.fillStyle = '#ff8a73'; dot(ctx, x - r * 0.3, y - r * 0.3, r * 0.35);
+  }
+
+  // A strip of tape across a corner.
+  function tape(ctx, x, y, w, h, rot) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot * Math.PI / 180);
+    ctx.fillStyle = 'rgba(236,222,150,.78)'; ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(-w / 2, -h / 2, w, h * 0.3);
+    ctx.restore();
+  }
+
+  function dossier(ctx, type, x, y, w, h, tilt) {
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(tilt * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(3, 4, w, h);
+    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(0, 0, w, h);
+    const ix = w * 0.07, iy = h * 0.06, iw = w * 0.86, ih = h * 0.74;
     ctx.fillStyle = '#6d5a4c'; ctx.fillRect(ix, iy, iw, ih);
     ctx.save(); ctx.beginPath(); ctx.rect(ix, iy, iw, ih); ctx.clip();
     S.draw(ctx, type, 'idle', 0, ix + iw / 2, iy + ih * 1.02, ih * 0.98);
     ctx.restore();
-    ctx.fillStyle = '#c41e1e'; dot(ctx, x + w / 2, y + 2, Math.max(2, w * 0.05));
+    pin(ctx, w / 2, 3, Math.max(2.5, w * 0.045));
+    ctx.restore();
   }
 
-  // The board is live evidence on the painted cork: receipts, his notes, the dossiers.
+  // A curled receipt scrap: cream, torn along the bottom, with a few printed lines.
+  function scrap(ctx, x, y, w, h, rot, n) {
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(2, 3, w, h);
+    ctx.fillStyle = '#f1e6c8'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, 0); ctx.lineTo(w, h);
+    const teeth = 6; for (let i = teeth; i >= 0; i--) ctx.lineTo(w * i / teeth, h + (i % 2 ? 0 : 3));
+    ctx.closePath(); ctx.fill();
+    const edge = ctx.createLinearGradient(0, 0, w, 0); edge.addColorStop(0, 'rgba(90,60,20,.25)'); edge.addColorStop(0.15, 'rgba(90,60,20,0)'); edge.addColorStop(0.85, 'rgba(90,60,20,0)'); edge.addColorStop(1, 'rgba(90,60,20,.25)');
+    ctx.fillStyle = edge; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(60,45,25,.55)';
+    for (let i = 0; i < 4; i++) ctx.fillRect(w * 0.14, h * (0.16 + i * 0.19), w * (0.72 - ((n + i) % 3) * 0.15), Math.max(1, h * 0.05));
+    if (n % 3 === 0) { ctx.fillStyle = 'rgba(168,52,28,.22)'; dot(ctx, w * 0.7, h * 0.7, w * 0.16); }
+    pin(ctx, w / 2, 2, 2.4);
+    ctx.restore();
+  }
+
+  function sticky(ctx, x, y, w, h, rot, tone) {
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(2, 3, w, h);
+    ctx.fillStyle = tone ? '#ffd98a' : '#ffe66b'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(160,110,20,.18)'; ctx.fillRect(0, h * 0.82, w, h * 0.18);
+    ctx.fillStyle = 'rgba(80,50,10,.5)'; for (let i = 0; i < 3; i++) ctx.fillRect(w * 0.14, h * (0.2 + i * 0.2), w * (0.7 - i * 0.12), Math.max(1, h * 0.05));
+    tape(ctx, w / 2, 0, w * 0.45, h * 0.16, tone ? 4 : -3);
+    ctx.restore();
+  }
+
+  // Yarn from pin to pin with the sag of a real string.
+  function yarn(ctx, a, b, w) {
+    const sag = 10 + Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.16, mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 + sag;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = w + 1; ctx.beginPath(); ctx.moveTo(a[0] + 1, a[1] + 2); ctx.quadraticCurveTo(mx + 1, my + 2, b[0] + 1, b[1] + 2); ctx.stroke();
+    ctx.strokeStyle = '#c41e1e'; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.quadraticCurveTo(mx, my, b[0], b[1]); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,150,130,.55)'; ctx.lineWidth = Math.max(0.4, w * 0.3); ctx.beginPath(); ctx.moveTo(a[0], a[1] - 0.5); ctx.quadraticCurveTo(mx, my - 0.5, b[0], b[1] - 0.5); ctx.stroke();
+  }
+
+  // The board is live evidence on the painted cork: receipts, his notes, the dossiers, strung together with yarn.
   function board(ctx, x, y, w, h, hq) {
     if (!S.layer('hq/back')) {
       ctx.fillStyle = '#4a3020'; ctx.fillRect(x - w * 0.03, y - h * 0.04, w * 1.06, h * 1.08);
       ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
     }
+    const rnd = seeded(97), pins = [];
+    // Receipts overlap in a loose drift down the left of the cork.
     const n = Math.min(hq.receipts, 18);
     for (let i = 0; i < n; i++) {
-      ctx.fillStyle = '#fffef6';
-      ctx.fillRect(x + w * (0.04 + (i % 6) * 0.075), y + h * (0.06 + Math.floor(i / 6) * 0.2), w * 0.055, h * 0.15);
+      const col = i % 6, row = Math.floor(i / 6), rw = w * 0.07, rh = h * 0.17;
+      const rx = x + w * (0.03 + col * 0.072) + (rnd() - 0.5) * w * 0.03, ry = y + h * (0.05 + row * 0.2) + (rnd() - 0.5) * h * 0.05, rot = (rnd() - 0.5) * 16;
+      scrap(ctx, rx, ry, rw, rh, rot, i);
+      if (i % 4 === 1) pins.push([rx + rw / 2, ry + 3]);
     }
+    const notes = [];
     for (let i = 0; i < hq.notes; i++) {
-      ctx.fillStyle = '#ffe66b';
-      ctx.fillRect(x + w * (0.05 + i * 0.07), y + h * 0.72, w * 0.06, h * 0.17);
+      const nx = x + w * (0.05 + i * 0.066) + (rnd() - 0.5) * w * 0.02, ny = y + h * (0.7 + (i % 2) * 0.05 + (rnd() - 0.5) * 0.05), nr = (rnd() - 0.5) * 14;
+      sticky(ctx, nx, ny, w * 0.07, h * 0.17, nr, i % 2);
+      notes.push([nx + w * 0.035, ny + 2]);
     }
-    for (const [type, fx, fy] of DOSSIERS) dossier(ctx, type, x + w * fx, y + h * fy, w * 0.19, h * 0.38);
-    if (hq.notes > 1) {
-      ctx.strokeStyle = '#c41e1e'; ctx.lineWidth = Math.max(0.5, w * 0.005); ctx.beginPath();
-      for (let i = 0; i < hq.notes; i++) ctx.lineTo(x + w * (0.08 + i * 0.07), y + h * (i % 2 ? 0.72 : 0.76));
-      ctx.lineTo(x + w * 0.655, y + h * 0.1);
-      ctx.stroke();
-    }
+    const posts = [];
+    for (const [type, fx, fy, tilt, dx, dy] of DOSSIERS) { const px = x + w * fx + dx, py = y + h * fy + dy, pw = w * 0.19; dossier(ctx, type, px, py, pw, h * 0.38, tilt); posts.push([px + pw / 2, py + 3]); }
+    // Yarn: note to note along the bottom, then up to the dossiers, with sag.
+    const draw = chain => { for (let i = 1; i < chain.length; i++) yarn(ctx, chain[i - 1], chain[i], Math.max(0.8, w * 0.006)); };
+    if (hq.notes > 1) draw([...notes, posts[2], posts[3]]);
+    draw([...pins.slice(0, 3), posts[0], posts[1]]);
+    for (const k of [...notes, ...pins]) pin(ctx, k[0], k[1], 2.4);
     if (!hq.alewife) return;
     const px = x + w * 0.56, py = y + h * 0.08, pw = w * 0.38, ph = h * 0.62;
-    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(px, py, pw, ph);
-    const ix = px + pw * 0.06, iy = py + ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
+    ctx.save(); ctx.translate(px + pw / 2, py + ph / 2); ctx.rotate(-1.5 * Math.PI / 180); ctx.translate(-pw / 2, -ph / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(4, 5, pw, ph);
+    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(0, 0, pw, ph);
+    const ix = pw * 0.06, iy = ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
     ctx.fillStyle = '#2a2230'; ctx.fillRect(ix, iy, iw, ih);
     const photo = S.layer('hq/alewife-polaroid');
     if (photo) { ctx.imageSmoothingEnabled = false; ctx.drawImage(photo, ix, iy, iw, ih); }
     else S.draw(ctx, 'alewife', 'idle', 0, ix + iw / 2, iy + ih, ih * 0.92) || placeholderAlewife(ctx, ix + iw / 2, iy + ih, ih * 0.9);
+    pin(ctx, pw / 2, 4, 5);
+    tape(ctx, pw * 0.1, 3, pw * 0.2, 12, -35);
+    ctx.restore();
   }
 
   function placeholderAlewife(ctx, x, foot, h) {
