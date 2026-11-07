@@ -11,15 +11,15 @@
 <body>
   <canvas id="stage" width="1280" height="720"></canvas>
   <div id="controls" class="hidden">
-    <button id="pauseBtn" class="corner">❚❚</button>
+    <button id="pauseBtn" class="corner" aria-label="Pause (Esc or P)"><i></i><i></i><span>PAUSE</span></button>
     <div class="pad move">
       <button id="turnBtn" data-key="turn" class="turn dim">TURN</button>
       <button data-key="left">◀</button>
       <button data-key="right">▶</button>
     </div>
     <div class="pad">
-      <button id="specialBtn" data-key="special" class="act">SPECIAL</button>
-      <button data-key="power" class="act">POWER</button>
+      <button id="specialBtn" data-key="special" class="act special">SPECIAL</button>
+      <button data-key="power" class="act topping">TOPPING</button>
       <button data-key="jump" class="jump">JUMP</button>
     </div>
   </div>
