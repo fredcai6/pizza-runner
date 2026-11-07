@@ -203,7 +203,7 @@
     left: false, right: false, jumpHeld: false, queued: {},
     take(k) { const v = this.queued[k]; this.queued[k] = false; return v; },
   };
-  const KEYS = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump', Shift: 'special', f: 'power', e: 'give', ArrowDown: 'turn', s: 'turn' };
+  const KEYS = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump', Shift: 'special', f: 'power', ArrowDown: 'turn', s: 'turn' };
   addEventListener('keydown', ev => {
     if (ev.key === 'Escape' || ev.key === 'p') return pause(!(run && run.paused));
     const k = KEYS[ev.key]; if (!k) return;
@@ -235,10 +235,6 @@
   $('muteBtn').onclick = () => { A.toggle(); $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on'; };
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
   setInterval(() => {
-    const near = run && !run.done && run.nearby;
-    const label = near ? { ninja: 'BRIBE', mutant: 'FEED', teen: 'DISTRACT' }[near.e.type] : null;
-    $('giveBtn').textContent = label || '';
-    $('giveBtn').classList.toggle('off', !label);
     const offer = run && !run.done && run.offer;
     $('turnBtn').classList.toggle('dim', !offer);
   }, 100);

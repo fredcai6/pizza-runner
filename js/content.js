@@ -283,19 +283,19 @@
 
   // Polaroids start as a name and question marks. Notes appear once the behavior has been seen.
   const ENEMIES = {
-    teen: { name: 'Teenager', claim: 'Agent of The Order. Reports back with photographs.', notes: { flees: 'One good pepperoni and it runs home for good.', stomp: 'Soft on top. Cries.', films: 'Takes your picture, and its friends show up next time.', distract: 'Easily distracted. Do not trust it.' } },
+    teen: { name: 'Teenager', claim: 'Agent of The Order. Reports back with photographs.', notes: { flees: 'One good pepperoni and it runs home for good.', stomp: 'Soft on top. Cries.', films: 'Takes your picture, and its friends show up next time.', } },
     turtle: { name: 'Turtle', claim: 'Agent of The Order. In place for ninety years, minimum.', notes: { bites: 'Bites, then stops to chew.', munch: 'Throw it something. It will stop to chew.', stun: 'Jump on it and it tucks in. It makes an excellent springboard.', armored: 'Nothing removes a turtle. It was here before us.' } },
-    ninja: { name: 'Ninja', claim: 'Senior agent of The Order. I do not like the reports.', notes: { throws: 'Throws things. Keeps its distance.', bounce: 'Do not jump on its head.', climbs: 'Hit it and it takes to the fire escapes. It remembers every hit.', bribe: 'Takes a topping and looks the other way, for now.', debt: 'Expects paying again. Fights with whatever you paid.', gone: 'Three hits and it does not come back.' } },
+    ninja: { name: 'Ninja', claim: 'Senior agent of The Order. I do not like the reports.', notes: { throws: 'Throws things. Keeps its distance.', bounce: 'Do not jump on its head.', climbs: 'Hit it and it takes to the fire escapes. It remembers every hit.', bows: 'Catches whatever you throw. Bows. Throws it straight back.', debt: 'Fights with whatever it took off a fallen slice.', gone: 'The third time, it runs off and does not come back.' } },
     mutant: { name: 'Mutant', claim: 'What is The Order feeding them?', notes: { peeks: 'Watch the storm drains. It looks before it comes.', chases: 'It comes up behind you, fast.', feed: 'Catches food and goes back down, for good.', bite: 'One bite and it goes home. One.' } },
   };
 
   const BARKS = {
     hot: 'Heat holding. You are magnificent.', warm: 'Lukewarm. Stay focused.', cold: 'Cold now. The cheese has given up on you.',
-    bribe: 'The ninja bows. It keeps the topping.', feed: 'It catches it and goes back down the drain.',
-    distract: 'The teenager has found something better.', filmed: 'A teenager took your picture.', fire: 'Warm again, for now.',
+    bow: 'The ninja catches it. Bows. Here it comes back.', feed: 'It catches it and goes back down the drain.',
+    filmed: 'A teenager took your picture.', fire: 'Warm again, for now.',
     recovered: 'Topping back in hand.', note: 'New note on the board.', paper: 'Something was in the box.',
     pickup: 'Three uses. The old topping is gone.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
-    flees: 'It ran off crying. It will not be back.', ninjaGone: 'Gone in a puff of smoke. It will not be back.', ninjaHit: 'It remembers that.',
+    flees: 'It ran off crying. It will not be back.', ninjaGone: 'It has had enough. It runs off and will not be back.', ninjaHit: 'It remembers that.',
     drain: 'Something in the storm drain.', almost: 'just ahead', missed: 'Rerouting...', bite: 'One bite and it goes home.', nope: 'Not this address yet.',
   };
 
@@ -311,6 +311,8 @@
   // Where a photo's new teenagers turn up, relative to where it was taken.
   const PHOTO_ARRIVALS = [-260, 320];
   const NINJA_HITS = 3;
+  // A slice can lose this many bites. Each one takes the same share of its heat, and that share never comes back.
+  const BITES = 5;
   const CHARGES = 3;
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';
@@ -326,6 +328,6 @@
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
   const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
-  const api = { CITY_DONE, CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
+  const api = { CITY_DONE, CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -215,15 +215,6 @@ test('a ninja keeps its hits across slices and leaves on the third', () => {
   assert.strictEqual(e.alive, false);
 });
 
-test('a bribe buys this attempt only', () => {
-  const c = fresh(), e = { toppings: [], bribed: -1 };
-  R.bribe(c, c.world, e, 'pepperoni');
-  assert.ok(R.peaceful(e, c.world.run));
-  lose(c);
-  assert.ok(!R.peaceful(e, c.world.run));
-  assert.deepStrictEqual(e.toppings, ['pepperoni']);
-});
-
 test('a photo brings local teenagers next attempt and changes no speeds', () => {
   const c = fresh(), street = Object.values(c.world.streets).find(s => s.length > 3000), before = street.enemies.length;
   street.filmed = 1500;

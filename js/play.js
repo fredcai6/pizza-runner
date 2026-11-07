@@ -2,10 +2,10 @@
 (function (root) {
   const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND;
   const W = 1280, H = 720, GROUND = R.GROUND;
-  const HIT = 12, BITE = 16, TALK_RANGE = 180, TURN_ZONE = [-420, 110];
+  const TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
   const SIZE = { turtle: 92, teen: 118, mutant: 120, ninja: 118 };
-  const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180;
+  const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
 
   class Run {
     constructor(canvas, input, { camp, city, world, slice, start, onEnd }) {
@@ -15,6 +15,8 @@
       this.topping = slice.topping;
       this.charges = slice.topping ? C.CHARGES : 0;
       this.heat = this.heatMax = st.heatMax;
+      // Every hit takes a bite, and nothing grows it back: heat can only come back up to what is left.
+      this.bites = 0; this.cap = this.heatMax;
       this.p = { x: 0, y: GROUND - st.h, vx: 0, vy: 0, w: st.w, h: st.h, grounded: true, facing: 1 };
       this.invuln = 0; this.specialCd = 0; this.smash = 0; this.pounding = false; this.splat = 0; this.pace = 0;
       this.coyote = 0; this.buffer = 0; this.bounced = false;
@@ -23,7 +25,7 @@
       this.speech = null; this.quipGap = 0; this.quipCount = {};
       this.bursts = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
       this.look = 0; this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
-      this.done = false; this.nearby = null; this.offer = null;
+      this.done = false; this.offer = null;
       this.wipe = 0; this.pending = null; this.removed = 0; this.found = 0; this.taken = new Set(); this.warned = false;
       this.enter(start.street, start.x);
       const gone = Object.values(world.streets).reduce((n, s) => n + s.enemies.filter(e => !e.alive).length, 0);
@@ -81,7 +83,7 @@
       if (this.done) return;
       this.stop();
       A.play(outcome === 'delivered' ? 'deliver' : 'lost');
-      this.onEnd({ outcome, killer: killer == null ? null : { street: this.street.id, id: killer }, street: this.street.id, x: this.p.x, topping: this.held(), left: this.left(), seconds: Math.round(this.frame / 60), removed: this.removed, checkpoints: this.found });
+      this.onEnd({ outcome, killer: killer == null ? null : { street: this.street.id, id: killer }, street: this.street.id, x: this.p.x, topping: this.held(), left: this.left(), bites: this.bites, seconds: Math.round(this.frame / 60), removed: this.removed, checkpoints: this.found });
     }
 
     speed() {
@@ -139,7 +141,6 @@
       if (!p.grounded && !this.bounced && p.vy < -10 && input.jumpHeld === false) p.vy = -10;
       if (input.take('special')) this.special();
       if (input.take('power')) this.power();
-      if (input.take('give')) this.give();
       if (input.take('turn')) this.takeTurn();
 
       const lastBottom = p.y + p.h, wasGrounded = p.grounded, fall = p.vy;
@@ -181,7 +182,7 @@
       this.look += (p.facing * 170 - this.look) * 0.04;
       this.cam += (this.camera() - this.cam) * 0.16;
       if (this.done) return;
-      if (this.god) this.heat = this.heatMax;
+      if (this.god) this.heat = this.cap;
       if (this.heat <= 0) return this.end('cold');
       this.doorStep();
     }
@@ -272,7 +273,7 @@
     fires() {
       for (const f of this.street.fires) {
         if (f.lit && Math.abs(this.p.x + this.p.w / 2 - f.x) < 58 && this.p.y + this.p.h > GROUND - 90) {
-          f.lit = false; this.heat = Math.min(this.heatMax, this.heat + 40); this.say(C.BARKS.fire); A.play('fire');
+          f.lit = false; this.heat = Math.min(this.cap, this.heat + 40); this.say(C.BARKS.fire); A.play('fire');
         }
       }
     }
@@ -317,7 +318,7 @@
           for (const s of [-1, 1]) this.shots.push({ x, y: GROUND - 22, vx: 14 * s, vy: 0, topping: held, color: t.color, life: 45, wave: true });
           break;
         case 'leap': p.vy = -27; p.grounded = false; this.bounced = true; break;
-        case 'reheat': this.heat = Math.min(this.heatMax, this.heat + 28); this.bursts.push({ x, y, r: 80, t: 12, color: '#7fd46a' }); break;
+        case 'reheat': this.heat = Math.min(this.cap, this.heat + 28); this.bursts.push({ x, y, r: 80, t: 12, color: '#7fd46a' }); break;
         case 'aura': this.aura = !this.aura; return;
       }
       this.spend(1);
@@ -330,23 +331,6 @@
       this.say(C.BARKS.spent); this.quip('spent');
     }
 
-    canGive(a) {
-      if (!this.held() || a.leaving || R.peaceful(a.e, this.world.run)) return false;
-      if (a.e.type === 'teen') return !a.distracted;
-      return a.e.type === 'ninja' || (a.e.type === 'mutant' && a.state !== 'lurk');
-    }
-
-    give() {
-      const a = this.nearby;
-      if (!a || !this.canGive(a)) return;
-      const held = this.held();
-      if (a.e.type === 'teen') { a.distracted = true; this.spend(1); this.camp.counts.distracted++; this.say(C.BARKS.distract); this.note('teen', 'distract'); return; }
-      if (a.e.type === 'mutant') { this.spend(1); this.feedMutant(a); return; }
-      R.bribe(this.camp, this.world, a.e, held);
-      this.say(C.BARKS.bribe); this.note('ninja', 'bribe'); A.play('bribe');
-      this.topping = null; this.charges = 0; this.aura = false;
-    }
-
     feedMutant(a) {
       R.feed(this.camp, a.e);
       this.removed++; this.say(C.BARKS.feed); this.note('mutant', 'feed'); A.play('bribe');
@@ -356,17 +340,15 @@
 
     // Enemies
     actorsStep() {
-      const { p, street } = this, run = this.world.run;
-      this.nearby = null;
+      const { p } = this;
       const cx = p.x + p.w / 2;
       for (const a of this.actors) {
         const e = a.e, dist = Math.abs(a.x - cx), power = 1 + Math.min(e.power, 4) * 0.12;
-        if (dist < TALK_RANGE && this.canGive(a) && (!this.nearby || dist < Math.abs(this.nearby.x - cx))) this.nearby = a;
         if (a.leaving) { this.leave(a); continue; }
         if (dist > 1350 && a.state !== 'chase' && a.state !== 'perch') continue;
         if (e.type === 'teen') this.teen(a, dist, power);
         else if (e.type === 'turtle') this.turtle(a, power);
-        else if (e.type === 'ninja') this.ninja(a, dist, power, run);
+        else if (e.type === 'ninja') this.ninja(a, dist, power);
         else this.mutant(a, cx);
         if (this.touching(a) && !a.leaving) this.collide(a);
       }
@@ -376,7 +358,6 @@
     leave(a) {
       a.t++;
       if (a.state === 'sink') { a.rise = Math.max(0, a.rise - 0.05); if (a.rise <= 0) a.goneNow = true; return; }
-      if (a.state === 'smoke') { a.goneNow = true; return; }
       a.x += a.dir * 9;
       if (a.t > 90) a.goneNow = true;
     }
@@ -387,7 +368,6 @@
     }
 
     teen(a, dist, power) {
-      if (a.distracted) { a.x += 2; return; }
       if (a.state === 'film') {
         if (--a.t <= 0) a.state = 'walk';
         return;
@@ -410,8 +390,14 @@
       this.patrol(a, 1.3 * power);
     }
 
-    ninja(a, dist, power, run) {
-      if (R.peaceful(a.e, run)) return;
+    ninja(a, dist, power) {
+      // Caught it, bows, and sends it straight back. Then off up the fire escapes.
+      if (a.state === 'bow') {
+        a.dir = Math.sign(this.p.x + this.p.w / 2 - a.x) || 1;
+        if (++a.t === BOW) this.throwBack(a);
+        if (a.t >= BOW + 14) { a.state = a.y < GROUND - 1 ? 'perch' : 'leap'; a.t = 0; }
+        return;
+      }
       if (a.state === 'leap') {
         a.t++;
         const f = a.t / 34;
@@ -453,6 +439,16 @@
       }
     }
 
+    throwBack(a) {
+      const t = a.caught, spec = C.TOPPINGS[t], dx = this.p.x + this.p.w / 2 - a.x, high = a.y < GROUND - 120;
+      const span = Math.max(30, Math.abs(dx) / 13);
+      a.threw = this.frame + 30; a.caught = null;
+      this.foes.push({
+        x: a.x, y: a.y - a.size / 2, vx: Math.sign(dx) * 13, vy: high ? (this.p.y + this.p.h / 2 - a.y + a.size / 2) / span : spec.kind === 'bounce' ? -5 : 0,
+        bounce: spec.kind === 'bounce', color: spec.color, topping: t, owner: a.e.id, life: 130,
+      });
+    }
+
     attack(a) {
       if (--a.cd > 0) return;
       const e = a.e, dx = this.p.x - a.x;
@@ -476,26 +472,26 @@
 
     collide(a) {
       const { p } = this, e = a.e;
-      if (R.peaceful(e, this.world.run) || a.distracted) return;
       const stomped = p.vy > 1 && p.y + p.h < a.y - a.size * 0.45;
       if (this.smash > 0) { this.hit(a, 'smash'); return; }
       if (e.type === 'turtle') {
         if (stomped) { a.state = 'stun'; a.t = STUN; this.bounce(27); this.note('turtle', 'stun'); this.note('turtle', 'armored'); return; }
         if (a.state !== 'walk') return;
-        this.hurt(HIT, e.id, a.x);
+        this.hurt(e.id, a.x);
         a.state = 'munch'; a.t = CHOMP; this.note('turtle', 'bites');
         return;
       }
       if (e.type === 'teen' && stomped) { this.bounce(16); this.note('teen', 'stomp'); this.quip('stomp'); this.flee(a); return; }
       if (e.type === 'ninja' && stomped) this.note('ninja', 'bounce');
       if (e.type === 'mutant') {
-        this.hurt(BITE, e.id, a.x);
+        this.hurt(e.id, a.x);
         if (this.done) return;
         R.feed(this.camp, e); this.removed++; this.note('mutant', 'bite'); this.say(C.BARKS.bite);
         a.state = 'sink'; a.leaving = true; a.t = 0; this.temp.push(a.x);
         return;
       }
-      this.hurt(HIT + Math.min(e.power, 4) * 3, e.id, a.x);
+      if (e.type === 'ninja' && a.state === 'bow') return;
+      this.hurt(e.id, a.x);
     }
 
     bounce(v) { this.p.vy = -v; this.p.grounded = false; this.bounced = true; this.wobV += 0.14; A.play('jump'); }
@@ -508,10 +504,11 @@
       this.say(C.BARKS.flees);
     }
 
-    // What each hit does depends entirely on who it hits. how is 'shot', 'wave', 'aura' or 'smash'.
-    hit(a, how) {
+    // What each hit does depends entirely on who it hits. how is 'shot', 'wave', 'aura' or 'smash',
+    // and topping is what was thrown, if anything was.
+    hit(a, how, topping = null) {
       const e = a.e;
-      if (R.peaceful(e, this.world.run) || a.leaving) return;
+      if (a.leaving || a.state === 'bow') return;
       A.play('smash');
       this.jolt(0.2); this.freeze = 3;
       this.bursts.push({ x: a.x, y: a.y - 40, r: 48, t: 10, color: '#ffffff' });
@@ -527,10 +524,13 @@
           a.struck = this.frame;
           const dropped = R.strike(this.camp, e);
           if (dropped) {
-            this.removed++; a.leaving = true; a.state = 'smoke';
+            // Had enough: it runs off, and drops whatever it took from earlier slices.
+            this.removed++; a.leaving = true; a.t = 0; a.state = 'flee'; a.dir = Math.sign(a.x - this.p.x) || 1;
             for (const t of dropped) this.drops.push({ x: a.x, y: Math.min(a.y, GROUND) - 50, topping: t });
-            this.bursts.push({ x: a.x, y: a.y - 50, r: 110, t: 18, color: '#3a3148' });
             this.say(C.BARKS.ninjaGone); this.note('ninja', 'gone');
+          } else if (topping) {
+            a.state = 'bow'; a.t = 0; a.caught = topping;
+            this.say(C.BARKS.bow); this.note('ninja', 'bows'); A.play('bribe');
           } else {
             this.say(C.BARKS.ninjaHit); this.note('ninja', 'climbs');
             if (a.state === 'walk') { a.state = 'leap'; a.t = 0; }
@@ -545,13 +545,16 @@
       if (R.learn(this.camp, type, key)) { this.say(C.BARKS.note); A.play('note'); }
     }
 
-    hurt(amount, owner, fromX) {
+    // A bite comes off the slice, and with it a share of the heat it can ever hold again.
+    hurt(owner, fromX) {
       if (this.invuln > 0) return;
       this.quip('hurt');
-      this.heat -= amount; this.invuln = 90; this.jolt(0.55); this.freeze = 5; this.wobV += 0.2;
+      const chunk = this.heatMax / C.BITES;
+      this.bites++; this.cap = this.heatMax - this.bites * chunk; this.heat = Math.min(this.cap, this.heat - chunk);
+      this.invuln = 90; this.jolt(0.55); this.freeze = 5; this.wobV += 0.2;
       A.play('hit');
       this.p.vy = -10; this.p.vx = this.p.x < fromX ? -9 : 9;
-      if (this.heat <= 0) this.end('dead', owner);
+      if (this.heat <= 0.01) this.end('dead', owner);
     }
 
     puff(x, y, n) {
@@ -589,9 +592,9 @@
         }
         if (s.life > 0 && s.y > GROUND - 130 && this.gateHit(s.x, 60)) s.life = 0;
         for (const a of this.actors) {
-          if (a.leaving || s.life <= 0 || a.rise < 0.3 || R.peaceful(a.e, this.world.run)) continue;
+          if (a.leaving || s.life <= 0 || a.rise < 0.3) continue;
           if (Math.abs(s.x - a.x) < a.size / 2 + 10 && s.y > a.y - a.size - 6 && s.y < a.y + 6) {
-            this.hit(a, s.wave ? 'wave' : 'shot');
+            this.hit(a, s.wave ? 'wave' : 'shot', s.topping);
             s.life = 0;
           }
         }
@@ -606,7 +609,7 @@
         if (f.bounce) { f.vy += 0.55; if (f.y > GROUND - 14) { f.y = GROUND - 14; f.vy = -11; } }
         if (f.y > GROUND) f.life = 0;
         if (f.x > p.x && f.x < p.x + p.w && f.y > p.y && f.y < p.y + p.h) {
-          this.hurt(9, f.owner, f.x); f.life = 0;
+          this.hurt(f.owner, f.x); f.life = 0;
         }
       }
       this.foes = this.foes.filter(f => f.life > 0);
@@ -833,7 +836,7 @@
     drawDead() {
       for (const d of this.street.dead) {
         const st = C.STYLES[d.style];
-        if (!S.draw(this.ctx, sliceArt(d.style), 'cold', 0, d.x, GROUND, st.height)) drawSlice(this.ctx, d.x, GROUND - 38, d.style, d.topping, '#8f8f8a', 1.5, true);
+        if (!S.draw(this.ctx, sliceArt(d.style), 'cold', 0, d.x, GROUND, st.height, 1, 1, { bites: d.bites || 0 })) drawSlice(this.ctx, d.x, GROUND - 38, d.style, d.topping, '#8f8f8a', 1.5, true);
       }
     }
 
@@ -856,24 +859,26 @@
     }
 
     drawActor(a) {
-      const { ctx } = this, e = a.e, calm = R.peaceful(e, this.world.run) || a.distracted;
-      const bob = { walk: 'walk', film: 'film', flee: 'flee', munch: 'munch', stun: 'stun', leap: 'leap', perch: 'crouch', chase: 'run', rise: 'idle', peek: 'idle', lurk: 'idle', sink: 'idle', smoke: 'hurt' }[a.state] || 'walk';
-      let anim = a.threw > this.frame && S.has(e.type, 'throw') ? 'throw' : bob;
-      if (calm) anim = 'idle';
+      const { ctx } = this, e = a.e;
+      const bob = { walk: 'walk', film: 'film', flee: 'flee', munch: 'munch', stun: 'stun', leap: 'leap', perch: 'crouch', chase: 'run', rise: 'idle', peek: 'idle', lurk: 'idle', sink: 'idle', bow: 'crouch' }[a.state] || 'walk';
+      const anim0 = a.threw > this.frame && S.has(e.type, 'throw') ? 'throw' : bob;
+      let anim = anim0;
       if (!S.has(e.type, anim)) anim = S.has(e.type, 'walk') ? 'walk' : 'run';
       if (a.rise <= 0) return;
       ctx.save();
       // Mutants come up through the street, so the ground hides whatever has not risen yet.
       if (a.rise < 1) { ctx.beginPath(); ctx.rect(a.x - 200, a.y - a.size - 40, 400, a.size + 40); ctx.clip(); ctx.translate(0, a.size * (1 - a.rise)); }
-      const facing = a.dir;
-      if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, facing)) {
+      const facing = a.dir, bow = a.state === 'bow' ? Math.sin(Math.min(1, a.t / (BOW * 0.6)) * Math.PI) : 0;
+      // The bow: a dip and a lean toward the slice, holding up what it caught.
+      if (bow) { ctx.translate(a.x, a.y); ctx.rotate(bow * 0.45 * facing); ctx.translate(-a.x, -a.y); }
+      if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12)) {
         ctx.font = `${a.size}px serif`; ctx.textAlign = 'center'; ctx.fillText(FACE[e.type], a.x, a.y - 4);
       }
       ctx.restore();
+      if (a.caught) this.drawToken(a.caught, a.x + facing * a.size * 0.3, a.y - a.size * 0.95);
       e.toppings.slice(0, 5).forEach((t, i) => { ctx.fillStyle = C.TOPPINGS[t].color; dot(ctx, a.x - 34 + i * 17, a.y - a.size - 14, 7); });
       if (e.type === 'ninja' && e.hits) { ctx.fillStyle = '#ff3b1f'; for (let i = 0; i < e.hits; i++) ctx.fillRect(a.x - 18 + i * 14, a.y - a.size - 26, 10, 10); }
       if (a.state === 'stun') { ctx.fillStyle = '#ffd76a'; for (let i = 0; i < 3; i++) dot(ctx, a.x + Math.cos(this.frame / 7 + i * 2.1) * 34, a.y - a.size - 8 + Math.sin(this.frame / 7 + i * 2.1) * 9, 5); }
-      if (calm) { ctx.fillStyle = '#fff'; ctx.font = '19px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(a.distracted ? 'scrolling' : 'paid', a.x, a.y - a.size - 26); }
     }
 
     // Each wisp is a wavy line that lifts off the crust, and running bends it back.
@@ -915,7 +920,7 @@
       const flop = st.flop ? Math.sin(this.frame / 9) * (moving ? 7 : 2.5) - p.vx * 1.3 + p.vy * 0.6 + this.wob * 30 : 0;
       const tilt = (p.vx / st.speed) * (st.flop ? 0.05 : 0.07);
       const dress = this.held() ? { piece: pieceArt(this.held(), this.slice.style), count: this.left() } : null;
-      if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop, dress })) {
+      if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop, dress, bites: this.bites })) {
         drawSlice(ctx, cx, p.y + p.h * 0.5 + (1 - squash) * 36, this.slice.style, this.held(), cheese, 2.15 * st.height / 124, false, p.facing, squash);
       }
       if (this.smash > 0) { ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, p.y + p.h / 2, st.height * 0.5, 0, 7); ctx.stroke(); }
@@ -978,8 +983,16 @@
       this.drawPie(444, 62, 36);
       ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 16, 372, 74);
       ctx.fillStyle = '#333'; ctx.fillRect(28, 28, 348, 20);
-      const f = Math.max(0, this.heat / this.heatMax);
+      const f = Math.max(0, this.heat / this.heatMax), cap = this.cap / this.heatMax;
       ctx.fillStyle = f > 0.6 ? '#ff5a24' : f > 0.3 ? '#f0a53a' : '#7fb6d6'; ctx.fillRect(28, 28, 348 * f, 20);
+      // What has been bitten off the end of the bar is gone: a dark chunk per bite, with tooth marks.
+      if (this.bites) {
+        const x0 = 28 + 348 * cap, chunk = 348 / C.BITES;
+        ctx.fillStyle = '#120c0a'; ctx.fillRect(x0, 24, 376 - x0, 28);
+        for (const y of [29, 38, 47]) dot(ctx, x0, y, 5);
+        ctx.fillStyle = '#3a2a22';
+        for (let i = 1; i < this.bites; i++) ctx.fillRect(x0 + chunk * i - 1, 26, 2, 24);
+      }
       ctx.fillStyle = '#fff'; ctx.font = '20px sans-serif'; ctx.textAlign = 'left';
       const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
       ctx.fillText(`${this.style.name}: ${t}`, 28, 76);

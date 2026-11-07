@@ -11,7 +11,37 @@
     await image.decode();
     const mask = atlas.seats ? new Image() : null;
     if (mask) { mask.src = `${base}/mask.png`; await mask.decode(); }
-    loaded[`${character}/${anim}`] = { atlas, image, mask };
+    loaded[`${character}/${anim}`] = { atlas, image, mask, rims: character.startsWith('slice-') ? rims(image, atlas) : null };
+  }
+
+  // Where bites come out of a slice, frame by frame: the corners and sides of the crust end,
+  // found from the drawing itself so they follow it as it runs. Each is [x, y, side].
+  const BITE = 0.15;
+  function rims(image, { frame: { w, h }, count }) {
+    const c = document.createElement('canvas');
+    c.width = image.width; c.height = image.height;
+    const g = c.getContext('2d');
+    g.drawImage(image, 0, 0);
+    const alpha = g.getImageData(0, 0, c.width, c.height).data, solid = (x, y) => alpha[(y * c.width + x) * 4 + 3] > 128;
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      let top = h;
+      for (let y = 0; y < h && top === h; y++) for (let x = 0; x < w; x++) if (solid(i * w + x, y)) { top = y; break; }
+      const span = y => {
+        let l = -1, r = -1;
+        for (let x = 0; x < w; x++) if (solid(i * w + x, y)) { if (l < 0) l = x; r = x; }
+        return [l, r];
+      };
+      const r = Math.round(h * BITE), at = f => Math.min(h - 1, top + Math.round(h * f));
+      const [, r1] = span(at(0.2)), [l0] = span(at(0.06)), [l2] = span(at(0.3)), [l3, r3] = span(top);
+      out.push([
+        [r1 + r * 0.1, at(0.2), 'side'],
+        [l0 - r * 0.1, at(0.06), 'side'],
+        [l3 + (r3 - l3) * 0.55, top - r * 0.15, 'top'],
+        [l2 - r * 0.1, at(0.3), 'side'],
+      ]);
+    }
+    return out;
   }
 
   async function load() {
@@ -115,20 +145,46 @@
     return frameCanvas;
   }
 
+  // Takes the bites out of one frame: a round chunk with tooth marks, the drawing's outline around it.
+  const biteCanvas = document.createElement('canvas');
+  function bitten(s, i, source, sx, n) {
+    const { w, h } = s.atlas.frame, spots = s.rims[i];
+    if (biteCanvas.width !== w || biteCanvas.height !== h) { biteCanvas.width = w; biteCanvas.height = h; }
+    const g = biteCanvas.getContext('2d');
+    g.clearRect(0, 0, w, h);
+    g.drawImage(source, sx, 0, w, h, 0, 0, w, h);
+    const r = Math.round(h * BITE), disc = (x, y, radius, paint) => {
+      for (let dy = -radius; dy <= radius; dy++) {
+        const half = Math.floor(Math.sqrt(radius * radius - dy * dy));
+        paint(Math.round(x) - half, Math.round(y) + dy, half * 2 + 1, 1);
+      }
+    };
+    spots.slice(0, n).forEach(([x, y, side]) => {
+      const teeth = side === 'top' ? [[0, 0, r], [-r * 0.8, r * 0.15, r * 0.55], [r * 0.8, r * 0.15, r * 0.55]] : [[0, 0, r], [r * 0.15, -r * 0.8, r * 0.55], [r * 0.15, r * 0.8, r * 0.55]];
+      g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#2a1810';
+      for (const [dx, dy, k] of teeth) disc(x + dx, y + dy, Math.round(k) + 2, (a, b, c, d) => g.fillRect(a, b, c, d));
+      g.globalCompositeOperation = 'source-over';
+      for (const [dx, dy, k] of teeth) disc(x + dx, y + dy, Math.round(k), (a, b, c, d) => g.clearRect(a, b, c, d));
+    });
+    return biteCanvas;
+  }
+
   // Standing still holds one pose, with a slow breath and, where the art has one, a blink.
   const BLINK_EVERY = 4300, BLINK_MS = 130;
   function calm(s, ms) { return s.atlas.blink != null && ms % BLINK_EVERY > BLINK_EVERY - BLINK_MS ? s.atlas.blink : 0; }
 
   // Draws feet-down at (x, foot). Returns false when there is no art, so the caller draws its own.
   // wide and tilt give a pizza its jelly, and flop bends the top of the frame like a floppy slice.
-  function draw(ctx, character, anim, ms, x, foot, height, facing = 1, squash = 1, { wide = 1, tilt = 0, flop = 0, dress = null } = {}) {
+  function draw(ctx, character, anim, ms, x, foot, height, facing = 1, squash = 1, { wide = 1, tilt = 0, flop = 0, dress = null, bites = 0 } = {}) {
     const s = loaded[`${character}/${anim}`];
     if (!s) return false;
     const { w, h } = s.atlas.frame, count = s.atlas.count;
     const idle = anim === 'idle';
     let i = Math.floor(ms / s.atlas.frame_ms);
     i = idle ? calm(s, ms) : s.atlas.loop ? i % count : Math.min(i, count - 1);
-    const scale = height / h, source = (dress && dress.count > 0 && dressed(s, i, dress)) || s.image, sx = source === s.image ? i * w : 0;
+    let source = (dress && dress.count > 0 && dressed(s, i, dress)) || s.image, sx = source === s.image ? i * w : 0;
+    if (bites > 0 && s.rims) { source = bitten(s, i, source, sx, bites); sx = 0; }
+    const scale = height / h;
     if (idle) squash *= 1 + Math.sin(ms / 800) * 0.012;
     ctx.save();
     ctx.imageSmoothingEnabled = false;
