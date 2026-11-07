@@ -310,3 +310,26 @@ test('every speaker and every pizza has a voice', () => {
     for (const r of C.RETURNS) for (const l of r.lines) if (l.by) assert.ok(l.by[style]);
   }
 });
+
+test('a deploy keeps a safe zone clear of enemies, photo arrivals included', () => {
+  const c = fresh(), world = c.world, safe = C.TUNING.spawnSafe, mk = (street, o) => street.enemies.push({ id: street.nextId++, y: R.GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0, ...o });
+  let checked = 0;
+  for (const st of Object.values(world.streets)) world.reached[st.to] = world.reached[st.to] || st.id;
+  for (const node of Object.keys(world.nodes)) {
+    const dep = R.deployment(world, node), street = world.streets[dep.street];
+    if (street.length < 2500) continue;
+    // Teenagers filmed us right here last time, a turtle sits on the spot, and a mutant's drain is behind it.
+    for (const offset of C.PHOTO_ARRIVALS) mk(street, { type: 'teen', x: Math.max(500, dep.x + offset), arrived: true });
+    mk(street, { type: 'turtle', x: dep.x + 20 });
+    mk(street, { type: 'mutant', x: dep.x - 60, drain: dep.x - 60 });
+    street.drains.push(dep.x - 60);
+    R.clearSpawn(street, dep.x);
+    for (const e of street.enemies.filter(e => e.alive)) {
+      const reach = e.type === 'mutant' ? 0 : e.range;
+      assert.ok(Math.abs(e.x - dep.x) >= safe + reach, `${street.id}: ${e.type} at ${e.x} is within ${safe} of ${dep.x}`);
+    }
+    for (const e of street.enemies.filter(e => e.drain != null)) assert.ok(street.drains.includes(e.drain));
+    checked++;
+  }
+  assert.ok(checked > 0);
+});

@@ -5,6 +5,9 @@
   const TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
   const SIZE = { turtle: 92, teen: 118, mutant: 120, ninja: 118 };
+  const INK = '#2a1830';
+  // Characters stand this far into the street surface, as feet do in a picture seen from slightly above.
+  const FOOT_SINK = 8;
   const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
 
   class Run {
@@ -18,7 +21,7 @@
       // Every hit takes a bite, and nothing grows it back: heat can only come back up to what is left.
       this.bites = 0; this.cap = this.heatMax;
       this.p = { x: 0, y: GROUND - st.h, vx: 0, vy: 0, w: st.w, h: st.h, grounded: true, facing: 1 };
-      this.invuln = 0; this.specialCd = 0; this.smash = 0; this.pounding = false; this.splat = 0; this.pace = 0;
+      this.invuln = 0; this.specialCd = 0; this.specialMax = Math.round(((C.TUNING.cooldown || {})[slice.style] || 0) * 60); this.ready = 0; this.shownHeat = this.heat; this.shownCap = this.cap; this.ghost = this.heat; this.fumes = []; this.smash = 0; this.pounding = false; this.splat = 0; this.pace = 0;
       this.coyote = 0; this.buffer = 0; this.bounced = false;
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
@@ -41,6 +44,7 @@
       R.travel(this.world, id);
       this.area = this.city.areas[street.area];
       this.junction = R.junction(this.world, street);
+      R.clearSpawn(street, x);
       this.actors = street.enemies.filter(e => e.alive).map(e => this.actor(e));
       this.shots = []; this.foes = []; this.drops = []; this.temp = []; this.sauce = [];
       this.p.x = x; this.p.y = GROUND - this.p.h; this.p.vy = 0; this.p.vx *= 0.5; this.p.grounded = true;
@@ -109,7 +113,12 @@
       if (this.quipGap > 0) this.quipGap--;
       if (this.speech && ++this.speech.age > this.speech.text.length * 2 + QUIP_HOLD) this.speech = null;
       if (this.invuln > 0) this.invuln--;
-      if (this.specialCd > 0) this.specialCd--;
+      if (this.denied > 0) this.denied--;
+      if (this.ready > 0) this.ready--;
+      if (this.specialCd > 0 && --this.specialCd === 0) {
+        this.ready = 50; A.play('note');
+        this.bursts.push({ x: p.x + p.w / 2, y: p.y + p.h / 2, r: st.height * 0.6, t: 14, color: '#ffe27a' });
+      }
       if (this.smash > 0) this.smash--;
       if (this.splat > 0) this.splat--;
       this.wobbleStep();
@@ -279,8 +288,9 @@
 
     special() {
       const { p, style: st } = this;
-      if (!st.special || this.specialCd > 0) return;
-      this.specialCd = st.special === 'dash' ? 60 : 75;
+      if (!st.special) return;
+      if (this.specialCd > 0) { this.denied = 14; return; }
+      this.specialCd = this.specialMax;
       if (st.special === 'dash') { this.smash = 24; this.jolt(0.14); this.invuln = Math.max(this.invuln, 24); A.play('jump'); return; }
       if (p.grounded) { p.vy = st.flop ? -15 : -16; p.grounded = false; this.bounced = true; } else p.vy = 26;
       this.pounding = true; this.smash = 90;
@@ -349,7 +359,10 @@
         else if (e.type === 'turtle') this.turtle(a, power);
         else if (e.type === 'ninja') this.ninja(a, dist, power);
         else this.mutant(a, cx);
-        if (this.touching(a) && !a.leaving) this.collide(a);
+        if (a.leaving) continue;
+        // A stomp counts a little before the boxes touch, so a jump that lands on a head is a stomp.
+        const stomp = (e.type === 'teen' || e.type === 'turtle') && this.stompable(a);
+        if (stomp || this.touching(a)) this.collide(a);
       }
       this.actors = this.actors.filter(a => !a.goneNow);
     }
@@ -480,9 +493,19 @@
       return p.x + p.w - 6 > a.x - half && p.x + 6 < a.x + half && p.y + p.h > a.y - a.size && p.y < a.y;
     }
 
+    // Coming down on an enemy, or just past the top of the jump: feet in the upper part of it, with slack
+    // at its sides. Walking into it from the side keeps the feet low, so that stays a bite.
+    stompable(a) {
+      const { p } = this, k = C.TUNING.stomp;
+      if (a.rise < 0.5 || p.grounded || p.vy < k.apexVy) return false;
+      const feet = p.y + p.h, top = a.y - a.size, half = a.size / 2;
+      if (feet < top - k.reachAbove || feet > top + a.size * k.window) return false;
+      return p.x + p.w - 6 + k.slack > a.x - half && p.x + 6 - k.slack < a.x + half;
+    }
+
     collide(a) {
       const { p } = this, e = a.e;
-      const stomped = p.vy > 1 && p.y + p.h < a.y - a.size * 0.45;
+      const stomped = this.stompable(a);
       if (this.smash > 0) { this.hit(a, 'smash'); return; }
       if (e.type === 'turtle') {
         if (stomped) { a.state = 'stun'; a.t = STUN; this.bounce(27); this.note('turtle', 'stun'); this.note('turtle', 'armored'); return; }
@@ -595,7 +618,7 @@
 
     shotsStep() {
       for (const s of this.shots) {
-        s.x += s.vx; s.y += s.vy; s.life--;
+        s.x += s.vx; s.y += s.vy; s.life--; s.age = (s.age || 0) + 1;
         if (s.bounce) { s.vy += 0.7; if (s.y > GROUND - 14) { s.y = GROUND - 14; s.vy = -12; } }
         for (const b of this.street.boxes) {
           if (!b.broken && s.life > 0 && s.x > b.x - 8 && s.x < b.x + b.w + 8 && s.y > GROUND - b.h) { this.breakBox(b); s.life = 0; }
@@ -615,7 +638,7 @@
     foesStep() {
       const { p } = this;
       for (const f of this.foes) {
-        f.x += f.vx; f.y += f.vy; f.life--;
+        f.x += f.vx; f.y += f.vy; f.life--; f.age = (f.age || 0) + 1;
         if (f.bounce) { f.vy += 0.55; if (f.y > GROUND - 14) { f.y = GROUND - 14; f.vy = -11; } }
         if (f.y > GROUND) f.life = 0;
         if (f.x > p.x && f.x < p.x + p.w && f.y > p.y && f.y < p.y + p.h) {
@@ -668,12 +691,66 @@
     }
 
     auraStep() {
-      if (!this.aura) return;
+      this.fumes = this.fumes.filter(w => ++w.age < w.t);
+      if (!this.aura) { this.fumes.length = 0; return; }
+      if (this.frame % 3 === 0 && this.fumes.length < 46) {
+        const R = C.TUNING.auraRadius, a = Math.random() * 7, d = R * (0.2 + Math.random() * 0.75);
+        this.fumes.push({ x: Math.cos(a) * d, y: Math.sin(a) * d * 0.8, vx: Math.cos(a) * 0.35 + (Math.random() - 0.5) * 0.4, vy: -0.5 - Math.random() * 0.5, age: 0, t: 70 + Math.random() * 60, seed: Math.random() * 7, size: 6 + Math.floor(Math.random() * 3) * 2, green: Math.random() < 0.55 });
+      }
       if (++this.auraTick % AURA_USE === 0) this.spend(1);
       if (this.auraTick % 20) return;
       for (const a of this.actors) {
-        if (a.rise > 0.3 && Math.hypot(a.x - this.p.x - this.p.w / 2, a.y - 50 - this.p.y - this.p.h / 2) < 170 && a.e.type !== 'turtle') this.hit(a, 'aura');
+        if (a.rise > 0.3 && Math.hypot(a.x - this.p.x - this.p.w / 2, a.y - 50 - this.p.y - this.p.h / 2) < C.TUNING.auraRadius && a.e.type !== 'turtle') this.hit(a, 'aura');
       }
+    }
+
+
+    // The stank: rippling green and cream bands out to the edge of its reach, a wobbling dashed rim, stink
+    // lines wafting up through it, and puffs drifting off.
+    drawAura() {
+      const { ctx, p } = this, f = this.frame, R = C.TUNING.auraRadius, cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+      const pulse = 1 + Math.sin(f / 14) * 0.025;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(this.cam - 40, -40, W + 80, GROUND + 40 + 22); ctx.clip();
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      const ring = (scale, lobes, speed, wave) => {
+        ctx.beginPath();
+        for (let i = 0; i <= 90; i++) {
+          const a = i / 90 * Math.PI * 2, r = R * scale * pulse * (1 + Math.sin(a * lobes + f * speed) * wave + Math.sin(a * (lobes + 3) - f * speed * 1.3) * wave * 0.6);
+          const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.92;
+          if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+        }
+        ctx.closePath();
+      };
+      // Bands, outside in: each a wavy-edged cloud at its own speed, so the edges slide over each other.
+      [[1, '#4a8a2e', 0.3, 5, 0.035, 0.035], [0.86, '#f1ecc0', 0.36, 4, -0.045, 0.045], [0.7, '#6aa83c', 0.38, 6, 0.05, 0.05], [0.54, '#f1ecc0', 0.4, 3, -0.06, 0.06], [0.36, '#a9d462', 0.45, 5, 0.07, 0.07]]
+        .forEach(([scale, color, alpha, lobes, speed, wave]) => { ctx.globalAlpha = alpha; ctx.fillStyle = color; ring(scale, lobes, speed, wave); ctx.fill(); });
+      // The rim of the reach, so the edge reads: heavy ink, a cream dash crawling along it.
+      ring(1, 5, 0.035, 0.035);
+      ctx.globalAlpha = 0.75; ctx.strokeStyle = INK; ctx.lineWidth = 7; ctx.stroke();
+      ctx.globalAlpha = 1; ctx.strokeStyle = '#d9ec96'; ctx.lineWidth = 3; ctx.setLineDash([22, 12]); ctx.lineDashOffset = -f * 0.6; ctx.stroke(); ctx.setLineDash([]);
+      // Stink lines: wavy strands that rise, thin out, and start again somewhere else.
+      for (let i = 0; i < 14; i++) {
+        const seed = i * 2.399, d = R * (0.2 + ((i * 37) % 11) / 11 * 0.7), life = (f / 100 + i * 0.137) % 1, len = 64 + (i % 3) * 20;
+        const bx = cx + Math.cos(seed) * d, by = cy + Math.sin(seed) * d * 0.7 + 30 - life * 150;
+        ctx.globalAlpha = Math.min(1, Math.sin(life * Math.PI) * 1.8);
+        for (const [w, color] of [[9, INK], [5, '#7cbb3c'], [2, '#f6f0c8']]) {
+          ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath();
+          for (let k = 0; k <= len; k += 5) {
+            const x = bx + Math.sin(k / 11 + f / 9 + i) * (6 + k * 0.1), y = by - k;
+            if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+          }
+          ctx.stroke();
+        }
+      }
+      // Puffs: fumes that drift out and up, wobbling, fattening as they thin.
+      for (const w of this.fumes) {
+        const t = w.age / w.t, x = cx + w.x + w.vx * w.age + Math.sin(w.age / 9 + w.seed) * 9, y = cy + w.y + w.vy * w.age, r = w.size * (1.6 + t * 1.6);
+        ctx.globalAlpha = Math.sin(t * Math.PI) * 0.75;
+        ctx.fillStyle = w.green ? '#8fc653' : '#f1ecc0';
+        for (const [dx, dy, k] of [[0, 0, 1], [-r * 0.8, r * 0.2, 0.7], [r * 0.7, r * 0.15, 0.75]]) { ctx.beginPath(); ctx.arc(x + dx, y + dy, r * k, 0, 7); ctx.fill(); }
+      }
+      ctx.restore();
     }
 
     // Drawing
@@ -717,12 +794,13 @@
         if (k.topping) { this.drawShot(k, 11); continue; }
         ctx.fillStyle = k.color; ctx.fillRect(k.x - 9, k.y - 9, 18, 18);
       }
-      if (this.aura) { ctx.fillStyle = 'rgba(180,200,90,0.22)'; dot(ctx, this.p.x + this.p.w / 2, this.p.y + this.p.h / 2, 170 + Math.sin(f / 6) * 8); }
+      if (this.aura) this.drawAura();
       ctx.fillStyle = 'rgba(235,225,205,0.45)';
       for (const d of this.dust) dot(ctx, d.x, d.y, d.r * (d.t / 22));
       this.drawSauce();
       this.drawWisps();
       this.drawPlayer();
+      this.drawSpecialCue();
       for (const b of this.bursts) this.drawBurst(b);
       this.drawParty();
       ctx.restore();
@@ -810,16 +888,30 @@
       ctx.fillStyle = C.TOPPINGS[topping].color; dot(ctx, x, y, 17);
     }
 
-    // Thrown toppings spin as they fly.
+    // Thrown toppings tumble end over end, flip like a coin, and flex as they fly: stretched along the
+    // throw, then squashed, with a wobble across the path. Wave shots just flex.
     drawShot(s, r) {
-      const { ctx } = this, art = s.topping && S.layer(`props/shot-${s.topping}`);
-      if (!art) { ctx.fillStyle = s.color; dot(ctx, s.x, s.y, r); return; }
-      ctx.save();
-      ctx.imageSmoothingEnabled = false;
-      ctx.translate(Math.round(s.x), Math.round(s.y));
-      ctx.rotate(Math.floor(this.frame / 3) * Math.PI / 4);
-      ctx.drawImage(art, -art.width / 2, -art.height / 2);
-      ctx.restore();
+      const { ctx } = this, art = s.topping && S.layer(`props/shot-${s.topping}`), t = (s.age || 0) + (s.x * 0.013 % 3);
+      const dir = Math.sign(s.vx) || 1, bobY = s.wave ? 0 : Math.sin(t * 0.5) * 4;
+      const flex = Math.sin(t * 0.7), flip = s.wave ? 1 : 0.3 + 0.7 * Math.abs(Math.cos(t * 0.33));
+      const sx = 1 + flex * 0.3, sy = (1 - flex * 0.24) * flip;
+      // A couple of ghost copies trail behind it, smaller and fainter.
+      const draw = (x, y, scale, alpha, spin) => {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(Math.round(x), Math.round(y));
+        ctx.rotate(spin * dir);
+        ctx.scale(sx * scale, sy * scale);
+        if (art) { ctx.imageSmoothingEnabled = false; ctx.drawImage(art, -art.width / 2, -art.height / 2); }
+        else {
+          ctx.fillStyle = '#2a1830'; dot(ctx, 0, 0, r + 3);
+          ctx.fillStyle = s.color; dot(ctx, 0, 0, r);
+          ctx.fillStyle = 'rgba(255,255,255,0.35)'; dot(ctx, -r * 0.3, -r * 0.3, r * 0.35);
+        }
+        ctx.restore();
+      };
+      if (!s.wave) for (const k of [2, 1]) draw(s.x - s.vx * k * 0.9, s.y + bobY - s.vy * k * 0.9, 1 - k * 0.12, 0.18 / k, (t - k) * 0.4);
+      draw(s.x, s.y + bobY, 1, 1, s.wave ? 0 : t * 0.4);
     }
 
     // Bursts are hard pixel shards flying out, in keeping with the art, not soft discs.
@@ -846,7 +938,7 @@
     drawDead() {
       for (const d of this.street.dead) {
         const st = C.STYLES[d.style];
-        if (!S.draw(this.ctx, sliceArt(d.style), 'cold', 0, d.x, GROUND, st.height, 1, 1, { bites: d.bites || 0 })) drawSlice(this.ctx, d.x, GROUND - 38, d.style, d.topping, '#8f8f8a', 1.5, true);
+        if (!S.draw(this.ctx, sliceArt(d.style), 'cold', 0, d.x, GROUND, st.height, 1, 1, { bites: d.bites || 0, sink: FOOT_SINK })) drawSlice(this.ctx, d.x, GROUND - 38, d.style, d.topping, '#8f8f8a', 1.5, true);
       }
     }
 
@@ -858,6 +950,12 @@
       if (!name || !S.prop(ctx, name, x, GROUND)) {
         ctx.fillStyle = '#2b1d14'; ctx.fillRect(x - 56, GROUND - 165, 112, 165);
         ctx.fillStyle = active ? '#ffd76a' : '#6b5a4a'; ctx.fillRect(x - 42, GROUND - 150, 84, 150);
+        this.drawDoorSign(x - 56, GROUND - 206, 112, 41, active);
+      } else {
+        // The painted doors carry a lettered board across the top. A new one, wordless, hangs over it.
+        const art = S.layer(name), big = art.height > 220;
+        const [bx, by, bw, bh] = big ? [18, 20, art.width - 36, 58] : [0, 0, art.width, 41];
+        this.drawDoorSign(x - art.width / 2 + bx, GROUND - art.height + by, bw, bh, active);
       }
       if (active) {
         ctx.fillStyle = '#ffd76a'; ctx.strokeStyle = '#1f1410'; ctx.lineWidth = 5; ctx.font = 'bold 52px system-ui, sans-serif'; ctx.textAlign = 'center';
@@ -866,6 +964,29 @@
       } else if (street.address < world.delivery) {
         ctx.fillStyle = '#b8843f'; ctx.fillRect(x + 66, GROUND - 16, 62, 16);
       }
+    }
+
+    // The delivery sign: a wooden shingle with a pizza slice on it, no words, glowing gold when this is the door.
+    drawDoorSign(x, y, w, h, active) {
+      const { ctx, frame } = this, cx = x + w / 2, cy = y + h / 2 + 1;
+      ctx.save();
+      ctx.lineJoin = 'round';
+      if (active) { ctx.shadowColor = '#ffd76a'; ctx.shadowBlur = 14 + Math.sin(frame / 8) * 6; }
+      ctx.fillStyle = INK; ctx.fillRect(x, y, w, h);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = active ? '#8a5430' : '#5e4234'; ctx.fillRect(x + 4, y + 4, w - 8, h - 8);
+      ctx.fillStyle = active ? '#a8693a' : '#74554a'; ctx.fillRect(x + 4, y + 4, w - 8, 4);
+      ctx.fillStyle = active ? '#6e4223' : '#4a342b'; ctx.fillRect(x + 4, y + h * 0.5 - 1, w - 8, 2);
+      ctx.strokeStyle = active ? '#e8b64a' : '#a08a5a'; ctx.lineWidth = 2; ctx.strokeRect(x + 7, y + 7, w - 14, h - 14);
+      ctx.fillStyle = '#e9d8a0'; for (const [rx, ry] of [[x + 9, y + 9], [x + w - 12, y + 9], [x + 9, y + h - 12], [x + w - 12, y + h - 12]]) ctx.fillRect(rx, ry, 3, 3);
+      // The slice, point down, with its crust on top.
+      const big = Math.min(1.35, h / 33); ctx.translate(cx, cy); ctx.scale(big, big); ctx.translate(-cx, -cy);
+      ctx.strokeStyle = INK; ctx.lineWidth = 3.2;
+      ctx.beginPath(); ctx.moveTo(cx - 12, cy - 8); ctx.lineTo(cx + 12, cy - 8); ctx.lineTo(cx, cy + 12); ctx.closePath(); ctx.stroke();
+      ctx.fillStyle = active ? '#ffcc33' : '#d6b25a'; ctx.fill();
+      ctx.fillStyle = '#d59a4c'; ctx.fillRect(cx - 14, cy - 13, 28, 6); ctx.strokeRect(cx - 14, cy - 13, 28, 6);
+      ctx.fillStyle = '#c8321e'; for (const [px, py] of [[-5, -2], [5, -3], [0, 5]]) dot(ctx, cx + px, cy + py, 3);
+      ctx.restore();
     }
 
     drawActor(a) {
@@ -881,7 +1002,9 @@
       const facing = a.dir, bow = a.state === 'bow' ? Math.sin(Math.min(1, a.t / (BOW * 0.6)) * Math.PI) : 0;
       // The bow: a dip and a lean toward the slice, holding up what it caught.
       if (bow) { ctx.translate(a.x, a.y); ctx.rotate(bow * 0.45 * facing); ctx.translate(-a.x, -a.y); }
-      if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12)) {
+      const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : 0;
+      if (grounded) this.shadow(a.x, GROUND + FOOT_SINK * 0.6, a.size * 0.3, 0.3);
+      if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12, { sink })) {
         ctx.font = `${a.size}px serif`; ctx.textAlign = 'center'; ctx.fillText(FACE[e.type], a.x, a.y - 4);
       }
       ctx.restore();
@@ -929,8 +1052,10 @@
       this.animMs += 16.7 * (anim === 'run' ? Math.max(0.5, pace) : 1);
       const flop = st.flop ? Math.sin(this.frame / 9) * (moving ? 7 : 2.5) - p.vx * 1.3 + p.vy * 0.6 + this.wob * 30 : 0;
       const tilt = (p.vx / st.speed) * (st.flop ? 0.05 : 0.07);
+      const air = Math.max(0, GROUND - (p.y + p.h)), sink = FOOT_SINK * Math.max(0, 1 - air / 14);
+      this.shadow(cx, GROUND + FOOT_SINK * 0.6, st.height * 0.34 * (1 + Math.max(-0.1, this.wob) * 0.5), 0.34 * Math.max(0, 1 - air / 260));
       const dress = this.held() ? { piece: pieceArt(this.held(), this.slice.style), count: this.left() } : null;
-      if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop, dress, bites: this.bites })) {
+      if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop, dress, bites: this.bites, sink })) {
         drawSlice(ctx, cx, p.y + p.h * 0.5 + (1 - squash) * 36, this.slice.style, this.held(), cheese, 2.15 * st.height / 124, false, p.facing, squash);
       }
       if (this.smash > 0) { ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, p.y + p.h / 2, st.height * 0.5, 0, 7); ctx.stroke(); }
@@ -956,8 +1081,8 @@
     // The pie this slice came from. Each wedge goes as it is delivered or lost.
     drawPie(x, y, r) {
       const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, n = slices.length, turn = Math.PI * 2 / n;
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x - r - 10, y - r - 10, r * 2 + 20, r * 2 + 20);
-      ctx.fillStyle = 'rgba(255,255,255,0.14)'; dot(ctx, x, y, r);
+      ctx.fillStyle = INK; dot(ctx, x, y, r + 9);
+      ctx.fillStyle = '#4a2c3c'; dot(ctx, x, y, r + 4);
       slices.forEach((s, i) => {
         if (s.status !== 'ready') return;
         const a = -Math.PI / 2 + i * turn, mid = a + turn / 2, out = s === this.slice ? 4 + Math.sin(frame / 9) * 2 : 0;
@@ -984,32 +1109,151 @@
       else text = `${feet(h.left)}, then ${h.street.name}`;
       ctx.font = 'bold 22px system-ui, sans-serif'; ctx.textAlign = 'center';
       const w = ctx.measureText(text).width + 36, x = 740;
-      ctx.fillStyle = 'rgba(0,0,0,0.68)'; ctx.fillRect(x - w / 2, 16, w, 42);
-      ctx.fillStyle = '#fff'; ctx.fillText(text, x, 45);
+      ctx.fillStyle = INK; ctx.fillRect(x - w / 2 - 4, 12, w + 8, 50);
+      ctx.fillStyle = '#4a2c3c'; ctx.fillRect(x - w / 2, 16, w, 42);
+      ctx.fillStyle = '#fff3d2'; ctx.fillText(text, x, 45);
+    }
+
+    // A soft contact shadow flat on the street under whatever stands on it.
+    shadow(x, y, rx, alpha) {
+      if (alpha <= 0.01) return;
+      const { ctx } = this;
+      ctx.save(); ctx.fillStyle = INK; ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.ellipse(Math.round(x), Math.round(y), rx, rx * 0.16 + 3, 0, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+
+    // Heavy-outlined text, like the rest of the game's ink.
+    inkText(text, x, y, size = 20, fill = '#fff3d2', align = 'left') {
+      const { ctx } = this;
+      ctx.font = `700 ${size}px "Pixelify Sans", system-ui, sans-serif`; ctx.textAlign = align; ctx.lineJoin = 'round';
+      ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.strokeText(text, x, y);
+      ctx.fillStyle = fill; ctx.fillText(text, x, y);
+    }
+
+    // Health is a slice on its side: crust at the left, cheese running out to the tip. Heat fills it from
+    // the crust, a bite takes a scalloped chunk off the tip for good, and a lost chunk drains away slowly.
+    drawHealth(x, y) {
+      const { ctx } = this, GW = 336, GH = 60, PAD = 8, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame;
+      if (!this.gauge) { this.gauge = document.createElement('canvas'); this.gaugeInk = document.createElement('canvas'); for (const c of [this.gauge, this.gaugeInk]) { c.width = w; c.height = h; } }
+      // Smooth: the bar eases to the true heat, and what a hit took trails behind in cream.
+      const heat = Math.max(0, this.heat);
+      this.shownHeat += (heat - this.shownHeat) * (heat > this.shownHeat ? 0.25 : 0.18);
+      this.shownCap += (this.cap - this.shownCap) * 0.14;
+      this.ghost = heat > this.ghost ? heat : Math.max(heat, this.ghost - 0.12 - (this.ghost - heat) * 0.025);
+      const max = this.heatMax, fill = this.shownHeat / max, capF = this.shownCap / max, ghostF = Math.min(capF, this.ghost / max);
+      const g = this.gauge.getContext('2d');
+      g.clearRect(0, 0, w, h);
+      g.save(); g.translate(PAD, PAD);
+      const CR = 26, bx = CR - 4, bodyLen = GW - bx;
+      // The whole slice: a rounded crust end and a cheese wedge that narrows to a rounded tip.
+      const shape = () => {
+        g.beginPath();
+        g.moveTo(CR, 0); g.quadraticCurveTo(GW * 0.66, GH * 0.04, GW - 10, GH * 0.4); g.quadraticCurveTo(GW, GH * 0.5, GW - 10, GH * 0.6); g.quadraticCurveTo(GW * 0.66, GH * 0.96, CR, GH);
+        g.closePath();
+        if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4);
+      };
+      const crust = () => { g.beginPath(); if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4); };
+      shape(); g.fillStyle = '#4a2c3c'; g.fill();
+      g.save(); shape(); g.clip();
+      // Cheese colour runs warm to cold with the heat.
+      const mix = (a, b, k) => { const n = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = n(a), B = n(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`; };
+      const hot = fill > 0.5, k = Math.max(0, Math.min(1, hot ? (fill - 0.5) * 2 : fill * 2));
+      const c1 = hot ? mix('#e8bc55', '#ffd23a', k) : mix('#a9c6d8', '#e8bc55', k), c2 = hot ? mix('#c98a44', '#ff8a24', k) : mix('#6f97b3', '#c98a44', k);
+      const edge = bx + bodyLen * ghostF, mid = bx + bodyLen * fill;
+      if (ghostF > fill) { g.fillStyle = '#fff3d2'; g.fillRect(mid, 0, edge - mid, GH); }
+      const grad = g.createLinearGradient(bx, 0, GW, 0); grad.addColorStop(0, c1); grad.addColorStop(1, c2);
+      g.fillStyle = grad; g.fillRect(bx, 0, Math.max(0, mid - bx), GH);
+      // Pepperoni along it, dimmed where the heat has gone, and a few cheese highlights.
+      for (const [px, py, pr] of [[0.2, 0.3, 8], [0.38, 0.68, 7], [0.5, 0.3, 6], [0.66, 0.6, 5], [0.8, 0.45, 4]]) {
+        const cx = bx + bodyLen * px, cy = GH * py, lit = cx < mid;
+        g.fillStyle = lit ? '#7a1a20' : '#35202c'; g.beginPath(); g.arc(cx, cy, pr + 2, 0, 7); g.fill();
+        g.fillStyle = lit ? '#c8321e' : '#4a2c3c'; g.beginPath(); g.arc(cx, cy, pr, 0, 7); g.fill();
+      }
+      g.fillStyle = 'rgba(255,248,214,.5)';
+      for (const [px, py] of [[0.1, 0.78], [0.3, 0.14], [0.58, 0.82], [0.72, 0.3]]) { const cx = bx + bodyLen * px; if (cx < mid) g.fillRect(Math.round(cx), Math.round(GH * py), 7, 3); }
+      // The crust, always warm, with its seam against the cheese.
+      crust(); g.fillStyle = '#d59a4c'; g.fill();
+      g.fillStyle = '#f0c27a'; g.fillRect(5, 3, CR - 14, 6); g.fillStyle = '#b97a38'; g.fillRect(5, GH - 8, CR - 14, 5);
+      g.fillStyle = '#a8662b'; g.fillRect(CR - 4, 0, 3, GH);
+      // Marks along the edge, one per bite the slice can take.
+      g.fillStyle = INK;
+      for (let i = 1; i < C.BITES; i++) { const mx = Math.round(bx + bodyLen * i / C.BITES); g.globalAlpha = 0.55; g.fillRect(mx - 1, 0, 2, 7); g.fillRect(mx - 1, GH - 7, 2, 7); }
+      g.globalAlpha = 1;
+      g.restore();
+      // Bites: whatever lies past the cap is gone, with scalloped teeth marks along the new edge.
+      if (capF < 0.999) {
+        const cut = bx + bodyLen * capF;
+        g.globalCompositeOperation = 'destination-out';
+        g.fillRect(cut + 14, -4, GW, GH + 8);
+        for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cut + 14, GH * (0.17 + i * 0.33), GH * 0.2, 0, 7); g.fill(); }
+        g.globalCompositeOperation = 'source-over';
+      }
+      g.restore();
+      // The outline: the slice's silhouette stamped around itself, heavy, in the game's ink.
+      const k2 = this.gaugeInk.getContext('2d');
+      k2.clearRect(0, 0, w, h); k2.globalCompositeOperation = 'source-over'; k2.drawImage(this.gauge, 0, 0);
+      k2.globalCompositeOperation = 'source-in'; k2.fillStyle = INK; k2.fillRect(0, 0, w, h);
+      ctx.save();
+      // A hit shakes the gauge.
+      const shake = this.invuln > 70 ? Math.sin(f * 2.4) * 3 : 0;
+      ctx.translate(x + shake, y);
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, Math.round(Math.cos(a / 20 * 6.2832) * 4), Math.round(Math.sin(a / 20 * 6.2832) * 4));
+      ctx.drawImage(this.gauge, 0, 0);
+      ctx.restore();
+    }
+
+    // The special's progress: a ring above the pizza that fills as it recharges, and a gold flash when it is back.
+    drawSpecialCue() {
+      const { ctx, p, style: st } = this;
+      if (!st.special || !this.specialMax) return;
+      const cx = p.x + p.w / 2, top = p.y + p.h - st.height, f = this.frame;
+      if (this.specialCd > 0) {
+        const k = 1 - this.specialCd / this.specialMax, r = 17, y = top - 24, deny = this.denied > 0 ? Math.sin(f * 1.6) * 4 : 0;
+        ctx.save(); ctx.translate(Math.round(cx + deny), Math.round(y));
+        ctx.fillStyle = INK; dot(ctx, 0, 0, r + 6);
+        ctx.fillStyle = '#4a2c3c'; dot(ctx, 0, 0, r);
+        ctx.fillStyle = this.denied > 0 ? '#ff5a3c' : '#ffcc33';
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = INK; dot(ctx, 0, 0, 5);
+        ctx.restore();
+      } else {
+        // Ready: a golden glow at the feet and sparkles circling the pizza.
+        const pulse = 0.5 + 0.5 * Math.sin(f / 7), flash = this.ready / 50;
+        ctx.save();
+        ctx.globalAlpha = 0.28 + pulse * 0.2 + flash * 0.3; ctx.fillStyle = '#ffd76a';
+        ctx.beginPath(); ctx.ellipse(cx, p.y + p.h - 2, st.height * 0.42 + flash * 40, 10 + pulse * 3, 0, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1;
+        for (let i = 0; i < 4; i++) {
+          const a = f / 22 + i * 1.5708, sx = cx + Math.cos(a) * st.height * 0.42, sy = p.y + p.h - st.height * 0.5 + Math.sin(a * 1.3) * st.height * 0.42, n = (i + Math.floor(f / 6)) % 3 ? 6 : 10;
+          ctx.fillStyle = INK; ctx.fillRect(Math.round(sx) - n / 2 - 2, Math.round(sy) - 2, n + 4, 4); ctx.fillRect(Math.round(sx) - 2, Math.round(sy) - n / 2 - 2, 4, n + 4);
+          ctx.fillStyle = '#fff3a8'; ctx.fillRect(Math.round(sx) - n / 2, Math.round(sy) - 1, n, 2); ctx.fillRect(Math.round(sx) - 1, Math.round(sy) - n / 2, 2, n);
+        }
+        ctx.restore();
+      }
+    }
+
+    // The special button on the touch pad shows the same progress as a dial filling round it.
+    syncSpecialButton() {
+      const btn = this.btn || (this.btn = document.getElementById('specialBtn'));
+      if (!btn || !this.style.special) return;
+      const cd = this.specialMax ? Math.round(this.specialCd / this.specialMax * 100) / 100 : 0;
+      if (cd !== this.btnCd) { this.btnCd = cd; btn.style.setProperty('--cd', cd); btn.classList.toggle('ready', cd === 0); }
     }
 
     hud() {
       const { ctx, world, city } = this;
       this.drawPie(444, 62, 36);
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 16, 372, 74);
-      ctx.fillStyle = '#333'; ctx.fillRect(28, 28, 348, 20);
-      const f = Math.max(0, this.heat / this.heatMax), cap = this.cap / this.heatMax;
-      ctx.fillStyle = f > 0.6 ? '#ff5a24' : f > 0.3 ? '#f0a53a' : '#7fb6d6'; ctx.fillRect(28, 28, 348 * f, 20);
-      // What has been bitten off the end of the bar is gone: a dark chunk per bite, with tooth marks.
-      if (this.bites) {
-        const x0 = 28 + 348 * cap, chunk = 348 / C.BITES;
-        ctx.fillStyle = '#120c0a'; ctx.fillRect(x0, 24, 376 - x0, 28);
-        for (const y of [29, 38, 47]) dot(ctx, x0, y, 5);
-        ctx.fillStyle = '#3a2a22';
-        for (let i = 1; i < this.bites; i++) ctx.fillRect(x0 + chunk * i - 1, 26, 2, 24);
-      }
-      ctx.fillStyle = '#fff'; ctx.font = '20px sans-serif'; ctx.textAlign = 'left';
+      this.drawHealth(14, 12);
       const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
-      ctx.fillText(`${this.style.name}: ${t}`, 28, 76);
+      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 22, 100, 20);
       // Addresses done, and the street we are on.
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(16, 96, 372, 36);
-      city.areas.forEach((a, i) => { ctx.fillStyle = i < world.delivery ? '#7fd46a' : i === world.delivery ? '#ffd76a' : '#555'; dot(ctx, 38 + i * 26, 114, 9); });
-      ctx.fillStyle = '#fff'; ctx.font = '19px sans-serif'; ctx.fillText(this.street.name, 118, 121);
+      city.areas.forEach((a, i) => {
+        const x = 34 + i * 28; ctx.fillStyle = INK; dot(ctx, x, 128, 13);
+        ctx.fillStyle = i < world.delivery ? '#7fd46a' : i === world.delivery ? '#ffd76a' : '#6b5560'; dot(ctx, x, 128, 8);
+      });
+      this.inkText(this.street.name, 34 + city.areas.length * 28 + 6, 135, 19);
+      this.syncSpecialButton();
       this.guideBar();
       if (this.barkT > 0) {
         ctx.font = 'italic 26px Georgia, serif'; ctx.textAlign = 'center';

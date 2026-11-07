@@ -50,6 +50,16 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await shot('06-street');
   ok('New York shows no special button', !(await page.locator('#specialBtn').isVisible()));
   ok('slice moved', await page.evaluate(() => __pr.run.p.x > 400));
+  // The pause button is always on screen, clear of the stage edge, and works for a tap; P pauses too.
+  const pauseBox = await page.locator('#pauseBtn').boundingBox();
+  ok('pause button is visible and on screen', pauseBox && pauseBox.x >= 0 && pauseBox.y >= 0 && pauseBox.x + pauseBox.width <= 844 && pauseBox.y + pauseBox.height <= 390 && /PAUSE/.test(await page.locator('#pauseBtn').innerText()), JSON.stringify(pauseBox));
+  await page.touchscreen.tap(pauseBox.x + pauseBox.width / 2, pauseBox.y + pauseBox.height / 2);
+  ok('tapping pause pauses', await page.evaluate(() => __pr.run.paused));
+  await click('Resume');
+  await page.keyboard.press('p');
+  ok('P pauses', await page.evaluate(() => __pr.run.paused));
+  await click('Resume');
+  ok('the Power button is now the Topping button', (await page.locator('#controls [data-key=power]').innerText()) === 'TOPPING');
   await page.keyboard.press('Escape');
   const before = await page.evaluate(() => __pr.run.frame);
   await page.waitForTimeout(250);

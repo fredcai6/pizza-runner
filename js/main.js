@@ -268,7 +268,7 @@
   };
   const KEYS = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump', Shift: 'special', f: 'power', ArrowDown: 'turn', s: 'turn' };
   addEventListener('keydown', ev => {
-    if (ev.key === 'Escape' || ev.key === 'p') return pause(!(run && run.paused));
+    if (ev.key === 'Escape' || ev.key.toLowerCase() === 'p') return pause(!(run && run.paused));
     const k = KEYS[ev.key]; if (!k) return;
     if (k === 'left' || k === 'right') input[k] = true; else if (!ev.repeat) { input.queued[k] = true; if (k === 'jump') input.jumpHeld = true; }
   });

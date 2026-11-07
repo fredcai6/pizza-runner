@@ -83,6 +83,25 @@
     return { street: street.id, x: street.id === 'lead' ? 140 : Math.max(140, street.turnAt - 620) };
   }
 
+  // Whatever is alive near where a slice is put down moves out of the safe zone, to the far side
+  // of it (the far end if the street ends first). The slice has room to look around before anything bites.
+  function clearSpawn(street, x, safe = C.TUNING.spawnSafe) {
+    const lo = 160, hi = street.length - 300, moved = [];
+    let right = x + safe, left = x - safe;
+    const foes = street.enemies.filter(e => e.alive).sort((a, b) => a.x - b.x);
+    for (const e of foes) {
+      const reach = e.type === 'mutant' ? 0 : e.range;
+      if (Math.abs(e.x - x) >= safe + reach) continue;
+      let to;
+      if (right + reach <= hi) { to = right + reach; right += 200; }
+      else if (left - reach >= lo) { to = left - reach; left -= 200; }
+      else continue;
+      if (e.drain != null) { const i = street.drains.indexOf(e.drain); if (i >= 0) street.drains[i] = to; e.drain = to; }
+      e.x = to; moved.push(e);
+    }
+    return moved;
+  }
+
   const addressStreet = (camp, city = currentCity(camp)) => MAPS[city.id].addresses[camp.world.delivery];
 
   // What a junction offers right now. A blocked shortcut stays on offer once its boxes are gone.
@@ -377,6 +396,6 @@
     return { name: file.name, claim: file.claim, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);
