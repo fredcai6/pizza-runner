@@ -41,8 +41,21 @@ h2 { font: 900 30px Impact, 'Arial Narrow', sans-serif; color: #c8321e; letter-s
 .ticket { background: #fffdf4; border: 2px dashed #1f1410; padding: 12px; text-align: center; }
 .ticket h3 { font: bold 18px 'Courier New', monospace; }
 
-.receipt { background: #fffef9; font: 15px/1.45 'Courier New', monospace; padding: 16px; max-width: 340px; width: 100%; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-.receipt hr { border: 0; border-top: 1px dashed #333; margin: 8px 0; }
+.receipt { --paper: #f1e6c8; position: relative; background:
+    radial-gradient(ellipse 38px 22px at 82% 74%, rgba(168,52,28,.20), transparent 70%),
+    radial-gradient(ellipse 26px 30px at 14% 91%, rgba(150,96,28,.20), transparent 70%),
+    radial-gradient(circle 15px at 71% 22%, rgba(150,96,28,.16), transparent 70%),
+    radial-gradient(ellipse 44px 14px at 30% 52%, rgba(120,80,24,.10), transparent 70%),
+    linear-gradient(90deg, rgba(90,60,20,.20), transparent 9%, transparent 91%, rgba(90,60,20,.22)),
+    linear-gradient(180deg, #f7edd0, var(--paper) 40%, #e9dcb8);
+  font: 15px/1.45 'Courier New', monospace; padding: 22px 18px 24px; max-width: 340px; width: 100%; margin: 12px auto 18px; color: #2c2418;
+  transform: perspective(700px) rotateX(3deg) rotate(-.7deg); transform-origin: 50% 0; border-radius: 2px 2px 12px 6px / 2px 2px 3px 5px;
+  filter: drop-shadow(2px 5px 5px rgba(0,0,0,.35)); }
+.receipt::before, .receipt::after { content: ''; position: absolute; left: 0; right: 0; height: 9px; background-size: 14px 14px; }
+.receipt::before { top: -9px; background: linear-gradient(315deg, #f7edd0 7px, transparent 0) 0 0 / 14px 9px, linear-gradient(45deg, #f7edd0 7px, transparent 0) 0 0 / 14px 9px; }
+.receipt::after { bottom: -9px; background: linear-gradient(135deg, #e9dcb8 7px, transparent 0) 0 0 / 14px 9px, linear-gradient(225deg, #e9dcb8 7px, transparent 0) 0 0 / 14px 9px; }
+.r-body { -webkit-mask-image: linear-gradient(180deg, #000 0 52%, rgba(0,0,0,.62)); mask-image: linear-gradient(180deg, #000 0 52%, rgba(0,0,0,.62)); text-shadow: 0 0 1px rgba(44,36,24,.35); letter-spacing: .3px; }
+.receipt hr { border: 0; border-top: 1px dashed #5b4a30; margin: 8px 0; }
 .r-head { text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 3px; margin-bottom: 8px; }
 .receipt.real { border-top: 5px solid #c8321e; }
 .note { font-size: 19px; line-height: 1.5; text-align: center; margin: 12px 0; }

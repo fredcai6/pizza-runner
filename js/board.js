@@ -3,11 +3,12 @@
   const C = root.PR_CONTENT, R = root.PR_RULES;
   const TABS = [['history', 'Attempts'], ['enemies', 'Enemies'], ['theory', 'Who is The Order?'], ['roster', 'Operatives']];
 
-  const receiptHtml = r => `<div class="receipt">
+  // Thermal paper: the print is inside .r-body so it can fade while the paper keeps its stains and torn edges.
+  const receiptHtml = r => `<div class="receipt"><div class="r-body">
     <div class="r-head">ORDER #${r.order}</div><div>PLACED: ${r.placed}</div>
     <div>DELIVER TO: <b>${r.to}</b></div><hr><div>${r.city}</div>
     ${(r.lines || []).map(l => `<div>${l}</div>`).join('')}
-    ${r.instructions ? `<hr><div>NOTES: ${r.instructions}</div>` : ''}</div>`;
+    ${r.instructions ? `<hr><div>NOTES: ${r.instructions}</div>` : ''}</div></div>`;
 
   function history(camp) {
     if (!camp.receipts.length) return '<p class="empty">Nothing yet.</p>';
