@@ -71,19 +71,24 @@
     show('<h1>PIZZA RUNNER</h1><p class="sub">You have been deployed.</p>', [...acts, ...fullButton()]);
   }
 
+  // A city's street art loads behind whatever is on screen, never behind a screen of its own.
+  // The briefing is back-room art that is already loaded, so it plays while the city arrives.
+  const loading = {};
+  const preload = city => (loading[city.id] = loading[city.id] || S.loadCity(city));
+
   async function route() {
     save();
-    const city = R.currentCity(camp);
-    if (S.needsCity(city)) show(`<h2 class="loading">On the way to ${city.name}...</h2>`);
-    await S.loadCity(city);
+    const city = R.currentCity(camp), ready = preload(city);
+    if (camp.phase !== 'briefing') await ready;
     switch (camp.phase) {
-      case 'briefing': return scene(city.briefing, () => {
+      case 'briefing': return scene(city.briefing, async () => {
+        await ready;
         if (city.final) { R.startFinale(camp); route(); } else orderScreen();
       });
       case 'order': return orderScreen();
       case 'map': return mapScreen();
       case 'door': return doorScene();
-      case 'cityDone': return scene([{ comp: 'pies', lines: C.CITY_DONE }], leave);
+      case 'cityDone': return leave();
       case 'gameover': return scene([{ comp: 'oldtimer', lines: C.CITY_LOST }], lostCity);
       case 'ending': return scene(C.ENDING.finale, endCard);
     }
@@ -99,6 +104,8 @@
 
   function doorScene() {
     const city = R.currentCity(camp), area = city.areas[camp.world.delivery - 1], last = camp.receipts[camp.receipts.length - 1];
+    // The last door of a city: start fetching the next city while the customer talks.
+    if (R.cityComplete(camp) && C.CITIES[camp.cityIndex + 1]) preload(C.CITIES[camp.cityIndex + 1]);
     scene([{ comp: 'door', lines: area.door }], () => {
       show(`<h2 class="stamp delivered">Delivered</h2>${B.receiptHtml(last)}`, [['Next', () => { R.afterDoor(camp); route(); }]]);
     }, { customer: area.customer, area, slice: { style: camp.world.lastStyle, topping: camp.world.lastTopping, left: camp.world.lastLeft } });
