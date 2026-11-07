@@ -255,7 +255,7 @@
       world.delivery++;
     } else {
       camp.counts.lost++;
-      if (here) here.dead.push({ x: result.x, topping: slice.topping, style: slice.style, bites: result.bites || 0 });
+      if (here) here.dead.push({ at: world.run, x: result.x, topping: slice.topping, style: slice.style, bites: result.bites || 0 });
       const killer = killerOf(world, result.killer);
       if (killer) {
         killer.power++;
