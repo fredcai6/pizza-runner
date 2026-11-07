@@ -97,6 +97,18 @@ test('required obstacles are within every pizza jump', () => {
   }
 });
 
+test('no rail runs longer than 700, and every ninja has one within reach', () => {
+  for (const cityDef of C.CITIES) {
+    for (const s of Object.values(R.newWorld(cityDef).streets)) {
+      const rails = s.platforms.filter(p => p.ledge);
+      for (const p of s.platforms) assert.ok(p.w <= 700, `${cityDef.id}/${s.id} rail ${p.w}`);
+      for (const e of s.enemies.filter(e => e.type === 'ninja')) {
+        assert.ok(rails.some(l => e.x > l.x - 700 && e.x < l.x + l.w + 700), `${cityDef.id}/${s.id} ninja at ${e.x}`);
+      }
+    }
+  }
+});
+
 test('enemies arrive in the agreed order', () => {
   const types = id => new Set(Object.values(R.newWorld(C.CITIES.find(x => x.id === id)).streets).flatMap(s => s.enemies.map(e => e.type)));
   assert.deepStrictEqual([...types('newyork')].sort(), ['teen', 'turtle']);

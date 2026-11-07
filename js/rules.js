@@ -28,6 +28,8 @@
     return { nodes, streets };
   }
 
+  const RAIL = 700;
+
   function generateStreet(city, def, addressed) {
     const r = rng(city.seed * 977 + [...def.id].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) | 0, 7));
     const { length, role } = def, quiet = role === 'alley' || role === 'lead' || length < 1800;
@@ -44,11 +46,16 @@
         enemies.push(e);
       }
     }
+    // Fire escapes: a rail over each ninja, none longer than RAIL. A ninja without one of its own shares its neighbour's.
     const ledges = [];
-    if (enemies.some(e => e.type === 'ninja')) ledges.push({ x: 300, y: GROUND - 330, w: length - 900, ledge: true });
-    else for (const e of enemies) if (e.type === 'turtle' && r() < 0.6) ledges.push({ x: e.x - 170, y: GROUND - 300, w: 340, ledge: true });
+    const ninjas = enemies.filter(e => e.type === 'ninja');
+    for (const e of ninjas) {
+      const x = Math.max(300, Math.min(length - 600 - RAIL, e.x - RAIL / 2)), last = ledges[ledges.length - 1];
+      if (x >= 300 && (!last || x > last.x + last.w + 160)) ledges.push({ x, y: GROUND - 330, w: RAIL, ledge: true });
+    }
+    if (!ninjas.length) for (const e of enemies) if (e.type === 'turtle' && r() < 0.6) ledges.push({ x: e.x - 170, y: GROUND - 300, w: 340, ledge: true });
     const pickups = [];
-    for (const l of ledges.slice(0, 2)) pickups.push({ x: l.x + Math.min(l.w, 700) / 2, y: l.y - 40, topping: city.pickups[pickups.length % city.pickups.length] });
+    for (const l of ledges.slice(0, 2)) pickups.push({ x: l.x + l.w / 2, y: l.y - 40, topping: city.pickups[pickups.length % city.pickups.length] });
     if (!quiet) pickups.push({ x: 600 + Math.floor(r() * (length - 1400)), y: GROUND - 60, topping: city.pickups[Math.floor(r() * city.pickups.length)] });
     const fires = length > 2500 ? [{ x: Math.floor(length * (0.45 + r() * 0.2)), lit: true }] : [];
     const boxes = [], barricades = [];
