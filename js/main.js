@@ -118,17 +118,73 @@
       [['Build the pie', () => pieBuilder(city)], boardButton(() => orderScreen())]);
   }
 
+  // Old-school character select: a grid of topping tiles with a cursor, a big pie beside it wearing
+  // the highlighted topping, and the topping's name and blurb as the fighter's stats.
+  const TOPPING_ORDER = ['pepperoni', 'jalapeno', 'garlic', 'mushroom', 'basil', 'pineapple', 'sausage'];
+  const CLASS = { shot: 'Ranged', bounce: 'Ricochet', aura: 'Area', leap: 'Mobility', reheat: 'Recovery', scatter: 'Spread', slam: 'Ground' };
+  const COLS = 4;
+
+  // Bits of a topping, scattered the same way every time so the pie does not shimmer as the cursor moves.
+  function bits(t, cx, cy, r, count, scale = 1) {
+    let seed = [...t].reduce((h, c) => h * 31 + c.charCodeAt(0), 7), out = '';
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const color = C.TOPPINGS[t].color;
+    for (let i = 0; i < count; i++) {
+      const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * r * 0.82, x = (cx + Math.cos(a) * d).toFixed(1), y = (cy + Math.sin(a) * d).toFixed(1), rot = Math.floor(rnd() * 360);
+      const k = 11 * scale;
+      if (t === 'pepperoni') out += `<circle cx="${x}" cy="${y}" r="${k * 1.15}" fill="#c8321e" stroke="#7a1a10" stroke-width="2"/><circle cx="${x}" cy="${y}" r="${k * 0.35}" fill="#e46a4c"/>`;
+      else if (t === 'jalapeno') out += `<circle cx="${x}" cy="${y}" r="${k}" fill="#6cc15a" stroke="#2f6d28" stroke-width="2.5"/><circle cx="${x}" cy="${y}" r="${k * 0.45}" fill="#d7ef9a"/>`;
+      else if (t === 'garlic') out += `<ellipse cx="${x}" cy="${y}" rx="${k * 0.9}" ry="${k * 0.5}" transform="rotate(${rot} ${x} ${y})" fill="#f3efd2" stroke="#b8ad7d" stroke-width="2"/>`;
+      else if (t === 'mushroom') out += `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M-${k} 2 A${k} ${k} 0 0 1 ${k} 2 Z" fill="#b99573" stroke="#6b4c34" stroke-width="2"/><rect x="-${k * 0.3}" y="2" width="${k * 0.6}" height="${k * 0.7}" fill="#e6d3bb" stroke="#6b4c34" stroke-width="2"/></g>`;
+      else if (t === 'basil') out += `<path transform="translate(${x} ${y}) rotate(${rot})" d="M0 -${k} Q${k} -${k * 0.2} 0 ${k} Q-${k} -${k * 0.2} 0 -${k} Z" fill="#3f9b4a" stroke="#1d5a2a" stroke-width="2"/>`;
+      else if (t === 'pineapple') out += `<rect x="${x - k * 0.8}" y="${y - k * 0.8}" width="${k * 1.6}" height="${k * 1.6}" transform="rotate(${rot} ${x} ${y})" rx="3" fill="#ffd84a" stroke="#b58a12" stroke-width="2.5"/>`;
+      else if (t === 'sausage') out += `<circle cx="${x}" cy="${y}" r="${k * 0.85}" fill="#8b4a2b" stroke="#4a2414" stroke-width="2"/><circle cx="${x - 2}" cy="${y - 2}" r="${k * 0.25}" fill="#b56a45"/>`;
+      else out += `<circle cx="${x}" cy="${y}" r="${k}" fill="${color}"/>`;
+    }
+    return out;
+  }
+
+  const pieSvg = t => `<svg class="bigpie" viewBox="0 0 300 300"><ellipse cx="150" cy="276" rx="110" ry="14" fill="rgba(0,0,0,.25)"/>
+    <circle cx="150" cy="150" r="136" fill="#d9954a" stroke="#6b3c18" stroke-width="6"/><circle cx="150" cy="150" r="116" fill="#c8321e"/>
+    <circle cx="150" cy="150" r="108" fill="#f6c94a"/><path d="M60 120 Q110 90 150 112 T240 120" stroke="#ffe27a" stroke-width="8" fill="none" opacity=".7"/>
+    ${bits(t, 150, 150, 120, 13)}</svg>`;
+  const tileSvg = t => `<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="#f6c94a" stroke="#c28a3a" stroke-width="4"/>${bits(t, 30, 30, 24, 3, 0.62)}</svg>`;
+
   function pieBuilder(city) {
     let pick = city.menu[0];
+    const done = () => { removeEventListener('keydown', keys); box(city, pick); };
+    const slot = TOPPING_ORDER.indexOf.bind(TOPPING_ORDER);
+    // Cursor moves over the tiles on the order's menu, nearest in the direction pressed, wrapping around.
+    const step = (dx, dy) => {
+      const n = TOPPING_ORDER.length, jump = dx || dy * COLS;
+      for (let k = 1; k <= n * 2; k++) {
+        const t = TOPPING_ORDER[(((slot(pick) + jump * k) % n) + n) % n];
+        if (city.menu.includes(t) && t !== pick) return t;
+      }
+      return pick;
+    };
+    const keys = ev => {
+      const move = { ArrowLeft: [-1, 0], a: [-1, 0], ArrowRight: [1, 0], d: [1, 0], ArrowUp: [0, -1], w: [0, -1], ArrowDown: [0, 1], s: [0, 1] }[ev.key];
+      if (move) { pick = step(...move); render(); ev.preventDefault(); }
+      else if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); done(); }
+    };
     const render = () => {
       if (city.menu.length === 1) {
+        removeEventListener('keydown', keys);
         show(`<h2>Build your pie</h2><p>This order is ${C.TOPPINGS[pick].name.toLowerCase()}. Just ${C.TOPPINGS[pick].name.toLowerCase()}.</p><p class="blurb">${C.TOPPINGS[pick].blurb}</p>`, [['Box it', () => box(city, pick)]]);
         return;
       }
-      show(`<h2>Pick the topping</h2><div class="side">${city.menu.map(t => `<button class="top${pick === t ? ' on' : ''}" data-t="${t}"><i style="background:${C.TOPPINGS[t].color}"></i>${C.TOPPINGS[t].name}</button>`).join('')}</div>
-        <p class="blurb">${C.TOPPINGS[pick].blurb}</p>`, [['Box it', () => box(city, pick)]]);
-      screen.querySelectorAll('.top').forEach(b => { b.onclick = () => { pick = b.dataset.t; render(); }; });
+      const T = C.TOPPINGS[pick];
+      const tiles = TOPPING_ORDER.concat([null]).map(t => !t ? '<div class="tile lock"><span>?</span></div>'
+        : city.menu.includes(t) ? `<button class="tile${pick === t ? ' on' : ''}" data-t="${t}" aria-label="${C.TOPPINGS[t].name}">${tileSvg(t)}<span>${C.TOPPINGS[t].name}</span></button>`
+        : `<div class="tile lock"><span>?</span></div>`).join('');
+      show(`<div class="select"><div class="selgrid"><h2>Pick the topping</h2><div class="tiles">${tiles}</div><p class="hint">Arrows to move, Enter to box it.</p></div>
+        <div class="fighter"><div class="stage">${pieSvg(pick)}</div>
+          <div class="plate"><b class="fname">${T.name}</b><span class="fclass">${CLASS[T.kind] || T.kind}</span><p class="blurb">${T.blurb}</p></div></div></div>`,
+        [['Box it', done]]);
+      screen.querySelectorAll('.tile[data-t]').forEach(b => { b.onclick = () => { if (pick === b.dataset.t) done(); else { pick = b.dataset.t; render(); } }; });
     };
+    addEventListener('keydown', keys);
     render();
   }
 
