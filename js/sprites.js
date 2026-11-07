@@ -11,7 +11,25 @@
     await image.decode();
     const mask = atlas.seats ? new Image() : null;
     if (mask) { mask.src = `${base}/mask.png`; await mask.decode(); }
-    loaded[`${character}/${anim}`] = { atlas, image, mask, rims: character.startsWith('slice-') ? rims(image, atlas) : null };
+    loaded[`${character}/${anim}`] = { atlas, image, mask, pad: footPad(image, atlas), rims: character.startsWith('slice-') ? rims(image, atlas) : null };
+  }
+
+  // Transparent rows under the lowest foot in a strip, taken over every frame. Art is painted with a margin
+  // under its feet, and a run cycle can float higher than an idle, so drawing sinks each animation by this much
+  // and the lowest foot always lands on the ground line.
+  function footPad(image, { frame: { w, h }, count }) {
+    const c = document.createElement('canvas');
+    c.width = image.width; c.height = image.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(image, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height).data;
+    let pad = h;
+    for (let i = 0; i < count; i++) {
+      let y = h - 1;
+      for (; y >= 0; y--) { let hit = false; for (let x = 0; x < w && !hit; x++) hit = data[(y * c.width + i * w + x) * 4 + 3] > 128; if (hit) break; }
+      pad = Math.min(pad, h - 1 - y);
+    }
+    return pad === h ? 0 : pad;
   }
 
   // Where bites come out of a slice, frame by frame: the corners and sides of the crust end,
@@ -175,7 +193,7 @@
 
   // Draws feet-down at (x, foot). Returns false when there is no art, so the caller draws its own.
   // wide and tilt give a pizza its jelly, and flop bends the top of the frame like a floppy slice.
-  function draw(ctx, character, anim, ms, x, foot, height, facing = 1, squash = 1, { wide = 1, tilt = 0, flop = 0, dress = null, bites = 0 } = {}) {
+  function draw(ctx, character, anim, ms, x, foot, height, facing = 1, squash = 1, { wide = 1, tilt = 0, flop = 0, dress = null, bites = 0, sink = 0 } = {}) {
     const s = loaded[`${character}/${anim}`];
     if (!s) return false;
     const { w, h } = s.atlas.frame, count = s.atlas.count;
@@ -188,7 +206,7 @@
     if (idle) squash *= 1 + Math.sin(ms / 800) * 0.012;
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    ctx.translate(x, foot);
+    ctx.translate(x, foot + sink + s.pad * scale);
     ctx.rotate(tilt * facing);
     ctx.scale(facing * wide, squash);
     if (!flop) ctx.drawImage(source, sx, 0, w, h, -w * scale / 2, -h * scale, w * scale, h * scale);

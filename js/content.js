@@ -314,6 +314,17 @@
   // A slice can lose this many bites. Each one takes the same share of its heat, and that share never comes back.
   const BITES = 5;
   const CHARGES = 3;
+  // Gameplay feel. Distances are stage pixels, times are seconds, frames run at 60 a second.
+  const TUNING = {
+    // Nothing alive stands or patrols within this far of where a slice is put down.
+    spawnSafe: 520,
+    // Seconds before a pizza's special (SLAM, FLOP, DASH) can be used again.
+    cooldown: { deep: 6, jumbo: 7, naples: 5 },
+    // Onion & garlic: how far the stank reaches.
+    auraRadius: 330,
+    // A stomp: feet may be this far into the top share of an enemy, hands-off slack at its sides, and a few frames of apex grace.
+    stomp: { window: 0.62, reachAbove: 16, slack: 18, apexVy: -3 },
+  };
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';
 
@@ -328,6 +339,6 @@
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
   const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
-  const api = { CITY_DONE, CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
+  const api = { CITY_DONE, CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

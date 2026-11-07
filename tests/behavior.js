@@ -14,9 +14,11 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
   const results = await page.evaluate(() => {
     const C = PR_CONTENT, R = PR_RULES, P = PR_PLAY, GROUND = R.GROUND, out = [];
     const ok = (name, pass, detail = '') => out.push([name, !!pass, String(detail)]);
+    const SAFE = C.TUNING.spawnSafe;
     const canvas = document.getElementById('stage');
     // One empty street with just the enemy under test on it.
     const scene = (cityIndex, style, topping, enemies = []) => {
+      C.TUNING.spawnSafe = 0; // these scenes place enemies right next to the start on purpose
       const city = C.CITIES[cityIndex], camp = R.newCampaign(); camp.cityIndex = cityIndex;
       camp.pies[city.id] = { slices: [{ id: 0, style, topping, status: 'ready' }, { id: 1, style, topping, status: 'ready' }] };
       camp.world = R.newWorld(city, 1); camp.phase = 'map';
@@ -133,6 +135,43 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       ok('Jumbo hangs in the air far longer', jumbo.f > ny.f * 1.5, `${jumbo.f} vs ${ny.f} frames`);
       const reach = style => { const s = scene(0, style, 'pepperoni'); s.input.right = true; s.steps(40); return s.run.p.x - 300; };
       ok('Deep Dish is slow to get going, Margherita quick', reach('deep') < reach('ny') * 0.7 && reach('naples') > reach('ny') * 1.2, `${reach('deep')} / ${reach('ny')} / ${reach('naples')}`);
+    }
+    { // A deploy is clear of enemies, and a stomp is forgiving without making a side hit free.
+      const s = scene(0, 'ny', 'pepperoni', [{ type: 'teen', x: 330, range: 160 }, { type: 'teen', x: 420, range: 160, arrived: true }, { type: 'turtle', x: 520, range: 160 }]);
+      C.TUNING.spawnSafe = SAFE; s.run.enter(s.street.id, 300);
+      ok('enemies near the deploy point are moved out of its safe zone', s.run.actors.length === 3 && s.run.actors.every(a => Math.abs(a.x - 300) >= SAFE + 160), s.run.actors.map(a => Math.round(a.x)).join(','));
+      s.steps(240);
+      ok('and nothing bites in the first moments', s.run.bites === 0, s.run.bites);
+      C.TUNING.spawnSafe = 0;
+
+      const stomp = (dx, dyInto, vy = 6) => { const t = scene(0, 'ny', 'pepperoni', [{ type: 'teen', x: 700, range: 0 }]); const a = t.run.actors[0], p = t.run.p; p.x = a.x - a.size / 2 - p.w + 6 + dx; p.y = a.y - a.size + dyInto - p.h - vy; p.vy = vy; p.grounded = false; t.run.step(); return { gone: !t.street.enemies[0].alive, bites: t.run.bites }; };
+      ok('a stomp lands on the head', stomp(30, 10).gone);
+      ok('a stomp lands a bit late, feet deep in the enemy', stomp(30, 60).gone);
+      ok('a stomp counts a little off the edge', stomp(-12, 10).gone);
+      ok('but not far off it', !stomp(-60, 10).gone && stomp(-60, 10).bites === 0);
+      ok('a stomp counts just past the top of the jump', (() => { const r = stomp(30, 10, -2); return r.gone; })());
+      const walk = scene(0, 'ny', 'pepperoni', [{ type: 'teen', x: 480, range: 0 }]);
+      walk.input.right = true; walk.steps(60);
+      ok('walking into one from the side is still a bite', walk.run.bites === 1 && walk.street.enemies[0].alive, walk.run.bites);
+      const low = stomp(30, 100);
+      ok('feet low on the enemy is a bite, not a stomp', !low.gone && low.bites === 1, JSON.stringify(low));
+    }
+    { // Specials wait out a real cooldown, and the dial follows it.
+      const s = scene(1, 'deep', 'sausage');
+      const want = C.TUNING.cooldown.deep * 60;
+      ok('Deep Dish SLAM has a cooldown of several seconds', want >= 300 && s.run.specialMax === want, `${s.run.specialMax} frames`);
+      s.input.q.special = true; s.steps(2);
+      ok('using it starts the cooldown', s.run.specialCd > want - 5 && s.run.pounding !== undefined, s.run.specialCd);
+      s.steps(100); s.run.pounding = false; s.run.smash = 0; s.input.q.special = true; s.steps(2);
+      ok('it cannot be used again while cooling', !s.run.pounding && s.run.denied > 0, s.run.specialCd);
+      s.steps(want); s.input.q.special = true; s.steps(2);
+      ok('and works again once ready', s.run.specialCd > 0 && s.run.smash > 0 || s.run.pounding, s.run.specialCd);
+      for (const [ci, style] of [[2, 'jumbo'], [3, 'naples']]) ok(`${style} special has a cooldown too`, scene(ci, style, 'pepperoni').run.specialMax >= 300, style);
+    }
+    { // Onion and garlic reaches a long way, and still only hurts what stands in it.
+      const reach = dx => { const t = scene(0, 'ny', 'garlic', [{ type: 'teen', x: 300 + dx, range: 0 }]); t.run.aura = true; t.run.p.x = 300 - t.run.p.w / 2; t.run.p.x = 300 - t.run.p.w / 2; t.steps(60); return !t.street.enemies[0].alive; };
+      ok('the stank gets a teen at 300 px', reach(300));
+      ok('but not one at 420 px', !reach(420));
     }
     return out;
   });
