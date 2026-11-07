@@ -40,8 +40,8 @@
 
         // Problem, then team, then first mission. New York goes last so its bravado earns the assignment.
         { comp: 'wide', lines: [
-          { who: 'old', text: 'New recruits. Look at you. Cold, plain, and full of hope.' },
-          { who: 'old', text: 'Welcome to Pizza HQ. Latrine is the grease trap. Stay off the top shelf of the oven. Nobody touches the thermostat.' },
+          { who: 'old', text: 'New recruits. Look at you. Warm, plain, and full of hope.' },
+          { who: 'old', text: 'Welcome to Pizza HQ.' },
           { who: 'old', text: 'They told you this was undercover work. They lied. This is **deep undercover**.' },
         ] },
         { comp: 'board', lines: [
@@ -63,8 +63,8 @@
           { who: 'old', text: 'Nobody said it was.' },
           { who: 'deep', text: 'Somebody will.' },
         ] },
-        { comp: 'jumbo', card: ['The Filibuster', 'Jumbo Slice of Washington'], lines: [
-          { who: 'old', text: 'The Filibuster. Largest slice in the free world. Structural integrity, none.' },
+        { comp: 'jumbo', card: ['Phil A. Buster', 'Jumbo Slice of Washington'], lines: [
+          { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Structural integrity, none.' },
           { who: 'jumbo', text: 'Thank you. If I may, I would like to yield my time to myself, for some brief remarks on the subject of...' },
           { who: 'old', text: 'You may not.' },
         ] },
@@ -94,7 +94,7 @@
       briefing: [
 
         { comp: 'ny', lines: [
-          { who: 'ny', text: "Boss. Boss. It's all out there. You seen what's out there? There's a whole lotta out there." },
+          { who: 'ny', text: "Boss, it's hell out there." },
           { who: 'ny', text: "And I ain't sayin' I'm rattled. I'm sayin' some a me didn't come back." },
           { who: 'old', text: "These jobs aren't for the **limp crusted**." },
           { who: 'old', text: 'What you saw out there is called intel. Intel goes on the board.' },
@@ -156,7 +156,7 @@
           { who: 'old', text: 'Suspicious is what it is. This goes **all the way to the top**.' },
         ] },
         { comp: 'jumbo', lines: [
-          { who: 'old', text: 'Filibuster. Go shake down DC.' },
+          { who: 'old', text: 'Phil. Go shake down DC.' },
           { who: 'jumbo', text: 'I accept with humility, and I shall begin with a statement of no more than four hours.' },
           { who: 'old', text: 'Go.' },
         ] },
@@ -199,8 +199,8 @@
           customer: "Kaytlynne", who: "Surfer", instructions: "Tower 3. Leave it above the tide line.",
           door: [{ who: 'customer', text: "Duuude. Pizza. On the sand. The ocean provides, bro." }] },
         { id: 'bungalows', name: "The Bungalows", palette: { skyTop: '#3d3a6b', skyBottom: '#e0729a', ground: '#5a5048', top: '#7d6e62' },
-          customer: "KATELYN™", who: "DJ Alewife", instructions: "Ring the bell. Follow the bass.",
-          door: [{ who: 'alewife', text: "[DJ ALEWIFE AT THE DOOR: LINE TO COME]" }] },
+          customer: "Katelyn", who: "DJ Alewife", instructions: "Ring the bell. Follow the bass.",
+          door: [{ who: 'alewife', text: "Pizza party!" }] },
       ],
       briefing: [
 
@@ -243,7 +243,7 @@
 
   // Who says what, and their sound. Everything in a pizza's mouth goes through its voice.
   const SPEAKERS = {
-    old: 'The Old Timer', ny: 'Vinny Two-Fold', deep: 'Big Stan', jumbo: 'The Filibuster', naples: 'La Contessa', alewife: 'DJ Alewife',
+    old: 'The Old Timer', ny: 'Vinny Two-Fold', deep: 'Big Stan', jumbo: 'Phil A. Buster', naples: 'La Contessa', alewife: 'DJ Alewife',
   };
 
   // What a pizza says out loud on the street, by event. One at a time, and not often.
@@ -317,7 +317,6 @@
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';
 
-  const CITY_DONE = [{ who: 'old', text: 'All three addresses. Nobody asked any questions. That is the worst part.' }];
   const CITY_LOST = [{ who: 'old', text: 'That whole pizza is gone. Deep undercover. Finest operatives I ever sent.' }, { who: 'old', text: 'The order still stands. Send another.' }];
 
   const ENDING = {
@@ -328,6 +327,6 @@
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
   const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
-  const api = { CITY_DONE, CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
+  const api = { CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);
