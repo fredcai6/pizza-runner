@@ -40,7 +40,6 @@
       const street = this.street = this.world.streets[id];
       R.travel(this.world, id);
       this.area = this.city.areas[street.area];
-      this.ledge = street.platforms.find(l => l.ledge && l.w > 1000) || street.platforms.find(l => l.ledge) || { y: GROUND - 330 };
       this.junction = R.junction(this.world, street);
       this.actors = street.enemies.filter(e => e.alive).map(e => this.actor(e));
       this.shots = []; this.foes = []; this.drops = []; this.temp = []; this.sauce = [];
@@ -51,7 +50,7 @@
     actor(e) {
       const a = { e, x: e.x, y: e.y, dir: -1, home: e.x, cd: 40 + e.id * 13 % 60, state: 'walk', t: 0, rise: 1, size: SIZE[e.type] * (1 + Math.min(e.power, 4) * 0.16) };
       if (e.type === 'mutant') { a.state = 'lurk'; a.rise = 0; }
-      if (e.type === 'ninja' && e.hits) { a.state = 'perch'; a.y = this.ledge.y; }
+      if (e.type === 'ninja' && e.hits) { a.state = 'perch'; a.ledge = this.railFor(a.x); a.y = a.ledge.y; a.x = this.onRail(a.ledge, a.x); }
       return a;
     }
 
@@ -355,6 +354,15 @@
       this.actors = this.actors.filter(a => !a.goneNow);
     }
 
+    // The nearest fire escape, and the closest spot on it.
+    railFor(x) {
+      const rails = this.street.platforms.filter(l => l.ledge);
+      const gap = l => Math.max(0, l.x - x, x - l.x - l.w);
+      return rails.reduce((best, l) => (gap(l) < gap(best) ? l : best), rails[0]) || { x: x - 30, w: 60, y: GROUND - 330 };
+    }
+
+    onRail(l, x) { return Math.max(l.x + 30, Math.min(l.x + l.w - 30, x)); }
+
     leave(a) {
       a.t++;
       if (a.state === 'sink') { a.rise = Math.max(0, a.rise - 0.05); if (a.rise <= 0) a.goneNow = true; return; }
@@ -401,15 +409,17 @@
       if (a.state === 'leap') {
         a.t++;
         const f = a.t / 34;
-        a.y = GROUND + (this.ledge.y - GROUND) * f - Math.sin(f * Math.PI) * 90;
-        if (f >= 1) { a.y = this.ledge.y; a.state = 'perch'; }
+        if (a.t === 1) a.ledge = this.railFor(a.x);
+        a.x += (this.onRail(a.ledge, a.x) - a.x) * 0.2;
+        a.y = GROUND + (a.ledge.y - GROUND) * f - Math.sin(f * Math.PI) * 90;
+        if (f >= 1) { a.y = a.ledge.y; a.state = 'perch'; }
         return;
       }
       if (a.state === 'perch') {
         const want = this.p.x + this.p.facing * 240;
         a.dir = Math.sign(this.p.x - a.x) || 1;
         a.x += Math.max(-7, Math.min(7, (want - a.x) * 0.05));
-        a.x = Math.max(this.ledge.x + 30, Math.min(this.ledge.x + this.ledge.w - 30, a.x));
+        a.x = this.onRail(a.ledge, a.x);
       } else this.patrol(a, 2.7 * power);
       if (dist < 900) this.attack(a);
     }
