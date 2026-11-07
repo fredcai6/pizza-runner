@@ -29,7 +29,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await click('Start');
   await page.locator('#dialog:not(.hidden)').waitFor(); await page.waitForTimeout(250); await shot('01-hq-opening');
   const firstLine = await page.locator('#dialog .line').getAttribute('data-full');
-  ok('opening scene plays', /New recruits/.test(firstLine), firstLine);
+  ok('opening scene plays', /New recruits. Look at you. Warm, plain/.test(firstLine), firstLine);
   await advance();
   await shot('03-order');
   ok('first order shows the customer alias', (await page.locator('.receipt').innerText()).includes('K8lyn'));
@@ -97,7 +97,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
       seen.add(await page.evaluate(() => __pr.camp.cityIndex + ':' + __pr.camp.phase));
       const line = await page.locator('#dialog .line').getAttribute('data-full');
       if (line === 'Know thy enemy...') { seen.add('final'); await page.waitForTimeout(1500); await shot('16-know-thy-enemy'); }
-      if (/DJ ALEWIFE/.test(line)) { await page.waitForTimeout(200); await shot('15-alewife-door'); }
+      if (line === 'Pizza party!') { await page.waitForTimeout(200); await shot('15-alewife-door'); }
       const door = await page.evaluate(() => __pr.camp.phase === 'door' && __pr.camp.cityIndex + '.' + __pr.camp.world.delivery);
       if (door && !seen.has(door)) { seen.add(door); await page.waitForTimeout(120); await shot(`14-door-${door}`); }
       await page.locator('#dialog').click(); continue;

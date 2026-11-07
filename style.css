@@ -52,12 +52,13 @@ h2 { font: 900 30px Impact, 'Arial Narrow', sans-serif; color: #c8321e; letter-s
 #controls button.corner { position: absolute; top: auto; bottom: calc(100vh - 62px); right: 12px; width: 46px; height: 46px; pointer-events: auto; font-size: 13px; }
 @font-face { font-family: 'Pixelify Sans'; src: url(assets/fonts/pixelify-sans-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
 @font-face { font-family: 'Pixelify Sans'; src: url(assets/fonts/pixelify-sans-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
-#dialog { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(92vw, 800px); min-height: 118px; background: #14122b; color: #fff; border: 4px solid #fff; box-shadow: 0 0 0 4px #14122b; padding: 20px 18px 12px; font-family: 'Pixelify Sans', monospace; }
+#dialog { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); width: min(92vw, 800px); background: #14122b; color: #fff; border: 4px solid #fff; box-shadow: 0 0 0 4px #14122b; padding: 20px 18px 12px; font-family: 'Pixelify Sans', monospace; }
 #dialog::after { content: '▼'; position: absolute; right: 12px; bottom: 6px; font-size: 16px; color: #ffd76a; opacity: 0; }
 #dialog.done::after { opacity: 1; animation: nudge .7s steps(2) infinite; }
 @keyframes nudge { 50% { transform: translateY(3px); } }
 .who { position: absolute; left: 12px; top: -16px; padding: 2px 10px; background: #c8321e; border: 3px solid #fff; font: 700 18px 'Pixelify Sans', monospace; color: #fff; }
-.line { font-size: 24px; line-height: 1.22; font-weight: 400; }
+.line { font-size: var(--fs, 24px); line-height: 1.22; font-weight: 400; }
+.line .rest { visibility: hidden; }
 .line b { color: #ffd76a; font-weight: 700; }
 .hand { font-style: italic; margin-bottom: 8px; }
 .claim { font-style: italic; color: #8a2a1a; }
