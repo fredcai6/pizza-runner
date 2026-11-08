@@ -15,7 +15,6 @@
     polaroid: { from: [1090, 262, 2], to: [1090, 252, 2] },
     boardTeen: { from: [1000, 180, 3], to: [1040, 175, 3] },
     boardTurtle: { from: [1110, 175, 3], to: [1150, 175, 3] },
-    boardTease: { from: [1030, 300, 3], to: [1160, 300, 3], ms: 1500 },
     ny: { from: [500, 410, 2], to: [500, 400, 2] },
     deep: { from: [780, 410, 2], to: [780, 400, 2] },
     jumbo: { from: [960, 370, 2], to: [960, 360, 2] },
@@ -76,7 +75,7 @@
   }
 
   // These shots lean over the table, so the recruits are out of the picture.
-  const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle', 'boardTease']);
+  const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle']);
   const OUTLINE_CSS = '#1e1030';
   let spots = { ny: [], deep: [], jumbo: [], naples: [] };
   fetch('assets/backgrounds/hq/recruit-spots.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) spots = j; }).catch(() => {});
@@ -141,7 +140,11 @@
     const edge = ctx.createLinearGradient(0, 0, w, 0); edge.addColorStop(0, 'rgba(90,60,20,.25)'); edge.addColorStop(0.15, 'rgba(90,60,20,0)'); edge.addColorStop(0.85, 'rgba(90,60,20,0)'); edge.addColorStop(1, 'rgba(90,60,20,.25)');
     ctx.fillStyle = edge; ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(60,45,25,.55)';
-    for (let i = 0; i < 4; i++) ctx.fillRect(w * 0.14, h * (0.16 + i * 0.19), w * (0.72 - ((n + i) % 3) * 0.15), Math.max(1, h * 0.05));
+    // Every ticket prints its header: ORDER.
+    ctx.font = `bold ${Math.max(6, w * 0.2)}px monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('ORDER', w / 2, h * 0.16, w * 0.8);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    for (let i = 1; i < 4; i++) ctx.fillRect(w * 0.14, h * (0.16 + i * 0.19), w * (0.72 - ((n + i) % 3) * 0.15), Math.max(1, h * 0.05));
     if (n % 3 === 0) { ctx.fillStyle = 'rgba(168,52,28,.22)'; dot(ctx, w * 0.7, h * 0.7, w * 0.16); }
     pin(ctx, w / 2, 2, 2.4);
     ctx.restore();
@@ -173,8 +176,9 @@
       ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
     }
     const rnd = seeded(97), pins = [];
-    // Receipts overlap in a loose drift down the left of the cork.
-    const n = Math.min(hq.receipts, 18);
+    // Receipts overlap in a loose drift down the left of the cork. Three are his from the
+    // tapped dispatch line, there from the start; the player's add to them.
+    const n = Math.min(hq.receipts + 3, 18);
     for (let i = 0; i < n; i++) {
       const col = i % 6, row = Math.floor(i / 6), rw = w * 0.07, rh = h * 0.17;
       const rx = x + w * (0.03 + col * 0.072) + (rnd() - 0.5) * w * 0.03, ry = y + h * (0.05 + row * 0.2) + (rnd() - 0.5) * h * 0.05, rot = (rnd() - 0.5) * 16;

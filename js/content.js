@@ -27,34 +27,36 @@
       mix: ['teen', 'teen', 'turtle', 'teen', 'turtle'], pickups: ['pepperoni'],
       areas: [
         { id: 'wallstreet', name: "Wall Street", palette: { skyTop: '#8fa3bb', skyBottom: '#e6d9c6', ground: '#6d6a68', top: '#8d8983' },
-          customer: "K8lyn", who: "Stockbroker", instructions: "Leave at the door. Do not ring. Do not linger.",
-          door: [{ who: 'customer', text: "I'm on with Tokyo. Put it on the expense account. Sell! SELL!" }] },
+          customer: 'K8lyn', who: 'Stockbroker', instructions: 'Leave it at the door. Do not ring, do not linger. He bills by the second.',
+          door: [{ who: 'customer', text: "I'm on with Tokyo! SELL! SELL! ...Not you, pizza. You I'm buying." }] },
         { id: 'centralpark', name: "Central Park", palette: { skyTop: '#9cc3d6', skyBottom: '#eee8c8', ground: '#7d8a5a', top: '#a3ab7a' },
-          customer: "Cat Lynn", who: "Bench Lady", instructions: "Third bench past the fountain. She will know.",
-          door: [{ who: 'customer', text: "Sit. Sit. The pigeons know you're here. I've been on this bench since 1974." }] },
+          customer: 'Cat Lynn', who: 'Pigeon Lady', instructions: 'Past the fountain. Follow the pigeons. She will know.',
+          door: [{ who: 'customer', text: "The pigeons said you'd come. They're never wrong. They owe me money." }] },
         { id: 'brooklyn', name: "Brooklyn", palette: { skyTop: '#c9a6a0', skyBottom: '#f3dcc0', ground: '#6f5b56', top: '#94807a' },
-          customer: "Katelynnnnn", who: "Local Artisan", instructions: "Gluten is fine. Irony is fine. Ring twice.",
-          door: [{ who: 'customer', text: "Is this sourdough? I ferment my own, actually. Bagel the dog says thanks." }] },
+          customer: 'Katelynnnnn', who: 'Local Artisan', instructions: 'Gluten is fine. Irony is fine. Ring twice.',
+          door: [{ who: 'customer', text: 'Is this sourdough? I ferment my own, actually. Bagel the dog says thank you.' }] },
       ],
       briefing: [
 
-        // Problem, then team, then first mission. New York goes last so its bravado earns the assignment.
         { comp: 'wide', lines: [
           { who: 'old', text: 'New recruits. Look at you. Warm, plain, and full of hope.' },
           { who: 'old', text: 'Welcome to Pizza HQ.' },
-          { who: 'old', text: 'They told you this was undercover work. They lied. This is **deep undercover**.' },
-        ] },
-        { comp: 'board', lines: [
-          { who: 'old', text: 'Slices are vanishing. All over the world. Whole pies, gone in a night. Some nights all that turns up is the crust.' },
-          { who: 'old', text: 'Somebody is giving the orders. I call them **The Order**. Nobody else does. That is how deep this goes.' },
-          { who: 'old', text: 'You will go out there, get in close, and find out who.' },
+          { who: 'old', text: 'Slices are vanishing all over the world.' },
         ] },
         { comp: 'naples', lines: [
           { who: 'naples', text: 'Mamma mia! The whole world? And nobody tells Napoli?' },
-          { who: 'old', text: '**Pipe down**, Contessa. You have the floor? Fine. People, meet your team.' },
+          { who: 'old', text: "**Pipe down**, Contessa. I'm getting to the string." },
+        ] },
+        { comp: 'board', lines: [
+          { who: 'old', text: 'Whole pies, gone in a night. Some nights all that turns up is the box.' },
+          { who: 'old', text: 'Someone is pulling the strings.' },
+          { who: 'old', text: 'I tapped the dispatch line. Every vanishing starts with a ticket that says **ORDER**. I call them **The Order**.' },
+          { who: 'old', text: "You go **undercover**. Under a cover. Lid down. Nobody asks a box what's inside." },
+          { who: 'old', text: "Most come back with a report. The best don't come back at all. That is **deep undercover**." },
+          { who: 'old', text: 'So you go out there, get in close, and find out who.' },
         ] },
         { comp: 'naples', card: ['La Contessa', 'Margherita of Naples'], lines: [
-          { who: 'old', text: 'La Contessa. Fastest thing in the oven, and cools just as fast. Certified as a pizza by an actual government.' },
+          { who: 'old', text: 'La Contessa. Fastest thing in the oven. Cools just as fast. Certified a pizza by a government.' },
           { who: 'naples', text: 'Ninety seconds in the fire. You would not last **nine**.' },
         ] },
         { comp: 'deep', card: ['Big Stan', 'Deep Dish of Chicago'], lines: [
@@ -64,15 +66,18 @@
           { who: 'deep', text: 'Somebody will.' },
         ] },
         { comp: 'jumbo', card: ['Phil A. Buster', 'Jumbo Slice of Washington'], lines: [
-          { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Structural integrity, none.' },
-          { who: 'jumbo', text: 'Thank you. If I may, I would like to yield my time to myself, for some brief remarks on the subject of...' },
+          { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Three names, because one would not hold him.' },
+          { who: 'old', text: 'Reads every lid. Twice. Structural integrity, none.' },
+          { who: 'jumbo', text: 'Thank you. I wish to yield my time to myself, for brief remarks on the subject of...' },
           { who: 'old', text: 'You may not.' },
         ] },
         { comp: 'ny', card: ['Vinny Two-Fold', 'Slice of New York'], lines: [
-          { who: 'old', text: 'And this is Vinny Two-Fold. Off the streets. Nobody would have him indoors.' },
-          { who: 'ny', text: "Mysterious disappearances? Boss, that's a **Tuesday** where I'm from. I ain't scared a nothin'. I fold for nobody." },
-          { who: 'old', text: 'Glad to hear it, Vinny. I like a brave slice. You go first.' },
+          { who: 'old', text: 'And last, Vinny Two-Fold. Off the streets. Nobody would take him indoors.' },
+          { who: 'ny', text: "Disappearances? Boss, that's a **Tuesday** where I'm from. I ain't scared a nothin'." },
+          { who: 'ny', text: 'I fold for nobody.' },
+          { who: 'old', text: 'I like a brave slice. New York first. Nobody looks twice at a loud one.' },
           { who: 'ny', text: 'Wait, what?' },
+          { who: 'old', text: "Lid's open. Get in the box." },
         ] },
       ],
     },
@@ -82,43 +87,42 @@
       mix: ['teen', 'turtle', 'mutant', 'teen', 'turtle'], pickups: ['jalapeno', 'pepperoni'], watchers: true,
       areas: [
         { id: 'loop', name: "The Loop", palette: { skyTop: '#7f98b3', skyBottom: '#d4dde0', ground: '#49545c', top: '#6c7a83' },
-          customer: "Kæthlynn", who: "Da Gal", instructions: "Top floor. Keep the box level. Buzzer is broken.",
-          door: [{ who: 'customer', text: "Took long enough. Now that is a pizza. Yous want a beef with that?" }] },
+          customer: 'Kæthlynn', who: 'Da Gal', instructions: "Top floor. Keep the box level. The buzzer's broken. So is the elevator.",
+          door: [{ who: 'customer', text: "Took yous long enough. Da Bears are on. You're blockin' da Bears." }] },
         { id: 'lincolnpark', name: "Lincoln Park", palette: { skyTop: '#a6c9d9', skyBottom: '#f0ead0', ground: '#6f8460', top: '#94a67e' },
-          customer: "Caytlinn", who: "Jogging Mom", instructions: "Hand it over while moving. She does not stop.",
-          door: [{ who: 'customer', text: "I'm on mile nine. Is it organic? Tyler, say thank you to the pizza." }] },
+          customer: 'Caytlinn', who: 'Jogging Mom', instructions: 'Hand it over while she moves. She does not stop.',
+          door: [{ who: 'customer', text: "I'm on mile nine and I'm not stopping. Is it organic? Tyler, thank the pizza." }] },
         { id: 'wickerpark', name: "Wicker Park", palette: { skyTop: '#b39aa0', skyBottom: '#ecd5c0', ground: '#5d4e4c', top: '#83706c' },
-          customer: "Kay T'Lynn", who: "Bartender", instructions: "Round the back. Mind the porch stairs.",
-          door: [{ who: 'customer', text: "Corner tavern's closed till four. This is the most honest thing that's happened all week." }] },
+          customer: "Kay T'Lynn", who: 'Bartender', instructions: 'Back door. Mind the porch stairs. Knock like a regular.',
+          door: [{ who: 'customer', text: "Tavern's closed till four. Ooh, a casserole! ...No? Fine. You're the most honest thing all week." }] },
       ],
       briefing: [
 
         { comp: 'ny', lines: [
-          { who: 'ny', text: "Boss, it's hell out there." },
+          { who: 'ny', text: "Boss. It's hell out there." },
+          { who: 'ny', text: 'Teenagers. Turtles. Teenagers with cameras. I got my picture took four times.' },
           { who: 'ny', text: "And I ain't sayin' I'm rattled. I'm sayin' some a me didn't come back." },
-          { who: 'old', text: "These jobs aren't for the **limp crusted**." },
-          { who: 'old', text: 'What you saw out there is called intel. Intel goes on the board.' },
+          { who: 'old', text: "Some of the best don't. These jobs aren't for the **limp crusted**." },
+          { who: 'old', text: "Silence from a slice? That's **deep undercover**. Intel goes on the board." },
         ] },
         { comp: 'board', lines: [
           { who: 'old', text: 'Every scrap we ever pulled is up here. A lot of good slices paid for this cork.' },
-          { who: 'old', text: 'Everything you see out there is an agent of The Order until proven otherwise. Nothing has ever been proven otherwise.' },
+          { who: 'old', text: 'Anything out there is an agent of The Order until proven otherwise. Nothing has been.' },
+          { who: 'ny', text: "Has anybody tried? Provin' it?" },
+          { who: 'old', text: "That's how they get you." },
         ] },
         { comp: 'boardTeen', lines: [
-          { who: 'old', text: '**Teenagers.** Do not let them take your picture. If they get one, more of them will be waiting next time you come around.' },
-          { who: 'old', text: 'Why would a teenager need that many pictures? Think about it.' },
+          { who: 'old', text: '**Teenagers.** One picture, then more show up next time. Why would a teenager need that many?' },
+          { who: 'old', text: 'Think about it.' },
         ] },
         { comp: 'boardTurtle', lines: [
-          { who: 'old', text: '**Turtles.** They move slow. But I have seen them take a bite out of many a tough slice.' },
-          { who: 'old', text: 'Slow is what they want you to think. It is also what they are.' },
-        ] },
-        { comp: 'boardTease', lines: [
-          { who: 'old', text: 'Then there are the other reports. I do not like the other reports.' },
-        ] },
-        { comp: 'board', lines: [
-          { who: 'old', text: 'Read the **corkboard** before you deploy. Every dossier, every operative. It may save your crust.' },
+          { who: 'old', text: "**Turtles.** Slow. But I've seen them take a bite out of many a tough slice." },
+          { who: 'old', text: 'Slow is what they want you to think.' },
         ] },
         { comp: 'deep', lines: [
-          { who: 'old', text: 'Big Stan. Your time to shine. Get to Chicago and see what else you can dig up on The Order.' },
+          { who: 'old', text: 'Big Stan. Deep undercover needs a deep dish.' },
+          { who: 'deep', text: "I'm a dish. I don't dig." },
+          { who: 'old', text: 'Dig anyway.' },
           { who: 'deep', text: '...Fine.' },
         ] },
       ],
@@ -129,35 +133,36 @@
       mix: ['ninja', 'teen', 'turtle', 'mutant', 'teen', 'ninja'], pickups: ['pineapple', 'jalapeno'],
       areas: [
         { id: 'georgetown', name: "Georgetown", palette: { skyTop: '#c4b5a8', skyBottom: '#f1e3cf', ground: '#7c5a4b', top: '#a18072' },
-          customer: "Xaitlyn", who: "Professor", instructions: "Security will wave you through. Nobody will mention this.",
-          door: [{ who: 'customer', text: "Ah. A rather large slice. Are you familiar with my monograph on the subject?" }] },
+          customer: 'Xaitlyn', who: 'Professor', instructions: 'Security will wave you through. Walk like you belong.',
+          door: [{ who: 'customer', text: 'Ah. A rather large slice. Have you read my monograph on the subject? Nobody has.' }] },
         { id: 'mall', name: "National Mall", palette: { skyTop: '#a9cfe6', skyBottom: '#f4f0db', ground: '#9a9c7a', top: '#c2c29c' },
-          customer: "Ceightlyn", who: "Tourist", instructions: "South side of the Monument. Look for the fanny pack.",
-          door: [{ who: 'customer', text: "Honey, get a picture of me with this! Which one's the Washington Monument? Is this it?" }] },
+          customer: 'Ceightlyn', who: 'Tourist', instructions: 'South side of the Monument. Look for the fanny pack. There will be forty.',
+          door: [{ who: 'customer', text: "Honey, get my picture with this! Which one's the Washington Monument? Is it **you**?" }] },
         { id: 'federal', name: "Federal Triangle", palette: { skyTop: '#b9c2c7', skyBottom: '#ecead9', ground: '#8f8c80', top: '#b3b0a2' },
-          customer: "KTLN", who: "Agent", instructions: "You were never here.",
-          door: [{ who: 'customer', text: "I can neither confirm nor deny this pizza." }] },
+          customer: 'KTLN', who: 'Agent', instructions: 'You were never here. Neither was the pizza.',
+          door: [{ who: 'customer', text: 'I can neither confirm nor deny this pizza.' }] },
       ],
       briefing: [
 
         { comp: 'deep', lines: [
-          { who: 'deep', text: "You weren't lying, boss. Something came up out of the storm drain. Some kind of mutant." },
-          { who: 'deep', text: 'It chased me for three blocks. I do not do three blocks.' },
+          { who: 'deep', text: "Vinny wasn't lying, boss. Something came up out of the storm drain. Some kind of mutant." },
+          { who: 'deep', text: 'It chased me three blocks. I do not do three blocks. Is any of this worth it?' },
         ] },
         { comp: 'oldtimer', lines: [
           { who: 'old', thump: true, text: '**THAT** is why we do this!' },
-          { who: 'old', text: 'Why we work long and hard to keep the ovens hot! So that tonight, somewhere out there, a family sleeps warm!' },
-          { who: 'old', text: 'Eight slices, side by side in the box. Little ones by the crust. Lid down. Cozy. They will never know your name.' },
-          { who: 'old', text: 'They sleep warm because you stand out there in the cold!' },
+          { who: 'old', text: 'Why we keep the ovens hot! So tonight, somewhere, a family sleeps warm!' },
+          { who: 'old', text: "A whole pie, shoulder to shoulder in the box. Lid down. Cozy. They'll never know your name." },
+          { who: 'old', text: 'They sleep warm because you stand out there in the cold! One nation, under cheese. **Indivisible!**' },
         ] },
         { comp: 'board', lines: [
-          { who: 'old', text: 'And another thing. These customers. K8lyn. Cat Lynn. Kæthlynn. Tell me that is a coincidence.' },
+          { who: 'old', text: "And these tickets. K8lyn. Cat Lynn. Kæthlynn. Tell me that's a coincidence." },
           { who: 'ny', text: 'I mean, it could be a popular name, boss.' },
-          { who: 'old', text: 'Suspicious is what it is. This goes **all the way to the top**.' },
+          { who: 'old', text: "Nobody spells their own name six ways. That's not a name. That's a cover with a typo." },
+          { who: 'old', text: 'This goes **all the way to the top**.' },
         ] },
         { comp: 'jumbo', lines: [
-          { who: 'old', text: 'Phil. Go shake down DC.' },
-          { who: 'jumbo', text: 'I accept with humility, and I shall begin with a statement of no more than four hours.' },
+          { who: 'old', text: "The top of the government is Washington. Phil, nobody turns you away. You're the size of a door." },
+          { who: 'jumbo', text: 'I accept with humility, and shall begin with a statement of no more than four hours.' },
           { who: 'old', text: 'Go.' },
         ] },
       ],
@@ -168,23 +173,29 @@
       mix: ['mutant', 'turtle', 'ninja', 'teen', 'mutant', 'ninja'], pickups: ['jalapeno', 'sausage'],
       areas: [
         { id: 'harbor', name: "The Harbor", palette: { skyTop: '#8fc3d6', skyBottom: '#f6dfb2', ground: '#7a6650', top: '#a58f73' },
-          customer: "Caterlynna", who: "Fisherwoman", instructions: "Il forno sa.",
-          door: [{ who: 'customer', text: "From the sea this morning. You, this morning also? Sit, eat, you are too thin." }] },
+          customer: 'Caterlynna', who: 'Fisherwoman', instructions: 'Il forno sa. Follow the smell of the sea.',
+          door: [{ who: 'customer', text: 'From the sea this morning. You, from the oven? Same hour. We understand each other.' }] },
         { id: 'center', name: "Centro Storico", palette: { skyTop: '#d9a97c', skyBottom: '#f7dcae', ground: '#6b5140', top: '#94765f' },
-          customer: "Kate? Lin?", who: "Nonna", instructions: "Fourth floor. Lower the basket.",
-          door: [{ who: 'customer', text: "Who made this? Your mother? Tell her she used too much. Mangia." }] },
+          customer: 'Kate? Lin?', who: 'Nonna', instructions: 'Fourth floor. Lower the basket. Do not make conversation.',
+          door: [{ who: 'customer', text: 'Who sent you? Your mother? Tell her she is late. ...Tell her nothing, is perfect.' }] },
         { id: 'hillside', name: "Vomero Hill", palette: { skyTop: '#a6c2dc', skyBottom: '#fbe2c8', ground: '#8a6d5a', top: '#b3957f' },
-          customer: "Qatelyn", who: "Signora", instructions: "Up the steps. All of them.",
-          door: [{ who: 'customer', text: "Ma che bello! A pizza! In THIS house! *gestures at the entire bay*" }] },
+          customer: 'Qatelyn', who: 'Signora', instructions: 'Up the steps. All of them. Do not ask how many.',
+          door: [{ who: 'customer', text: "Ma che bello! A pizza, in THIS house! With THIS view! Is mine. Don't tell the neighbors." }] },
       ],
       briefing: [
 
         { comp: 'jumbo', lines: [
-          { who: 'jumbo', text: 'Mr. Chairman, I rise today as a mere fraction of my former self.' },
-          { who: 'jumbo', text: 'But let the record show that every one of them says it. On every box. **Original Italian.**' },
-          { who: 'naples', text: 'That is just printed on the boxes.' },
-          { who: 'old', text: 'Original. Italian. Then we go back to where it all began.' },
-          { who: 'old', text: '**Naples.**' },
+          { who: 'jumbo', text: 'Mr. Chairman, I rise today a mere fraction of my former self.' },
+          { who: 'jumbo', text: 'I entered that city whole. The record shows nothing. It is classified.' },
+          { who: 'jumbo', text: 'But I read every lid in the capital. Every one says **Original Italian.**' },
+          { who: 'deep', text: "Mine says it too. I'm from Chicago." },
+        ] },
+        { comp: 'naples', lines: [
+          { who: 'naples', text: "Then somebody copies me. Is flattery, not a clue. Everybody knows where I'm from." },
+          { who: 'old', text: 'Nothing honest announces itself.' },
+          { who: 'naples', text: 'Honest things announce themselves **constantly**. This is Italy.' },
+          { who: 'old', text: "Then you won't mind us checking the source. **Naples.**" },
+          { who: 'naples', text: '...Finalmente. Somebody takes me home.' },
         ] },
       ],
     },
@@ -193,36 +204,37 @@
       mix: ['teen', 'ninja', 'mutant', 'turtle', 'ninja', 'mutant'], pickups: ['pineapple', 'jalapeno', 'mushroom'],
       areas: [
         { id: 'downtown', name: "Downtown", palette: { skyTop: '#f7b98a', skyBottom: '#ffe6b8', ground: '#a58a70', top: '#cdb28e' },
-          customer: "Caitlyn (the C is silent)", who: "Roller Skater", instructions: "Meet at the fountain. She is skating.",
+          customer: 'Caitlyn (the C is silent)', who: 'Roller Skater', instructions: "Meet at the fountain. She is skating, so it's a moving handoff.",
           door: [{ who: 'customer', text: "Oh my gosh, you're so warm! I have, like, zero cash. Good vibes okay?" }] },
         { id: 'beach', name: "The Beach", palette: { skyTop: '#8fd8e6', skyBottom: '#ffeec4', ground: '#dcc38a', top: '#f2deaa' },
-          customer: "Kaytlynne", who: "Surfer", instructions: "Tower 3. Leave it above the tide line.",
-          door: [{ who: 'customer', text: "Duuude. Pizza. On the sand. The ocean provides, bro." }] },
+          customer: 'Kaytlynne', who: 'Surfer', instructions: 'Tower 3. Above the tide line. The tide has opinions.',
+          door: [{ who: 'customer', text: 'Duuude. A pizza, on the beach. The ocean provides, bro.' }] },
         { id: 'bungalows', name: "The Bungalows", palette: { skyTop: '#3d3a6b', skyBottom: '#e0729a', ground: '#5a5048', top: '#7d6e62' },
-          customer: "Katelyn", who: "DJ Alewife", instructions: "Ring the bell. Follow the bass.",
+          customer: 'Katelyn', who: 'DJ Alewife', instructions: 'Ring the bell. Follow the bass.',
           door: [{ who: 'alewife', text: "Pizza party!" }] },
       ],
       briefing: [
 
         { comp: 'wide', lines: [
-          { who: 'old', text: 'Look at you. Look at what is left of you.' },
-          { who: 'old', text: 'Good. That means they are scared. I think we have found the head of The Order.' },
+          { who: 'old', text: "Look at what's left of you. Good. Nobody swings that hard at a bluff. We're close." },
         ] },
-        // PROVISIONAL: what points him to Long Beach is unsettled. The string running out there is a
-        // draft bridge, and deliberately no evidence of anything.
         { comp: 'board', lines: [
-          { who: 'old', text: 'I ran red string from every order, in every city. And right here, I ran out of string.' },
-          { who: 'old', text: '**Long Beach, California.** One house. The top Katelyn. Tell me that is an accident.' },
-          { who: 'deep', text: 'Did you buy more string?' },
-          { who: 'old', text: 'They would be expecting that.' },
+          { who: 'old', text: 'Twelve tickets. Twelve spellings. Twelve disguises.' },
+          { who: 'old', text: 'Then Long Beach prints. Three stops. One spelled **right**. K-A-T-E-L-Y-N.' },
+          { who: 'deep', text: "Or she's just a person who can spell." },
+          { who: 'old', text: "That's exactly what she'd want you to think." },
+          { who: 'old', text: 'Twelve disguises, then one real name. You only drop the disguise at **home**.' },
         ] },
         { comp: 'wide', lines: [
-          { who: 'old', text: 'One slice will not do it. This takes all of you. Every crumb. Find out where it leads.' },
+          { who: 'old', text: "One slice won't do it. This takes all four of you." },
           { who: 'jumbo', text: 'A point of order. Will you be joining us in the field, sir?' },
-          { who: 'naples', text: 'Sì. You, who have seen so much. Who sends us out there. You come, yes?' },
+          { who: 'naples', text: 'Sì. You send us out. You come too, yes?' },
         ] },
         { comp: 'oldtimer', lines: [
-          { who: 'old', text: "Me? Kid, I've been in this box for a long time." },
+          { who: 'deep', text: 'You never leave the building.' },
+          { who: 'old', text: 'Not since 1987.' },
+          { who: 'deep', text: 'What happened in 1987?' },
+          { who: 'old', text: "...Nothing. That's what bothers me." },
           { who: 'old', text: "I'm too stale for this shit." },
         ] },
       ],
@@ -231,19 +243,19 @@
 
   // A word between slices. First match wins. `by` gives each pizza its own version of a line.
   const RETURNS = [
-    { when: L => L.lastOutcome === 'delivered', lines: [{ who: 'old', text: 'Good. The customer suspects nothing.' }] },
-    { when: L => L.left === 2 && L.remaining > 1, lines: [{ who: 'old', text: 'Two left and work to do. Do not make me fire up the oven.' }] },
-    { when: L => L.left === 1, lines: [{ who: 'pizza', by: { ny: "This is the last a me, boss.", deep: 'This is all of me there is.', jumbo: 'Let the record show that I am down to one.', naples: 'Uno. I am uno.' } }, { who: 'old', text: 'Kid, I know the feeling.' }] },
-    { when: L => L.filmed, lines: [{ who: 'old', text: 'They got your picture. Put it on the board.' }] },
+    { when: L => L.lastOutcome === 'delivered', lines: [{ who: 'pizza', by: { ny: "Dropped him at the door, boss. He didn't come back out.", deep: 'Dropped one off. Door closed. Nothing.', jumbo: 'The slice entered the residence. The record is silent thereafter.', naples: 'He goes inside. The door closes. Is very quiet inside.' } }, { who: 'old', text: 'No contact. That means it\'s working.' }] },
+    { when: L => L.left === 2 && L.remaining > 1, lines: [{ who: 'old', text: "Two left and work to do. Don't make me bake more of you." }] },
+    { when: L => L.left === 1, lines: [{ who: 'pizza', by: { ny: 'This is the last a me, boss. Go easy.', deep: "This is all of me there is. It's enough. It's a lot.", jumbo: 'Let the record show that I am down to one. A very large one.', naples: 'Uno. I am uno. Is a very Italian number.' } }, { who: 'old', text: 'Kid, I know the feeling.' }] },
+    { when: L => L.filmed, lines: [{ who: 'pizza', by: { ny: "A kid took my picture, boss. I wasn't ready.", deep: 'I blinked.', jumbo: 'I was photographed without comment. Without **adequate** comment.', naples: 'My left! I said my left!' } }, { who: 'old', text: 'Pin it up. Somewhere a teenager is looking at your face right now.' }] },
     { when: L => L.lastOutcome === 'cold', lines: [{ who: 'pizza', by: { ny: "It's freezin' out there, boss.", deep: 'Cold. Should have stayed in the pan.', jumbo: 'I wish to enter into the record that it was very cold.', naples: 'I was made in a fire. I do not do this.' } }, { who: 'old', text: 'It always is. Go. Stay moving.' }] },
-    { when: L => L.nemesisPower >= 2, lines: [{ who: 'pizza', by: { ny: 'That thing out there, it got bigger.', deep: 'It got bigger.', jumbo: 'That thing has, by all estimates, grown.', naples: 'Is bigger now. Why is it bigger?' } }, { who: 'old', text: 'Then The Order knows we are close.' }] },
-    { when: L => L.owesNinjas > 0, lines: [{ who: 'old', text: 'The ninjas will want paying again. Nothing personal. It is just Tuesday.' }] },
+    { when: L => L.nemesisPower >= 2, lines: [{ who: 'pizza', by: { ny: 'That thing out there, it got bigger.', deep: 'It got bigger.', jumbo: 'That thing has, by all estimates, grown.', naples: 'Is bigger now. Why is it bigger?' } }, { who: 'old', text: 'Bigger means somebody\'s behind it. Somebody means The Order.' }] },
+    { when: L => L.owesNinjas > 0, lines: [{ who: 'old', text: "The ninjas want paying again. It's not personal. It's a retainer." }] },
     { when: () => true, lines: [{ who: 'pizza', by: { ny: 'You didn\'t tell us about that.', deep: 'You did not mention that.', jumbo: 'I was not briefed on that.', naples: 'Nobody told me about this.' } }, { who: 'old', text: 'Would you have gone? Next.' }] },
   ];
 
   // Who says what, and their sound. Everything in a pizza's mouth goes through its voice.
   const SPEAKERS = {
-    old: 'The Old Timer', ny: 'Vinny Two-Fold', deep: 'Big Stan', jumbo: 'Phil A. Buster', naples: 'La Contessa', alewife: 'DJ Alewife',
+    old: 'Sergeant Dayold', ny: 'Vinny Two-Fold', deep: 'Big Stan', jumbo: 'Phil A. Buster', naples: 'La Contessa', alewife: 'DJ Alewife',
   };
 
   // What a pizza says out loud on the street, by event. One at a time, and not often.
@@ -270,15 +282,17 @@
     },
   };
 
-  // Sticky notes on "Who is The Order?", all in the Old Timer's hand. They appear on fixed city milestones.
+  // Sticky notes on "Who is The Order?", all in Sergeant Dayold's hand. They appear on fixed city milestones.
   const THEORY = [
     { from: 0, text: 'WHO IS THE ORDER?' },
+    { from: 0, text: 'Every ticket says ORDER. Printed right on it. HIDING IN PLAIN SIGHT.' },
     { from: 0, text: 'Slices go out. Less of them come back. WHERE IS THE REST?' },
+    { from: 1, text: "Vinny's missing slice. No call = DEEP UNDERCOVER. Proud." },
     { from: 1, text: 'Teenagers and turtles: AGENTS? (yes)' },
     { from: 2, text: 'The names are ALIASES. Has to be.' },
     { from: 2, text: 'ALL THE WAY TO THE TOP' },
     { from: 3, text: '"Original Italian". On EVERY box. Why??' },
-    { from: 4, text: 'Ran out of string at LONG BEACH. NOT an accident.' },
+    { from: 4, text: 'Twelve disguises. ONE name spelled RIGHT. Long Beach. You only drop the disguise at HOME.' },
   ];
 
   // Polaroids start as a name and question marks. Notes appear once the behavior has been seen.
@@ -303,7 +317,7 @@
     'CARBON COPY: "Still warm?" "Still warm." The same exchange, over and over.',
     'PERSONNEL FILE: Beer Sprite Lite. Powers: none. Performance: exemplary.',
     'TICKET STUB: Slice must build a band of brothers. The handwriting looks young.',
-    'NAPKIN, IN THE OLD TIMER\'S HAND: The Kates, Katies, Kaitlins and Caitlyns do not meet. They do not need to.',
+    'NAPKIN, IN SERGEANT DAYOLD\'S HAND: The Kates, Katies, Kaitlins and Caitlyns do not meet. They do not need to.',
   ];
 
   // Zanier as the run goes on. Each city's customer is listed on its own order.
@@ -328,7 +342,12 @@
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';
 
-  const CITY_LOST = [{ who: 'old', text: 'That whole pizza is gone. Deep undercover. Finest operatives I ever sent.' }, { who: 'old', text: 'The order still stands. Send another.' }];
+  // The first line is the lost pizza's epitaph, chosen by `by`. Without a known pizza the generic text stands.
+  const CITY_LOST = [
+    { who: 'old', text: 'That whole pie is gone. Not a crumb on the radio. **Deep undercover.**', by: { ny: 'Vinny Two-Fold. Folded for nobody. Went in deep.', deep: 'Big Stan. Heavy to the last. Not a word out of him.', jumbo: 'Phil A. Buster. Gone silent. First time in his career.', naples: 'La Contessa. Ninety seconds in the fire, then silence.' } },
+    { who: 'old', text: 'Tape goes over the photo. Regulation. Finest operatives I ever sent.' },
+    { who: 'old', text: '...I keep the tape handy. The order still stands. Send another.' },
+  ];
 
   const ENDING = {
     finale: [{ comp: 'polaroid', lines: [{ who: 'old', mood: 'squint', text: 'Know thy enemy...' }] }],

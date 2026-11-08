@@ -311,6 +311,25 @@ test('every speaker and every pizza has a voice', () => {
   }
 });
 
+test('losing a city names the pizza that was lost, and falls back when none is known', () => {
+  for (const [i, style] of [[0, 'ny'], [1, 'deep'], [2, 'jumbo'], [3, 'naples']]) {
+    const c = R.newCampaign(); c.cityIndex = i; order(c);
+    while (c.phase !== 'gameover') lose(c);
+    const lines = R.epitaph(c);
+    assert.strictEqual(lines[0].text, C.CITY_LOST[0].by[style]);
+    assert.strictEqual(lines.length, C.CITY_LOST.length);
+  }
+  const c = fresh(); c.world.lastStyle = null;
+  assert.strictEqual(R.epitaph(c)[0].text, C.CITY_LOST[0].text);
+});
+
+test('the old timer is Sergeant Dayold and the tickets say ORDER', () => {
+  assert.strictEqual(C.SPEAKERS.old, 'Sergeant Dayold');
+  assert.match(R.printOrder(fresh()).order, /^\d+$/);
+  assert.ok(C.THEORY.some(t => /Every ticket says ORDER/.test(t.text)));
+  assert.strictEqual(C.CITIES.flatMap(x => x.areas).find(a => a.id === 'centralpark').who, 'Pigeon Lady');
+});
+
 test('a deploy keeps a safe zone clear of enemies, photo arrivals included', () => {
   const c = fresh(), world = c.world, safe = C.TUNING.spawnSafe, mk = (street, o) => street.enemies.push({ id: street.nextId++, y: R.GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0, ...o });
   let checked = 0;

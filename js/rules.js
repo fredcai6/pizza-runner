@@ -365,6 +365,12 @@
     return C.RETURNS.find(c => c.when(ledger(camp))).lines.map(l => (l.by ? { who: style, text: l.by[style] } : l));
   }
 
+  // The Old Timer's words when a city's last slice is gone. The first line names the pizza that was lost.
+  function epitaph(camp) {
+    const style = camp.world && camp.world.lastStyle;
+    return C.CITY_LOST.map(l => ({ who: l.who, text: (l.by && l.by[style]) || l.text }));
+  }
+
   // What HQ shows. The four recruits exist from the start, cold and plain, until their orders come in.
   function headquarters(camp) {
     return {
@@ -396,6 +402,6 @@
     return { name: file.name, claim: file.claim, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { epitaph, GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);
