@@ -364,3 +364,10 @@ test('toppings unlock by signature city and by pickup', () => {
   assert.throws(() => R.placeOrder(camp, 'basil'));
   R.placeOrder(camp, 'mushroom');
 });
+
+test('the board starts with his two suspects and pins up the others once met', () => {
+  const c = R.newCampaign();
+  assert.deepStrictEqual(R.headquarters(c).known, ['teen', 'turtle']);
+  c.seen['mutant.peeks'] = true;
+  assert.deepStrictEqual(R.headquarters(c).known, ['teen', 'turtle', 'mutant']);
+});
