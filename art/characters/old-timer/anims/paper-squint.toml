@@ -1,0 +1,12 @@
+master = "characters/old-timer/references/paper-master.png"
+canvas = [136, 130]
+job = 227
+frame_ms = 140
+loop = false
+run = "paper"
+[[frames]]
+pose = "master"
+hold = 2
+[[frames]]
+pose = "squint/2"
+hold = 12

@@ -112,6 +112,14 @@
     return `<text class="roadname" transform="translate(${p.x + Math.sin(r) * 19} ${p.y - Math.cos(r) * 19}) rotate(${turn})">${text}</text>`;
   }
 
+  // The slice out on the street is its own character, as a sticker: bottom centre at (x, y), fitted in a box.
+  function youImage({ style, topping }, x, y, box) {
+    const S = root.PR_SPRITES, art = S.portrait(style, topping);
+    if (!art) return '';
+    const k = Math.min(box / art.width, box / art.height), w = Math.round(art.width * k), h = Math.round(art.height * k);
+    return `<image href="${S.portraitUrl(style, topping)}" x="${x - w / 2}" y="${y - h}" width="${w}" height="${h}" style="image-rendering:pixelated"/>`;
+  }
+
   // picked is the checkpoint chosen, live is the slice out on the street right now.
   function svg(camp, { picked, live } = {}) {
     const city = R.currentCity(camp), world = camp.world, out = [], m = MAPS[city.id];
@@ -177,11 +185,11 @@
     });
     if (live) {
       const s = world.streets[live.street], p = along(lines[s.id], live.x / s.length);
-      out.push(`<g class="you" transform="translate(${p.x} ${p.y})"><circle r="24"/><text y="9">🍕</text></g><text class="youlabel" x="${p.x}" y="${p.y - 34}">YOU</text>`);
+      out.push(`<g class="you" transform="translate(${p.x} ${p.y})">${youImage(live, 0, 8, 56)}</g><text class="youlabel" x="${p.x}" y="${p.y - 42}">YOU</text>`);
     }
     out.push(`<g class="legend"><circle cx="40" cy="692" r="11" class="k-addr"/><text x="58" y="699">Next stop</text>
       <circle cx="210" cy="692" r="11" class="k-check"/><text x="228" y="699">${live ? 'Checkpoints' : 'Tap to start here'}</text>
-      <path class="k-lost" d="M430 680 L442 692 L430 704 L418 692 Z"/><text x="454" y="699">Slice lost${lost.length ? ' (' + lost.length + ')' : ''}</text>${live ? '<text x="700" y="699">🍕 You are here</text>' : ''}</g></svg>`);
+      <path class="k-lost" d="M430 680 L442 692 L430 704 L418 692 Z"/><text x="454" y="699">Slice lost${lost.length ? ' (' + lost.length + ')' : ''}</text>${live ? `<g transform="translate(700 700)">${youImage(live, 14, 0, 30)}</g><text x="736" y="699">You are here</text>` : ''}</g></svg>`);
     return out.join('');
   }
 

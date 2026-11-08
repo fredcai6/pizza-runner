@@ -7,23 +7,31 @@
  "frame_ms": 110,
  "loop": true,
  "rev": {
-  "sha": "4dea945420019a518ec2b5bd79e870ee09d54f1d",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "f21e0fe84285eed56992b9804d088a5ca1321ee5",
+  "dirty": true
+ },
  "source": {
-  "run": "keys",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 7.2,
+  "job": 227,
+  "master": "characters/old-timer/references/paper-master.png",
+  "cell": 7.467,
+  "border": 4,
+  "palette": 48,
   "poses": [
-   "talk_open/1",
-   "talk_closed/1",
-   "talk_open/1",
-   "talk_closed/1",
-   "talk_open/1",
-   "talk_open/1",
-   "talk_closed/1",
-   "talk_closed/1"
+   "talk_open/2",
+   "talk_open/2",
+   "talk_open/2",
+   "talk_open/2",
+   "talk_open/2",
+   "talk_open/2",
+   "talk_open/2",
+   "talk_open/2"
   ]
  }
 }

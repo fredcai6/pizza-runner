@@ -1,0 +1,28 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "Redraw the character from image 1 exactly as it is: the same paper standee, the same thick white paper border all around the silhouette like a sticker, the same flat colours, the same face style. Exactly two arms and two legs, two hands. {action} The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+refs = ["characters/turtle/references/paper-master.png", "paper/style_pm_sq.png"]
+
+[shots.idle_b]
+prompt = "Idle: standing, the head lowered slightly, the eyes shut as two thin flat lines, blinking."
+
+[shots.walk_a]
+prompt = "Walking: side view facing right, plodding mid-step, the front left leg and the back right leg lifted forward and back."
+
+[shots.walk_b]
+prompt = "Walking: side view facing right, plodding mid-step, the front right leg and the back left leg lifted forward and back."
+
+[shots.munch_a]
+prompt = "Munching: side view facing right, the head stretched forward chewing a green leaf, the mouth open, the eyes half closed as flat lines."
+
+[shots.munch_b]
+prompt = "Munching: side view facing right, the head slightly lowered, the mouth closed and chewing, a bit of green leaf hanging from the lips."
+
+[shots.stun_a]
+prompt = "Stunned: the dazed face with two small spiral dizzy eyes, the mouth a wobbly line, three small yellow stars circling above the head."
+
+[shots.stun_b]
+prompt = "Stunned: the head drooping, the eyes two small crosses, the mouth a flat line, three small yellow stars circling above the shell."

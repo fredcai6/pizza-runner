@@ -7,13 +7,31 @@
  "frame_ms": 70,
  "loop": true,
  "rev": {
-  "sha": "3c817c6d02524b9193201ca5e4b3f977e41ef84c",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "ff7b09a6d5426ddf21928eb97321b36a078945a6",
+  "dirty": true
+ },
  "source": {
-  "rig": "characters/teen/rig/flee.toml",
-  "body": "characters/teen/sprites/flee/sheet.png",
-  "gait": "run"
+  "poseguide": "qwen-pose-paper",
+  "motion": "flee",
+  "seed": 2,
+  "place": "skel",
+  "frames": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "master": "characters/teen/references/paper-master.png",
+  "border": 4,
+  "palette": 48
  }
 }

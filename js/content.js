@@ -19,11 +19,12 @@
     naples: { bio: 'Certified. Quick. Cools fast, tells you so anyway.', name: 'Margherita', speed: 9.6, accel: 1.5, decel: 1.5, jump: 23, gravity: 1.05, fall: 1.1, maxFall: 24, spring: 0.3, damp: 0.66, heatDecay: 1.55, heatMax: 100, height: 104, w: 60, h: 80, special: 'dash', specialName: 'DASH', blurb: 'Small, quick, and cools fast. DASH barrels through anything.' },
   };
 
-  // Route is New York to Long Beach. Menus past New York are provisional.
+  // Route is New York to Long Beach. Each city's pizza brings its signature topping; the rest are collected
+  // as pickups on the street. A pie can wear any topping unlocked so far (R.menu).
   const CITIES = [
     {
       id: 'newyork', name: 'New York', style: 'ny', seed: 23, stretch: 3900, gap: 720,
-      menu: ['pepperoni'],
+      signature: 'pepperoni',
       mix: ['teen', 'teen', 'turtle', 'teen', 'turtle'], pickups: ['pepperoni'],
       areas: [
         { id: 'wallstreet', name: "Wall Street", palette: { skyTop: '#8fa3bb', skyBottom: '#e6d9c6', ground: '#6d6a68', top: '#8d8983' },
@@ -83,8 +84,8 @@
     },
     {
       id: 'chicago', name: 'Chicago', style: 'deep', seed: 53, stretch: 3200, gap: 620,
-      menu: ['sausage', 'pepperoni', 'mushroom'],
-      mix: ['teen', 'turtle', 'mutant', 'teen', 'turtle'], pickups: ['jalapeno', 'pepperoni'], watchers: true,
+      signature: 'garlic',
+      mix: ['teen', 'turtle', 'mutant', 'teen', 'turtle'], pickups: ['sausage', 'pepperoni', 'garlic'], watchers: true,
       areas: [
         { id: 'loop', name: "The Loop", palette: { skyTop: '#7f98b3', skyBottom: '#d4dde0', ground: '#49545c', top: '#6c7a83' },
           customer: 'Kæthlynn', who: 'Da Gal', instructions: "Top floor. Keep the box level. The buzzer's broken. So is the elevator.",
@@ -129,8 +130,8 @@
     },
     {
       id: 'dc', name: 'Washington, DC', style: 'jumbo', seed: 41, stretch: 3500, gap: 600,
-      menu: ['pepperoni', 'garlic', 'mushroom'],
-      mix: ['ninja', 'teen', 'turtle', 'mutant', 'teen', 'ninja'], pickups: ['pineapple', 'jalapeno'],
+      signature: 'jalapeno',
+      mix: ['ninja', 'teen', 'turtle', 'mutant', 'teen', 'ninja'], pickups: ['sausage', 'pepperoni', 'pineapple'],
       areas: [
         { id: 'georgetown', name: "Georgetown", palette: { skyTop: '#c4b5a8', skyBottom: '#f1e3cf', ground: '#7c5a4b', top: '#a18072' },
           customer: 'Xaitlyn', who: 'Professor', instructions: 'Security will wave you through. Walk like you belong.',
@@ -169,8 +170,8 @@
     },
     {
       id: 'naples', name: 'Naples', style: 'naples', seed: 37, stretch: 4600, gap: 640, predicts: true,
-      menu: ['basil', 'garlic', 'pepperoni'],
-      mix: ['mutant', 'turtle', 'ninja', 'teen', 'mutant', 'ninja'], pickups: ['jalapeno', 'sausage'],
+      signature: 'basil',
+      mix: ['mutant', 'turtle', 'ninja', 'teen', 'mutant', 'ninja'], pickups: ['basil', 'garlic', 'mushroom'],
       areas: [
         { id: 'harbor', name: "The Harbor", palette: { skyTop: '#8fc3d6', skyBottom: '#f6dfb2', ground: '#7a6650', top: '#a58f73' },
           customer: 'Caterlynna', who: 'Fisherwoman', instructions: 'Il forno sa. Follow the smell of the sea.',
@@ -308,7 +309,7 @@
     bow: 'The ninja catches it. Bows. Here it comes back.', feed: 'It catches it and goes back down the drain.',
     filmed: 'A teenager took your picture.', fire: 'Warm again, for now.',
     recovered: 'Topping back in hand.', note: 'New note on the board.', paper: 'Something was in the box.',
-    pickup: 'Three uses. The old topping is gone.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
+    pickup: 'Three uses. The old topping is gone.', unlocked: 'New topping! Three uses now, and it is on the menu for every pie after this.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
     flees: 'It ran off crying. It will not be back.', ninjaGone: 'It has had enough. It runs off and will not be back.', ninjaHit: 'It remembers that.',
     drain: 'Something in the storm drain.', almost: 'just ahead', missed: 'Rerouting...', bite: 'One bite and it goes home.', nope: 'Not this address yet.',
   };

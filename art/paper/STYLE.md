@@ -58,3 +58,20 @@ Scripts: `art/backgrounds/{paper_prep,paper_prep_props,paper_edit,paper,paper_ne
 - Near is drawn in code (`paper_near.py`): Qwen turned dark clutter into big white-bordered stickers at the wrong scale.
 - Paper grain is added after palette reduction (`paper.add_grain`, seeded white noise plus short fibres), so it survives.
 - Hazard tape, door numbers and white highlight bricks read as letters: redraw or fill them (see `clean_tape`, `ERASE`).
+
+## Characters recipe (settled on the New York cast, 2026-11-07)
+Tools live in `art/paper/`: `paperkit.py` (frames and masters to sheets), `pizzarig.py` (pizza run on the code rig),
+`paperpose.py` (humans on a pose skeleton). Run them with `FORGE_PROJECT=art PYTHONPATH=~/projects/sprite-forge`
+and sprite-forge's venv.
+1. **Master:** Qwen-Image-Edit 2511 on the current art plus `style_pm_sq.png` (`style_pm_tall.png` for tall figures). Generate 3 seeds
+   of 1-2 prompt variants in one job and pick one. Pick on: dot eyes, no brows, no lettering, two arms and two legs, flat fills.
+   The model's own white border is welcome but not needed: the next step normalises it.
+2. **Frames:** every other pose is Qwen on the finished master plus the same style reference, with the master named "image 1"
+   and the paper look restated. Pizzas run on the code rig; humans walk and flee on a pose skeleton (`paperpose.py`).
+3. **Reduction (`paperkit.py`):** key the figure off the magenta backdrop; peel the model's white border (near-white pixels connected
+   to the outside, up to twice its measured width) so every frame is borderless; reduce with one 48-colour palette from the master
+   and one scale for all frames; then add a 4 px (3 px under 110 px tall) #fbf6ea border and a 1 px #2a1830 rim in code. The border is
+   code-made on every frame, so a pose the model drew without one still has it.
+4. **Frame heights:** figure plus border plus rim fills the canvas height of the old art (hero 124, old timer 130, teen 118,
+   turtle 92, customers 150), so collision and the game's foot-pad grounding are untouched.
+5. **Check:** every frame at 2x for extra limbs, lettering and stray cast shadow before it is imported.

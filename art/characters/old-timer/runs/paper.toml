@@ -1,0 +1,19 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "Redraw the character from image 1 exactly as it is: the same paper standee, the same thick white paper border all around the silhouette like a sticker, the same flat colours, the same face style. Exactly two arms and two legs, two hands. {action} The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+refs = ["characters/old-timer/references/paper-master.png", "paper/style_pm_sq.png"]
+
+[shots.idle_b]
+prompt = "Idle: standing hunched, a long weary sigh, the shoulders drooped slightly lower, the eyes still two small black dots, the mouth a flat line under the mustache, both arms hanging."
+
+[shots.talk_open]
+prompt = "Talking: one grey-gloved hand raised with a bony finger pointing up as if lecturing, the other hand on his lower back, the mouth open as a small dark oval under the mustache, leaning forward slightly, the eyes still two small black dots."
+
+[shots.talk_closed]
+prompt = "Talking: one grey-gloved hand raised with a bony finger pointing up as if lecturing, the other hand on his lower back, the mouth shut as a flat line under the mustache, leaning forward slightly, the eyes still two small black dots."
+
+[shots.squint]
+prompt = "Squinting suspiciously: the two dot eyes become thin flat horizontal slits, the head tilted forward, one hand stroking the chin, the mouth a flat line under the mustache, leaning toward the viewer."

@@ -1,0 +1,14 @@
+# Idle: the master held, with a 1 px settle of the upper body.
+master = "characters/customer-newyork-brooklyn/paper-master.png"
+canvas = [120, 150]
+frame_ms = 240
+job = 225
+[[frames]]
+pose = "master"
+hold = 2
+[[frames]]
+pose = "master"
+sink = 1
+[[frames]]
+pose = "master"
+hold = 1
