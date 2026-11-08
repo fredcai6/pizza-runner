@@ -59,6 +59,19 @@ Scripts: `art/backgrounds/{paper_prep,paper_prep_props,paper_edit,paper,paper_ne
 - Paper grain is added after palette reduction (`paper.add_grain`, seeded white noise plus short fibres), so it survives.
 - Hazard tape, door numbers and white highlight bricks read as letters: redraw or fill them (see `clean_tape`, `ERASE`).
 
+### Rolled out to the other cities (2026-11-07)
+`paper_build.py CITY OUT` builds Chicago, DC, Naples and Long Beach with the New York steps (specs: `make_paper_spec_rest.py`,
+second-pass shots: `make_paper_fixups.py`, picks and cleared boxes: `paper_picks_rest.json`). Findings that changed the recipe:
+- A far layer carries no near-black: `lift_dark` pulls a model-drawn black tower to a slate. Far also drops any band of dark hills or houses
+  along its bottom edge by choosing the seed that has none.
+- The Loop's elevated railway is drawn in code (`paper_near.elevated_line`) and goes behind the mid buildings; Qwen drew it as floating
+  lilac pillars once keyed. `BEHIND` in `paper_build.py` lists such pieces per area.
+- Anything a back layer must not contain (a clock tower, potted plants) is asked away in a second-pass prompt, or cut with a `clear` box.
+- Grounds differ per area (slabs, bricks, cobbles, sand) but every one starts with a cut line on its first row, so the street reads as
+  starting at y 600, where the mid's street line sits and the characters' feet sink 8 px.
+- Shared props (`paper_props_shared.py`) and topping pickups are drawn in code at 1:1; pickups are sticker discs with the topping drawn large.
+- `shoot_areas.js` and `seams.py` make the review screenshots: each area in play, each door scene and each wrap point.
+
 ## Characters recipe (settled on the New York cast, 2026-11-07)
 Tools live in `art/paper/`: `paperkit.py` (frames and masters to sheets), `pizzarig.py` (pizza run on the code rig),
 `paperpose.py` (humans on a pose skeleton). Run them with `FORGE_PROJECT=art PYTHONPATH=~/projects/sprite-forge`
