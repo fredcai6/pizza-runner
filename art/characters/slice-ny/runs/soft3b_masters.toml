@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.h_1]
+refs = ["tests/soft-pizzas/guides/slice-ny-g1.png", "paper/style_pm_sq.png"]
+prompt = "Image 1 is a flat-colour silhouette guide for a pizza slice mascot. Repaint it as a paper standee as a paper standee: Paper Mario style papercraft cutout, a thick white paper cut border all around, clean flat colours with one soft shade, a faint paper grain, and a Charlie the Unicorn style flat deadpan face: two small plain blank black dot eyes, no eyebrows, no white eyeballs, no pupils, a flat or very slightly bent line mouth, deadpan. KEEP image 1's exact silhouette, proportions and pose: every soft rounded curve, bulge, bend and droop must stay as drawn, never straightened into a rigid triangle. The character is Vinny, a New York cheese slice with a plain crust, two pepperoni, white gloves and red sneakers, with rounded corners and a soft bulge. Draw the face once only, on the clean cheese. Standing, the whole figure visible head to feet. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.h_2]
+refs = ["tests/soft-pizzas/guides/slice-ny-g2.png", "paper/style_pm_sq.png"]
+prompt = "Image 1 is a flat-colour silhouette guide for a pizza slice mascot. Repaint it as a paper standee as a paper standee: Paper Mario style papercraft cutout, a thick white paper cut border all around, clean flat colours with one soft shade, a faint paper grain, and a Charlie the Unicorn style flat deadpan face: two small plain blank black dot eyes, no eyebrows, no white eyeballs, no pupils, a flat or very slightly bent line mouth, deadpan. KEEP image 1's exact silhouette, proportions and pose: every soft rounded curve, bulge, bend and droop must stay as drawn, never straightened into a rigid triangle. The character is Vinny, a New York cheese slice with a plain crust, two pepperoni, white gloves and red sneakers, with rounded corners and a soft bulge. Draw the face once only, on the clean cheese. Standing, the whole figure visible head to feet. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

@@ -1,0 +1,49 @@
+{
+ "slice-deep": {"top": "2", "options": {
+  "1": {"tag": "a", "seed": 2, "read": "Rounder crust that bulges at both ends and a wider, rounder body; still saucy with long drips and the fat drop. The mildest change."},
+  "2": {"tag": "b", "seed": 3, "read": "Plump belly with a rounded tip and a thick pillowy crust wall: the softest silhouette of rounds 1-2, still saucy and pan-baked."},
+  "3": {"tag": "e", "seed": 1, "read": "Crust drawn as puffy scalloped pillows like a pan pie wall, sauce piled on top and dripping; reads most clearly as deep dish."},
+  "4": {"tag": "e", "seed": 2, "read": "Scalloped crust wall with a rolled end and loose sauce drips; the lumpiest, most pan-pie look."}},
+  "round3": {"top": "5", "intent": "Guide: a stubby plump wedge under a tall thick pan-crust wall, sauce piled on top and dripping down the front. Honest read: the guide shape was followed exactly and is far softer, but it has gone past a slice into a muffin or acorn; the saucy look and the heavy boots survive.",
+   "options": {
+  "5": {"tag": "h1", "seed": 1, "read": "Glossy sauce piled on a thick crust cap, plump rounded body, heavy boots. Softest, and clearly saucy; reads more muffin than slice."},
+  "6": {"tag": "h1", "seed": 2, "read": "Same shape with darker, drippier sauce and a flatter paper finish."},
+  "7": {"tag": "h2", "seed": 1, "read": "Taller wall variant: the crust cap is deeper and the body shorter, so the most deep-dish and the least slice-like."},
+  "8": {"tag": "h2", "seed": 2, "read": "Taller-wall variant with deep red sauce and white gloves; the heaviest looking."}}},
+  "round4": {"top": "9", "intent": "Guide: a clear wedge tapering to a rounded point, plumper than the current master, with a tall flat-topped pan-crust band across the top and sauce piled on and dripping down the front. Honest read: this one reads as a soft deep-dish slice again, a wedge not a muffin; its sides are only gently convex, so it is softer than the current Stan but less dramatically than round 3.",
+   "options": {
+  "9": {"tag": "i1", "seed": 1, "read": "Glossy sauce over a tall crust band with a slight lip, rounded point, white gloves; the most saucy and the most slice-like."},
+  "10": {"tag": "i1", "seed": 2, "read": "Same wedge with a flat-matte crust band and a deadpan frown; the cleanest silhouette of the set."},
+  "11": {"tag": "i2", "seed": 1, "read": "Taller band variant: a deeper crust wall over a slightly shorter wedge, glossy sauce."},
+  "12": {"tag": "i2", "seed": 2, "read": "Band drawn with pan-pie creases, darker sauce and a frown; the most pan-baked looking."}}}},
+ "slice-jumbo": {"top": "3", "options": {
+  "1": {"tag": "a", "seed": 2, "read": "Rounded corners and a fuller body, crust edge thinner and smoother; the tip is only slightly droopy."},
+  "2": {"tag": "a", "seed": 3, "read": "A thin plain crust edge (the rolled tube is gone) over a softly curved body; closest to the plain-crust note."},
+  "3": {"tag": "b", "seed": 3, "read": "Thin crust edge that bows, with softly curved sides and a rounder tip; the floppiest of rounds 1-2, still stiff."},
+  "4": {"tag": "d", "seed": 1, "read": "Thin, wide plain crust with a wavy edge, rounded corners and a cheese drip; plainest crust, little droop."}},
+  "round3": {"top": "5", "intent": "Guide: a very long, wide, thin slice with a plain flat crust strip; the front third folds under its own weight and the tip droops and curls. Honest read: the thin plain crust and the folded, drooping tip finally appear and it is clearly floppier, but the wide top gives a cup or bowl look and the tiny legs hang below it.",
+   "options": {
+  "5": {"tag": "h1", "seed": 1, "read": "Thin plain crust strip, wide body, front folding over into a drooping, curling tip, wavy mouth kept. The floppiest by far."},
+  "6": {"tag": "h2", "seed": 1, "read": "Same fold lower down and longer: the tip hangs between the legs. More droop, more cup-like."}}},
+  "round4": {"top": "7", "intent": "Guide: a long wedge that tapers like a slice with a thin plain crust edge, the bottom third bending forward and down into a drooping tip, long legs coming out below the middle. Honest read: it no longer reads as a cup and the legs can stand, but it tapers so hard that it looks like an inverted cone or ice-cream wedge, the fold reads as a banana-shaped tail, and only Phil 7 kept its gloves (8 and 9 have bare arm ends).",
+   "options": {
+  "7": {"tag": "i1", "seed": 1, "read": "Thin plain crust, tapering wedge, fold ending in a curling tip, round gloves, long legs. The only one with hands and the best droop."},
+  "8": {"tag": "i1", "seed": 2, "read": "Same shape in softer, flatter yellow with a short drooping tail; no gloves on the arms."},
+  "9": {"tag": "i2", "seed": 1, "read": "Longer drop of the folded part, tail hanging down beside the right leg; no gloves."}}}},
+ "slice-naples": {"top": "2", "options": {
+  "1": {"tag": "b", "seed": 2, "read": "Puffy leopard-spotted crust with a bulging, sagging body and rounded tip; the softest outline of rounds 1-2."},
+  "2": {"tag": "c", "seed": 3, "read": "Plump blistered crust, curved sides and a softly rounded tip; still reads as the same Contessa."},
+  "3": {"tag": "d", "seed": 1, "read": "Very puffy cornicione with rounder edges; the leopard spotting stays bold and her smirk stays crisp."},
+  "4": {"tag": "e", "seed": 2, "read": "Pillowy crust with a limper, drooping lower tip; more bend than the others."}},
+  "round3": {"top": "5", "intent": "Guide: a small rounded wedge with a puffy bubbly leopard-spotted rim, mozzarella and basil blobs, a soft belly curve. Honest read: the shape was followed and is much softer and rounder; the margherita reads as a plump shield with a puffy crust.",
+   "options": {
+  "5": {"tag": "g1", "seed": 2, "read": "Puffy speckled crust over a red sauce shield with a cream mozzarella centre and basil dots; soft, round, on-model."},
+  "6": {"tag": "g2", "seed": 2, "read": "Deeper belly curve under a spotted crust; the roundest and plumpest."}}}},
+ "slice-ny": {"top": "1", "current_read": "Tommy's original pick, unchanged in the game.", "options": {
+  "1": {"tag": "b", "seed": 2, "read": "Rounder crust and a plump rounded body, clearly softer yet still Vinny; the only round 1-2 option with a real silhouette change."},
+  "2": {"tag": "b", "seed": 3, "read": "Same softening with a paler, creamier cheese and a slightly drooping tip."}},
+  "round3": {"top": "3", "intent": "Guide: his proportions with rounded corners and a slight soft bulge. Honest read: this overshot, since he is now a rounded shield with a flat crust cap; softer, but he lost his curled crust and his look, so only for a bolder change.",
+   "options": {
+  "3": {"tag": "h1", "seed": 1, "read": "Rounded shield body, flat crust cap, one pepperoni near the point; very soft, less recognisably Vinny."},
+  "4": {"tag": "h2", "seed": 1, "read": "Slightly shallower bulge with white gloves; the closest of round 3 to him."}}}}
+}
