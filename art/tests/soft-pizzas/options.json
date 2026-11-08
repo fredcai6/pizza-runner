@@ -1,0 +1,20 @@
+{
+ "slice-deep": {"top": "2", "options": {
+  "1": {"tag": "a", "seed": 2, "read": "Rounder crust that bulges at both ends and a wider, rounder body; still saucy with long drips and the fat drop. The mildest change."},
+  "2": {"tag": "b", "seed": 3, "read": "Plump belly with a rounded tip and a thick pillowy crust wall: the softest silhouette of the four, still saucy and pan-baked."},
+  "3": {"tag": "e", "seed": 1, "read": "Crust drawn as puffy scalloped pillows like a pan pie wall, sauce piled on top and dripping; reads most clearly as deep dish."},
+  "4": {"tag": "e", "seed": 2, "read": "Scalloped crust wall with a rolled end and loose sauce drips; the lumpiest, most pan-pie look."}}},
+ "slice-jumbo": {"top": "3", "options": {
+  "1": {"tag": "a", "seed": 2, "read": "Rounded corners and a fuller body, crust edge thinner and smoother; the tip is only slightly droopy."},
+  "2": {"tag": "a", "seed": 3, "read": "A thin plain crust edge (the rolled tube is gone) over a softly curved body; closest to the plain-crust note."},
+  "3": {"tag": "b", "seed": 3, "read": "Thin crust edge that bows, with softly curved sides and a rounder tip; the floppiest of this set."},
+  "4": {"tag": "d", "seed": 1, "read": "Thin, wide plain crust with a wavy edge, rounded corners and a cheese drip; plainest crust, little droop."}}},
+ "slice-naples": {"top": "2", "options": {
+  "1": {"tag": "b", "seed": 2, "read": "Puffy leopard-spotted crust with a bulging, sagging body and rounded tip; the softest outline."},
+  "2": {"tag": "c", "seed": 3, "read": "Plump blistered crust, curved sides and a softly rounded tip; still reads as the same Contessa."},
+  "3": {"tag": "d", "seed": 1, "read": "Very puffy cornicione with rounder edges; the leopard spotting stays bold and her smirk stays crisp."},
+  "4": {"tag": "e", "seed": 2, "read": "Pillowy crust with a limper, drooping lower tip; more bend than the others."}}},
+ "slice-ny": {"top": "1", "current_read": "Tommy's original pick, unchanged in the game.", "options": {
+  "1": {"tag": "b", "seed": 2, "read": "Rounder crust and a plump rounded body, clearly softer yet still Vinny; the only option here with a real silhouette change."},
+  "2": {"tag": "b", "seed": 3, "read": "Same softening with a paler, creamier cheese and a slightly drooping tip."}}}
+}

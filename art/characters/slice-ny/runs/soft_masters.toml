@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.s_a]
+refs = ["characters/slice-ny/references/paper-master.png", "paper/style_pm_sq.png"]
+prompt = "Image 1 is Vinny, a finished paper standee pizza slice mascot. Redraw Vinny, the New York cheese pizza slice, softer. Keep him recognisably the same Vinny: same crust, cheese, two pepperoni, white gloves and red sneakers. Soften the shapes: round every corner, give every edge a soft bulge and curve, bend the whole body gently, and use soft, rounder, curvier limbs. No rigid flat triangle, no straight stiff edges. Keep exactly image 1's material, thick white paper cut border, clean flat colours with one soft shade, and above all its face: two small plain blank black dot eyes, no eyebrows, no white eyeballs, no pupils, a flat or very slightly bent line mouth, deadpan. Standing and facing slightly right, the whole figure visible head to feet. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.s_b]
+refs = ["characters/slice-ny/references/paper-master.png", "paper/style_pm_sq.png"]
+prompt = "Image 1 is Vinny, a finished paper standee pizza slice mascot. Redraw Vinny, the New York slice, as a soft, pillowy, slightly drooping slice, recognisably the same Vinny with the same crust, cheese, two pepperoni, white gloves and red sneakers. Make the whole body soft and pillowy like a squishy cloth toy: very rounded corners, plump bulging edges, a gentle S-curve bend in the body, noodle-soft arms and legs, and a rounded tip instead of a sharp point. It must still read instantly as a pizza slice. Keep exactly image 1's material, thick white paper cut border, clean flat colours with one soft shade, and above all its face: two small plain blank black dot eyes, no eyebrows, no white eyeballs, no pupils, a flat or very slightly bent line mouth, deadpan. Standing and facing slightly right, the whole figure visible head to feet. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
