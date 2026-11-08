@@ -140,6 +140,51 @@
     return true;
   }
 
+
+  // A pizza character as a sticker: one idle frame, dressed in its topping, cropped to the drawing. The
+  // size comes from the atlas, so redrawn art drops in. grey is a spent slice: drained of colour and faded.
+  const portraits = {}, portraitUrls = {};
+  function portrait(style, topping, { grey = false, count = 3 } = {}) {
+    const key = `${style}|${topping || ''}|${topping ? count : 0}|${grey}`;
+    if (portraits[key]) return portraits[key];
+    const s = loaded[`slice-${style}/idle`];
+    if (!s) return null;
+    const { w, h } = s.atlas.frame;
+    const worn = topping && dressed(s, 0, { piece: `props/piece-${topping}-${style}`, count });
+    const full = document.createElement('canvas');
+    full.width = w; full.height = h;
+    const g = full.getContext('2d', { willReadFrequently: true });
+    if (worn) g.drawImage(worn, 0, 0); else g.drawImage(s.image, 0, 0, w, h, 0, 0, w, h);
+    const px = g.getImageData(0, 0, w, h), d = px.data;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return null;
+    if (grey) for (let i = 0; i < d.length; i += 4) { const v = d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; d[i] = d[i + 1] = d[i + 2] = 120 + v * 0.35; d[i + 3] *= 0.5; }
+    const out = document.createElement('canvas');
+    out.width = x1 - x0 + 1; out.height = y1 - y0 + 1;
+    const o = out.getContext('2d');
+    if (grey) { g.putImageData(px, 0, 0); o.drawImage(full, x0, y0, out.width, out.height, 0, 0, out.width, out.height); }
+    else o.drawImage(full, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+    return (portraits[key] = out);
+  }
+  const portraitUrl = (style, topping, opts) => {
+    const key = `${style}|${topping || ''}|${JSON.stringify(opts || {})}`;
+    if (!portraitUrls[key]) { const c = portrait(style, topping, opts); portraitUrls[key] = c ? c.toDataURL() : ''; }
+    return portraitUrls[key];
+  };
+
+  // Draws a portrait contained in a box, bottom centre at (x, bottom). False when there is no art.
+  function stamp(ctx, style, topping, x, bottom, boxW, boxH, opts) {
+    const c = portrait(style, topping, opts);
+    if (!c) return false;
+    const k = Math.min(boxW / c.width, boxH / c.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, Math.round(x - c.width * k / 2), Math.round(bottom - c.height * k), Math.round(c.width * k), Math.round(c.height * k));
+    return true;
+  }
+
+  const size = (character, anim = 'idle') => { const s = loaded[`${character}/${anim}`]; return s ? s.atlas.frame : null; };
+
   const has = (character, anim) => !!loaded[`${character}/${anim}`];
 
   // Puts toppings on one frame: pieces at the frame's seats, behind whatever crosses the surface.
@@ -221,5 +266,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, loadCity, needsCity, layer, tile, ground, prop, strip, has, draw };
+  root.PR_SPRITES = { load, loadLayers, loadCity, needsCity, layer, tile, ground, prop, strip, has, draw, portrait, portraitUrl, stamp, size };
 })(window);

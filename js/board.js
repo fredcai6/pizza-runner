@@ -63,7 +63,8 @@
   function roster(camp) {
     return scatter(R.roster(camp).map(r => {
       const s = C.STYLES[r.style], city = C.CITIES.find(c => c.id === r.city).name;
-      return `<div class="agent ${r.taped ? 'taped' : ''}"><b>${C.SPEAKERS[r.style]}</b><span>${s.name} of ${city}</span><span class="bio">${s.bio}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '' : `<span>${r.left} of 6 left</span>`}${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
+      const pie = camp.pies[r.city], pic = root.PR_SPRITES.portraitUrl(r.style, pie && pie.topping);
+      return `<div class="agent ${r.taped ? 'taped' : ''}"><img class="agentpic" src="${pic}" alt=""><b>${C.SPEAKERS[r.style]}</b><span>${s.name} of ${city}</span><span class="bio">${s.bio}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '' : `<span>${r.left} of 6 left</span>`}${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
     }), { cell: [170, 150], salt: 5 });
   }
 

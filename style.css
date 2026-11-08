@@ -77,14 +77,13 @@ h2 { align-self: flex-start; font: 700 28px/1.1 var(--display); color: var(--tex
 
 .radio { font-style: italic; font-weight: 400; font-size: 18px; border-left: 6px solid var(--coral); padding-left: 10px; }
 .slices { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-.slice { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: var(--paper); border: 4px solid #fff; border-radius: 10px; box-shadow: var(--cut-s); font: 700 14px var(--body); color: var(--text); text-align: left; }
+.slice { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--paper); border: 4px solid #fff; border-radius: 10px; box-shadow: var(--cut-s); font: 700 14px var(--body); color: var(--text); text-align: left; }
+.slice img { width: 44px; height: 44px; object-fit: contain; flex: none; image-rendering: pixelated; }
+.slice .sl { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .slice b { font-family: var(--display); font-weight: 600; font-size: 15px; }
 .lore { font-size: 14px; font-style: italic; font-weight: 400; color: #6b4b6f; }
 .lore p + p { margin-top: 6px; }
 
-.wheel { width: 150px; height: 150px; margin: 8px auto; border-radius: 50%; border: 8px solid #fff; box-shadow: var(--cut); background: repeating-conic-gradient(var(--sun) 0 30deg, var(--coral) 30deg 60deg); }
-.wheel.spinning { animation: spin .5s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 .ticket { background: var(--card); border: 4px dashed var(--text); padding: 12px; text-align: center; }
 .ticket h3 { font: 600 18px var(--display); }
 
@@ -153,6 +152,7 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .alias { background: var(--paper); padding: 3px 8px; font: 700 13px var(--body); box-shadow: 2px 2px 0 rgba(42,24,48,.8); }
 .roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .agent { position: relative; background: var(--paper); padding: 10px; display: flex; flex-direction: column; font: 700 13px var(--body); color: var(--text); overflow: hidden; min-height: 76px; }
+.agentpic { align-self: center; height: 64px; max-width: 100%; object-fit: contain; image-rendering: pixelated; margin-bottom: 4px; }
 .agent b { font-family: var(--display); font-weight: 600; font-size: 15px; }
 .tape { position: absolute; inset: 22% -10%; display: flex; align-items: center; justify-content: center; background: var(--coral); color: #fff; font: 700 15px var(--display); letter-spacing: 1.5px; transform: rotate(-6deg); border-top: 3px dashed rgba(255,255,255,.7); border-bottom: 3px dashed rgba(255,255,255,.7); box-shadow: 2px 3px 0 rgba(42,24,48,.8); }
 .card { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; text-align: center; }
@@ -211,7 +211,8 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .mapside .tally, .mapside .dispatch { background: var(--paper); border: 3px solid #fff; border-radius: 10px; padding: 5px 8px; box-shadow: var(--cut-s); }
 .dispatch { font-size: 13px; font-style: italic; font-weight: 400; border-left: 6px solid var(--coral); }
 .mapside .slices { grid-template-columns: 1fr; gap: 6px; }
-.mapside .slice { padding: 5px 8px; flex-direction: row; justify-content: space-between; border-width: 3px; }
+.mapside .slice { padding: 4px 8px; border-width: 3px; }
+.mapside .slice img { width: 38px; height: 38px; }
 .slice.on { background: var(--paper2); outline: 3px solid var(--coral); }
 .mapactions .actions { gap: 8px; }
 .mapactions .actions button { padding: 8px; font-size: 16px; border-width: 3px; }
@@ -233,28 +234,28 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .landmark { font-size: 20px; font-style: italic; font-weight: 700; fill: #7a6048; }
 .routeline { fill: none; stroke: var(--coral); stroke-width: 5; stroke-dasharray: 3 11; stroke-linecap: round; }
 
-/* ---- Build Your Pie: tab title, sticker grid, a pizza on a spotlight disc ---- */
+/* ---- Build Your Pie: the pizza character on a spotlight disc, a sticker grid of toppings ---- */
 .sheet:has(.select) { max-width: 940px; }
 .select { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; background: var(--teal); border: 4px solid #fff; border-radius: 18px; box-shadow: var(--cut); padding: 16px; color: var(--text); }
 .select h2 { background: var(--sun); }
 .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
 .tile { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; background: var(--paper); border: 4px solid #fff; border-radius: 12px; box-shadow: var(--cut-s); color: var(--text); font: 600 12px var(--display); }
-.tile svg { width: 62%; }
+.tile img { width: 52%; max-height: 62%; object-fit: contain; image-rendering: pixelated; }
 .tile.lock { background: rgba(255,255,255,.4); border-style: dashed; border-color: rgba(255,255,255,.85); box-shadow: none; color: rgba(59,42,90,.45); font-size: 26px; }
 .tile.on { background: var(--paper2); outline: 4px solid var(--coral); outline-offset: 2px; animation: cursor .6s steps(2) infinite; }
 @keyframes cursor { 50% { outline-color: var(--sun); } }
 .hint { font: 700 13px var(--body); color: var(--text); margin-top: 10px; }
 .fighter { display: flex; flex-direction: column; gap: 12px; }
 .stage { background: radial-gradient(ellipse 52% 17% at 50% 82%, #fff 0 78%, transparent 80%), radial-gradient(ellipse 48% 14% at 50% 82%, var(--paper) 0 99%, transparent 100%); padding: 6px; }
-.bigpie { width: 100%; max-height: 40vh; display: block; animation: bob 1.2s ease-in-out infinite; filter: drop-shadow(4px 5px 0 var(--ink)); }
-@keyframes bob { 50% { transform: translateY(-5px) rotate(1.5deg); } }
+.fighterart { width: 100%; max-height: 42vh; aspect-ratio: 1; display: block; margin: 0 auto; }
+.byline { font: 700 13px var(--body); color: #6b4b6f; }
 .plate { background: var(--paper); border: 4px solid #fff; border-radius: 12px; box-shadow: var(--cut); padding: 10px 14px; font-family: var(--body); }
 .fname { display: block; font: 700 26px var(--display); color: var(--text); }
 .fclass { display: inline-block; background: var(--coral); color: #fff; border-radius: 6px; padding: 0 9px; font: 600 13px var(--display); letter-spacing: 1px; text-transform: uppercase; }
 .plate .blurb { font-style: normal; font-weight: 700; font-size: 16px; margin: 6px 0; }
 .stat { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 1px; }
 .stat i { display: inline-block; width: 100px; height: 10px; background: linear-gradient(90deg, var(--sun) calc(var(--v) * 20%), #e6dcc0 0); border: 2px solid var(--ink); border-radius: 5px; }
-@media (max-height: 480px) { .select { grid-template-columns: 1fr 1fr; padding: 8px; gap: 8px; } .select h2 { font-size: 18px; } .tile span { display: none; } .tile { aspect-ratio: 1.3; } .bigpie { max-height: 28vh; } .plate .blurb { font-size: 13px; } .fname { font-size: 19px; } .sheet:has(.select) { gap: 8px; } .tiles { gap: 7px; margin-top: 8px; } h1 { margin-top: 2vh; } .actions { gap: 10px; } .actions button { padding: 9px; font-size: 17px; } h2 { font-size: 22px; } }
+@media (max-height: 480px) { .select { grid-template-columns: 1fr 1fr; padding: 8px; gap: 8px; } .select h2 { font-size: 18px; } .tile span { display: none; } .tile { aspect-ratio: 1.3; } .fighterart { max-height: 30vh; } .plate .blurb { font-size: 13px; } .fname { font-size: 19px; } .sheet:has(.select) { gap: 8px; } .tiles { gap: 7px; margin-top: 8px; } h1 { margin-top: 2vh; } .actions { gap: 10px; } .actions button { padding: 9px; font-size: 17px; } h2 { font-size: 22px; } }
 
 /* ---- the corkboard: loose pins, overlap, tilt, tape and yarn ---- */
 .cork { position: relative; margin: 6px auto 0; }

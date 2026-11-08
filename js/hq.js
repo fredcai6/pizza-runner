@@ -76,12 +76,11 @@
 
   // These shots lean over the table, so the recruits are out of the picture.
   const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle']);
-  const OUTLINE_CSS = '#1e1030';
   let spots = { ny: [], deep: [], jumbo: [], naples: [] };
   fetch('assets/backgrounds/hq/recruit-spots.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) spots = j; }).catch(() => {});
 
   // The recruits stand on the table: plain and cold at first, then wearing their topping
-  // once they have been out. The row of wedges beneath shows the slices still left.
+  // once they have been out. The row of little portraits beneath shows the slices still left.
   function recruit(ctx, x, foot, z, ms) {
     const plain = `recruit-${z.style}`, st = C.STYLES[z.style];
     if (!S.draw(ctx, plain, 'idle', ms, x, foot, st.height)) S.draw(ctx, `slice-${z.style}`, 'idle', ms, x, foot, st.height) || P.drawSlice(ctx, x, foot - 50, z.style, null, '#d9d0ae', 2);
@@ -90,10 +89,7 @@
       ctx.imageSmoothingEnabled = false;
       for (const [dx, dy] of spots[z.style]) ctx.drawImage(art, Math.round(x + dx - art.width / 2), Math.round(foot + dy - art.height / 2));
     }
-    for (let i = 0; i < 6; i++) {
-      ctx.fillStyle = OUTLINE_CSS; ctx.fillRect(x - 45 + i * 16, foot + 8, 12, 12);
-      ctx.fillStyle = i < z.left ? '#ffcc33' : '#4a3a3a'; ctx.fillRect(x - 43 + i * 16, foot + 10, 8, 8);
-    }
+    for (let i = 0; i < R.SLICES; i++) S.stamp(ctx, z.style, z.topping, x - 42 + i * 17, foot + 28, 16, 19, { grey: i >= z.left });
   }
 
   // Dossier photos on the cork, as fractions of the board, each a little off true: [type, fx, fy, tilt in degrees, dx, dy].
