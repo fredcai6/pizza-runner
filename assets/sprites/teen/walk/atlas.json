@@ -7,12 +7,16 @@
  "frame_ms": 100,
  "loop": true,
  "rev": {
-  "sha": "f70d6866ba4b2bb9f80ac4de8327fc6cb249b398",
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
   "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "ff7b09a6d5426ddf21928eb97321b36a078945a6",
+  "dirty": true
+ },
  "source": {
-  "poseguide": "qwen-pose-run",
+  "poseguide": "qwen-pose-paper",
   "motion": "walk-texting",
   "seed": 2,
   "place": "skel",
@@ -25,6 +29,9 @@
    5,
    6,
    7
-  ]
+  ],
+  "master": "characters/teen/references/paper-master.png",
+  "border": 4,
+  "palette": 48
  }
 }
