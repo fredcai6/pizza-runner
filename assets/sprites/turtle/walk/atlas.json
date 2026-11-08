@@ -7,19 +7,27 @@
  "frame_ms": 220,
  "loop": true,
  "rev": {
-  "sha": "dba610b1dabc92df070e60c3ea1e9d126b8d46d5",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "a0d4086d16d0c8af819a0f18398d0b55161a115f",
+  "dirty": true
+ },
  "source": {
-  "run": "keys",
-  "model": "klein",
-  "cell": 9.2,
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 228,
+  "master": "characters/turtle/references/paper-master.png",
+  "cell": 9.429,
+  "border": 3,
+  "palette": 48,
   "poses": [
-   "walk_a/1",
-   "walk_c/1",
-   "walk_b/1",
-   "walk_c/1"
+   "walk_a/2",
+   "walk_b/2",
+   "walk_a/3",
+   "walk_b/3"
   ]
  }
 }

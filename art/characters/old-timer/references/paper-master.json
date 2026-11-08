@@ -1,0 +1,21 @@
+{
+ "model": "qwen-edit",
+ "shot": "ot_A",
+ "seed": 2,
+ "prompt": "Full body character art for a 2D platformer, the whole figure visible head to boots, standing hunched and facing the viewer. The character is the ancient stale old pizza slice sergeant from image 1: a weathered triangular slice with dull cracked matte cheese, only two shrivelled pepperoni, a thin crust along the top, thin arms and legs, grey gloves, worn brown boots, wearing an old-school police hat (a dark navy peaked cap with a flat brim and a small plain gold badge with no lettering) and a big bushy grey-white angry mustache that droops down at both sides above a flat line mouth. Paper Mario style papercraft standee: the whole character is a flat cut-out of printed card, a thick white paper border all around the silhouette like a sticker, a visible fold crease line across the body, a slightly curled corner, a visible paper fibre texture and soft matte printing, simple bold shapes, flat colours. The face is a Charlie the Unicorn style flat deadpan face: two small plain black dot eyes, no eyebrows, a flat line mouth hidden under the mustache, almost no detail. Gentle soft shading with a little highlight and a soft shade under each fold, still clean and flat. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "refs": [
+  "characters/old-timer/references/old_seed1.png",
+  "paper/style_pm_sq.png"
+ ],
+ "size": [
+  1024,
+  1024
+ ],
+ "steps": null,
+ "secs": 17.1,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ }
+}

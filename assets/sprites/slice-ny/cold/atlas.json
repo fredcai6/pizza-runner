@@ -7,17 +7,25 @@
  "frame_ms": 140,
  "loop": true,
  "rev": {
-  "sha": "4d5dab1f2b8112e5de50b033def4d5e0d765014c",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "e2f387bb737c2581a87fed5ddcb674dd3a7b1f5f",
+  "dirty": true
+ },
  "source": {
-  "run": "keys3",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 7.16,
+  "job": 225,
+  "master": "characters/slice-ny/references/paper-master.png",
+  "cell": 7.605,
+  "border": 4,
+  "palette": 48,
   "poses": [
-   "cold_a/1",
-   "cold_b/1"
+   "cold_a/2",
+   "cold_a/3"
   ]
  }
 }

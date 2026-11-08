@@ -1,0 +1,33 @@
+{
+ "frame": {
+  "w": 120,
+  "h": 150
+ },
+ "count": 4,
+ "frame_ms": 240,
+ "loop": true,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "e2f387bb737c2581a87fed5ddcb674dd3a7b1f5f",
+  "dirty": true
+ },
+ "source": {
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 225,
+  "master": "characters/customer-newyork-wallstreet/paper-master.png",
+  "cell": 7.036,
+  "border": 4,
+  "palette": 48,
+  "poses": [
+   "master",
+   "master",
+   "master",
+   "master"
+  ]
+ }
+}

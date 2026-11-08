@@ -1,0 +1,21 @@
+{
+ "model": "qwen-edit",
+ "shot": "m_A",
+ "seed": 3,
+ "prompt": "Full body character art for a 2D platformer, the whole figure visible head to feet, standing in a side view facing right. The character is the teenager from image 1: messy brown hair over one eye, orange hoodie, baggy blue jeans, big white sneakers, both hands holding a glowing phone in front of the chest, head bowed over it.  Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is simple and readable: one small dot eye and a flat bored line mouth, no detail. No mask, no weapons. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "refs": [
+  "characters/teen/references/master.png",
+  "paper/style_pm_tall.png"
+ ],
+ "size": [
+  1024,
+  1024
+ ],
+ "steps": null,
+ "secs": 15.6,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ }
+}

@@ -7,19 +7,27 @@
  "frame_ms": 200,
  "loop": true,
  "rev": {
-  "sha": "184b424b4e6f46a1289bf61bcdfc6ebdff881f08",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "f21e0fe84285eed56992b9804d088a5ca1321ee5",
+  "dirty": true
+ },
  "source": {
-  "run": "keys3",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 8.3,
+  "job": 227,
+  "master": "characters/teen/references/paper-master.png",
+  "cell": 8.481,
+  "border": 4,
+  "palette": 48,
   "poses": [
-   "film_a/1",
-   "film_a/1",
-   "film_b/1",
-   "film_b/1"
+   "film_b/2",
+   "film_b/2",
+   "film_b/3",
+   "film_b/3"
   ]
  }
 }

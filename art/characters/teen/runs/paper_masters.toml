@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/teen/references/master.png", "paper/style_pm_tall.png"]
+prompt = "Full body character art for a 2D platformer, the whole figure visible head to feet, standing in a side view facing right. The character is the teenager from image 1: messy brown hair over one eye, orange hoodie, baggy blue jeans, big white sneakers, both hands holding a glowing phone in front of the chest, head bowed over it.  Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is simple and readable: one small dot eye and a flat bored line mouth, no detail. No mask, no weapons. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.m_B]
+refs = ["characters/teen/references/master.png", "paper/style_pm_tall.png"]
+prompt = "Full body character art for a 2D platformer, the whole figure visible head to feet, standing in a side view facing right. The character is the teenager from image 1: messy brown hair over one eye, orange hoodie, baggy blue jeans, big white sneakers, both hands holding a glowing phone in front of the chest, head bowed over it.  Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is simple and readable: one small dot eye and a flat bored line mouth, no detail. No mask, no weapons. Gentle soft shading with a little highlight and a soft shade under each fold, still clean and flat. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

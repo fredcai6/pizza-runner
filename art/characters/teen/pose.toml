@@ -1,3 +1,4 @@
+master = "references/paper-master.png"
 canvas = [112, 118]
 ground = 114
 hip_x = 52
