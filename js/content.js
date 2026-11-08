@@ -85,7 +85,7 @@
     {
       id: 'chicago', name: 'Chicago', style: 'deep', seed: 53, stretch: 3200, gap: 620,
       signature: 'garlic',
-      mix: ['teen', 'turtle', 'mutant', 'teen', 'turtle'], pickups: ['jalapeno', 'pepperoni'], watchers: true,
+      mix: ['teen', 'turtle', 'mutant', 'teen', 'turtle'], pickups: ['sausage', 'pepperoni', 'garlic'], watchers: true,
       areas: [
         { id: 'loop', name: "The Loop", palette: { skyTop: '#7f98b3', skyBottom: '#d4dde0', ground: '#49545c', top: '#6c7a83' },
           customer: 'Kæthlynn', who: 'Da Gal', instructions: "Top floor. Keep the box level. The buzzer's broken. So is the elevator.",
@@ -131,7 +131,7 @@
     {
       id: 'dc', name: 'Washington, DC', style: 'jumbo', seed: 41, stretch: 3500, gap: 600,
       signature: 'jalapeno',
-      mix: ['ninja', 'teen', 'turtle', 'mutant', 'teen', 'ninja'], pickups: ['pineapple', 'jalapeno'],
+      mix: ['ninja', 'teen', 'turtle', 'mutant', 'teen', 'ninja'], pickups: ['sausage', 'pepperoni', 'pineapple'],
       areas: [
         { id: 'georgetown', name: "Georgetown", palette: { skyTop: '#c4b5a8', skyBottom: '#f1e3cf', ground: '#7c5a4b', top: '#a18072' },
           customer: 'Xaitlyn', who: 'Professor', instructions: 'Security will wave you through. Walk like you belong.',
@@ -171,7 +171,7 @@
     {
       id: 'naples', name: 'Naples', style: 'naples', seed: 37, stretch: 4600, gap: 640, predicts: true,
       signature: 'basil',
-      mix: ['mutant', 'turtle', 'ninja', 'teen', 'mutant', 'ninja'], pickups: ['jalapeno', 'sausage'],
+      mix: ['mutant', 'turtle', 'ninja', 'teen', 'mutant', 'ninja'], pickups: ['basil', 'garlic', 'mushroom'],
       areas: [
         { id: 'harbor', name: "The Harbor", palette: { skyTop: '#8fc3d6', skyBottom: '#f6dfb2', ground: '#7a6650', top: '#a58f73' },
           customer: 'Caterlynna', who: 'Fisherwoman', instructions: 'Il forno sa. Follow the smell of the sea.',
