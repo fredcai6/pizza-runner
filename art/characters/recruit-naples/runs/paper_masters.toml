@@ -1,0 +1,13 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+refs = ["characters/slice-naples/references/paper-master.png", "paper/style_pm_sq.png"]
+
+[shots.rc_B]
+prompt = "Redraw the character from image 1 as its plain cheese recruit version: the same slice, the same paper standee, the same thick white paper border, the same flat colours, the same deadpan face with two small blank black dot eyes and a flat line mouth, but with NO pepperoni, NO tomato, NO basil and no toppings at all, only plain melted cheese (keep the charred crust and the plain white mozzarella and red sauce, no basil, no tomato slices). Standing facing slightly right, both white gloves hanging at the sides. The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.rc_C]
+prompt = "Redraw the character from image 1 as its plain cheese recruit version: the same slice, the same paper standee, the same thick white paper border, the same flat colours, the same deadpan face with two small blank black dot eyes and a flat line mouth, but with NO pepperoni, NO tomato, NO basil and no toppings at all, only plain melted cheese (keep the charred crust and the plain white mozzarella and red sauce, no basil, no tomato slices). Standing facing slightly right, both white gloves hanging at the sides. The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

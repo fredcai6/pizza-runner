@@ -1,49 +1,48 @@
+# Big Stan's run on the code rig (see art/paper/pizzarig.py). Coordinates are on sprites/idle-core frame 0 (230x170 stage pixels).
 anim = "run"
 canvas = [230, 170]
 frame_ms = 70
-dark = [1, 0, 1]
-outline = 4
+dark = [2, 1, 1]
+outline = 2
 inner_outline = 2
-src_outline = 4
+src_outline = 2
+
+[paper]
+border = 4
 
 [body]
-src = "characters/slice-deep/sprites/idle/sheet.png"
+cut_from = "characters/slice-deep/sprites/idle-core/sheet.png"
+src = "characters/slice-deep/sprites/idle-body/sheet.png"
 frame = 0
 frame_w = 230
-erase = [
-  [[40,80],[72,80],[80,86],[85,92],[90,98],[96,104],[102,112],[106,120],[110,128],[110,170],[40,170]],
-  [[158,80],[185,80],[185,170],[120,170],[126,128],[132,118],[138,108],[145,98],[150,88],[153,82]],
-  [[90,134],[190,134],[190,170],[90,170]],
-  [[96,122],[114,122],[114,140],[96,140]],
-  [[124,120],[150,120],[150,140],[124,140]],
-  [[104,127],[130,127],[130,170],[104,170]],
-]
+# the slice and its crust only: arms, legs, gloves and boots are drawn by the rig
+keep = [[54,28],[62,22],[95,8],[130,6],[165,8],[173,16],[171,30],[168,42],[160,60],[152,76],[145,88],[137,102],[130,114],[124,126],[119,127],[112,117],[104,106],[96,94],[88,80],[80,66],[73,52],[56,48]]
+erase = []
 
 [limb]
-leg = [[252,236,170],[238,159,76],[150,53,67]]
-arm = [[252,236,170],[238,159,76],[150,53,67]]
+leg = [[255,205,140],[255,176,94],[213,100,35]]
+arm = [[255,205,140],[255,176,94],[213,100,35]]
 
 [foot]
-src = "characters/slice-deep/sprites/idle/sheet.png"
+src = "characters/slice-deep/sprites/idle-core/sheet.png"
 frame = 0
 frame_w = 230
-box = [118, 131, 168, 160]
-anchor = [130, 146]
-lift_dark = [58, 42, 80]
+box = [127, 127, 178, 162]
+anchor = [140, 138]
 
 [hand]
-src = "characters/slice-deep/sprites/idle/sheet.png"
+src = "characters/slice-deep/sprites/idle-core/sheet.png"
 frame = 0
 frame_w = 230
-box = [60, 106, 95, 134]
-anchor = [78, 108]
+box = [64, 98, 94, 128]
+anchor = [80, 100]
 
 [arm]
 behind = true
-shoulder_near = [150, 90]
-shoulder_far = [82, 90]
+shoulder_near = [146, 86]
+shoulder_far = [86, 80]
 len = 28
-w = 11
+w = 9
 swing = 0.8
 
 [gait]
@@ -56,11 +55,5 @@ lean_down = 2
 stride = 0.85
 clear = 0.8
 bob = 1.5
-ground = 159
-hip = [118, 122]
-
-[drips]
-amp = 6
-colour = [231, 30, 8]
-shade = [207, 23, 8]
-points = [[91, 88, 0.0], [107, 73, 2.0], [133, 59, 4.0], [145, 66, 1.0], [158, 77, 3.0]]
+ground = 161
+hip = [121, 124]

@@ -19,7 +19,8 @@ def frames(seq):
 
 
 def anim(name, a, master, canvas, job, ms, loop, seq, run="paper"):
-    text = (f'master = "{master}"\ncanvas = [{canvas[0]}, {canvas[1]}]\njob = {job}\nframe_ms = {ms}\nloop = {str(loop).lower()}\nrun = "{run}"\n' + frames(seq))
+    extra = "own_palette = true\n" if a == "cold" else ""
+    text = (extra + f'master = "{master}"\ncanvas = [{canvas[0]}, {canvas[1]}]\njob = {job}\nframe_ms = {ms}\nloop = {str(loop).lower()}\nrun = "{run}"\n' + frames(seq))
     d = ART / "characters" / name / "anims"
     d.mkdir(parents=True, exist_ok=True)
     (d / f"paper-{a}.toml").write_text(text)
@@ -40,6 +41,20 @@ PIZZAS = {
         "fall": (90, True, [dict(pose="fall/1"), dict(pose="fall/2", dy=1)]),
         "cold": (140, True, [dict(pose="cold_a/2", dx=-1), dict(pose="cold_a/1", dx=1)]),
         "special": (80, False, [dict(pose="special_a/1", hold=2), dict(pose="special_a/3", hold=2), dict(pose="special_a/2", hold=2), dict(pose="special_a/3", hold=2)]),
+    }),
+    "deep": ("slice-deep", (230, 170), 242, {
+        "idle": (200, True, [dict(pose="master", hold=3), dict(pose="master", sink=2, hold=2), dict(pose="idle_c/2")]),
+        "jump": (90, False, [dict(pose="jump_rise/1", hold=2)]),
+        "fall": (90, True, [dict(pose="fall/2"), dict(pose="fall/2", dy=1)]),
+        "cold": (140, True, [dict(pose="cold_a/2", dx=-1), dict(pose="cold_a/1", dx=1)]),
+        "special": (110, False, [dict(pose="special_a/2", scale=1.1, hold=3), dict(pose="special_b/1", hold=6)]),
+    }),
+    "jumbo": ("slice-jumbo", (330, 240), 242, {
+        "idle": (200, True, [dict(pose="master", hold=3), dict(pose="master", sink=2, hold=2), dict(pose="idle_b/2")]),
+        "jump": (90, False, [dict(pose="jump_rise/2", hold=2)]),
+        "fall": (90, True, [dict(pose="fall/1"), dict(pose="fall/2", dy=1)]),
+        "cold": (140, True, [dict(pose="cold_a/1", dx=-1), dict(pose="cold_a/2", dx=1)]),
+        "special": (110, False, [dict(pose="jump_rise/2", hold=3), dict(pose="special_b/2", hold=6)]),
     }),
     "ninja": ("ninja", (128, 118), 239, {
         "idle": (240, True, [dict(pose="master", hold=2), dict(pose="idle_b/1", hold=2), dict(pose="master"), dict(pose="idle_b/3")]),

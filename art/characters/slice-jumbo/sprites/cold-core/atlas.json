@@ -1,0 +1,31 @@
+{
+ "frame": {
+  "w": 330,
+  "h": 240
+ },
+ "count": 2,
+ "frame_ms": 140,
+ "loop": true,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "89a41869ca70a26af6ff2c07cfd6231a46b663a7",
+  "dirty": true
+ },
+ "source": {
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 242,
+  "master": "characters/slice-jumbo/references/paper-master.png",
+  "cell": 3.765,
+  "border": 4,
+  "palette": 48,
+  "poses": [
+   "cold_a/1",
+   "cold_a/2"
+  ]
+ }
+}

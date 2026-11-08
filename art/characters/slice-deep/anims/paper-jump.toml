@@ -1,0 +1,9 @@
+master = "characters/slice-deep/references/paper-master.png"
+canvas = [230, 170]
+job = 242
+frame_ms = 90
+loop = false
+run = "paper"
+[[frames]]
+pose = "jump_rise/1"
+hold = 2

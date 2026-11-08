@@ -1,0 +1,22 @@
+{
+ "model": "qwen-edit",
+ "shot": "m_A",
+ "seed": 1,
+ "prompt": "A blurry candid snapshot photo taken secretly from inside a bush: the black-hooded ninja from image 1, crouched on a fire escape ledge, one hand raised holding a small throwing star, looking away. The whole image is a papercraft diorama made of cut card, flat bold shapes, a faint paper grain texture: a flat pastel paper street with paper buildings far behind. The subject keeps its white paper cut border and flat colours but is a little soft and out of focus with gentle motion blur, small in the middle of the frame. In the foreground, big out-of-focus dark green paper-cut leaves and twigs cover the corners and edges of the frame, as if shot through a hedge. Warm faded snapshot colours, a soft vignette. Image 2 shows only the paper material to borrow; do not copy its characters. Absolutely no text, letters, numbers, logos, date stamps, borders or frames anywhere in the image.",
+ "refs": [
+  "characters/ninja/references/paper-master.png",
+  "paper/style_pm_sq.png"
+ ],
+ "size": [
+  1024,
+  768
+ ],
+ "steps": null,
+ "secs": 30.2,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "job": 239
+}

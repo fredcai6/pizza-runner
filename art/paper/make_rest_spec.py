@@ -204,6 +204,8 @@ def polaroids():
             "flat bold shapes, a faint paper grain texture, a purple paper wall with paper string lights behind her. Warm snapshot colours, a soft vignette, square framing. Image 2 shows only the paper material "
             "to borrow; do not copy its characters. Absolutely no text, letters, numbers, logos or borders anywhere in the image.")
     d = ART / "characters/alewife/runs"
+    body2 = body.replace("The whole image is a papercraft diorama", "NOT pixel art: smooth clean vector shapes. The whole image is a papercraft diorama").replace("a laptop", "a plain closed laptop with no logo") + " The turntables are simple flat grey paper shapes with no buttons detail."
+    (d / "polaroid2.toml").write_text(shots("alewife", ["characters/alewife/references/paper-master.png", SQ], body2, body2.replace("candid snapshot", "candid soft-focus snapshot"), (1024, 1024)))
     (d / "polaroid.toml").write_text(shots("alewife", ["characters/alewife/references/paper-master.png", "characters/alewife/references/channel-avatar.png", SQ], body, body, (1024, 1024)))
 
 
