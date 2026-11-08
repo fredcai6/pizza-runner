@@ -22,7 +22,8 @@
    "upscaled_2x": true,
    "seam_start_x": 8,
    "dark_lifted": true,
-   "erased_text_boxes": []
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
    "run": "paper/naples-1",
@@ -41,7 +42,8 @@
    "upscaled_2x": true,
    "seam_start_x": 0,
    "shifted_by": -101,
-   "erased_text_boxes": []
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "near": {
    "procedural": "paper_near.near_layer",

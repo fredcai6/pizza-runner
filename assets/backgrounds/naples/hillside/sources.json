@@ -22,26 +22,28 @@
    "upscaled_2x": true,
    "seam_start_x": 84,
    "dark_lifted": true,
-   "erased_text_boxes": []
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
-   "run": "paper/naples-1",
-   "job": 236,
+   "run": "paper/naples-2",
+   "job": 241,
    "model": "qwen-edit",
    "shot": "hillside_mid",
    "seed": 1,
    "refs": [
     "paper/style_pm_sq.png"
    ],
-   "secs": 18.0,
+   "secs": 22.9,
    "size": [
     1408,
     360
    ],
    "upscaled_2x": true,
-   "seam_start_x": 103,
-   "shifted_by": -104,
-   "erased_text_boxes": []
+   "seam_start_x": 110,
+   "shifted_by": -110,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "near": {
    "procedural": "paper_near.near_layer",
