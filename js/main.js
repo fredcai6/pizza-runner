@@ -89,7 +89,7 @@
       case 'map': return mapScreen();
       case 'door': return doorScene();
       case 'cityDone': return leave();
-      case 'gameover': return scene([{ comp: 'oldtimer', lines: C.CITY_LOST }], lostCity);
+      case 'gameover': return scene([{ comp: 'oldtimer', lines: R.epitaph(camp) }], lostCity);
       case 'ending': return scene(C.ENDING.finale, endCard);
     }
   }

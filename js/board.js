@@ -57,7 +57,7 @@
   function theory(camp) {
     const notes = R.theory(camp).map((t, i) => `<div class="sticky s${i % 3}">${t.text}</div>`);
     const names = R.aliases(camp).map(a => `<span class="alias">${a}</span>`);
-    return `<p class="hand">The Old Timer's theory, in his hand.</p>${scatter(notes, { cell: [150, 100], salt: 3 })}${names.length ? `<h4>Customer names. Aliases?</h4>${scatter(names, { cell: [150, 34], salt: 4 })}` : ''}`;
+    return `<p class="hand">Sergeant Dayold's theory, in his hand.</p>${scatter(notes, { cell: [150, 100], salt: 3 })}${names.length ? `<h4>Customer names. Aliases?</h4>${scatter(names, { cell: [150, 34], salt: 4 })}` : ''}`;
   }
 
   function roster(camp) {
@@ -85,7 +85,7 @@
       host.querySelectorAll('[data-enemy]').forEach(b => {
         b.onclick = () => {
           const f = R.enemyFile(camp, b.dataset.enemy);
-          pop(`<div class="file"><h3>${f.name}</h3><p class="claim">O.T.: ${f.claim}</p><h4>Seen in the field</h4>${f.notes.length ? f.notes.map(n => `<p>${n}</p>`).join('') : '<p>???</p>'}</div>`);
+          pop(`<div class="file"><h3>${f.name}</h3><p class="claim">Sgt. Dayold: ${f.claim}</p><h4>Seen in the field</h4>${f.notes.length ? f.notes.map(n => `<p>${n}</p>`).join('') : '<p>???</p>'}</div>`);
         };
       });
     };
