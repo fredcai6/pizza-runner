@@ -333,14 +333,17 @@
   // A card across the shot, Ocean's Eleven style, when a recruit is introduced.
   // It takes the side of the stage the introduced recruit is not standing on.
   function nameCard(ctx, [name, title], age, right) {
-    const slide = 1 - Math.min(1, age / 260) ** 3;
+    const slide = 1 - Math.min(1, age / 260) ** 3, K = root.PR_PAPER;
     ctx.save(); ctx.translate(right ? W - 560 + 560 * slide : -560 * slide, 0);
-    ctx.fillStyle = 'rgba(16,14,36,0.92)'; ctx.fillRect(0, 54, 560, 112);
-    ctx.fillStyle = '#ffd76a'; ctx.fillRect(0, 54, 560, 5); ctx.fillRect(0, 161, 560, 5);
+    // A paper card pasted across the shot. Its far end runs off the edge of the screen.
+    const x = right ? 0 : -60;
+    ctx.save(); ctx.translate(280, 110); ctx.rotate(right ? 0.012 : -0.012); ctx.translate(-280, -110);
+    K.card(ctx, x, 54, 620, 112, { r: 16, shadow: 6 });
+    ctx.fillStyle = K.CORAL; ctx.fillRect(x, 54, 620, 12); ctx.fillStyle = K.SUN; ctx.fillRect(x, 66, 620, 5);
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#ffd76a'; ctx.font = 'bold 54px "Pixelify Sans", monospace'; ctx.fillText(name, 34, 116);
-    ctx.fillStyle = '#fff'; ctx.font = '26px "Pixelify Sans", monospace'; ctx.fillText(title, 36, 148);
-    ctx.restore();
+    ctx.fillStyle = K.TEXT; ctx.font = K.display(52, 700); ctx.fillText(name, 34, 125, 500);
+    ctx.fillStyle = K.CORAL; ctx.font = K.body(26, 800); ctx.fillText(title, 36, 155, 500);
+    ctx.restore(); ctx.restore();
   }
 
   // Plays shots of lines over the canvas. A tap finishes the line, the next tap moves on.
