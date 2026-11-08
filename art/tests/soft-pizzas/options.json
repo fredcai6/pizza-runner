@@ -9,7 +9,13 @@
   "5": {"tag": "h1", "seed": 1, "read": "Glossy sauce piled on a thick crust cap, plump rounded body, heavy boots. Softest, and clearly saucy; reads more muffin than slice."},
   "6": {"tag": "h1", "seed": 2, "read": "Same shape with darker, drippier sauce and a flatter paper finish."},
   "7": {"tag": "h2", "seed": 1, "read": "Taller wall variant: the crust cap is deeper and the body shorter, so the most deep-dish and the least slice-like."},
-  "8": {"tag": "h2", "seed": 2, "read": "Taller-wall variant with deep red sauce and white gloves; the heaviest looking."}}}},
+  "8": {"tag": "h2", "seed": 2, "read": "Taller-wall variant with deep red sauce and white gloves; the heaviest looking."}}},
+  "round4": {"top": "9", "intent": "Guide: a clear wedge tapering to a rounded point, plumper than the current master, with a tall flat-topped pan-crust band across the top and sauce piled on and dripping down the front. Honest read: this one reads as a soft deep-dish slice again, a wedge not a muffin; its sides are only gently convex, so it is softer than the current Stan but less dramatically than round 3.",
+   "options": {
+  "9": {"tag": "i1", "seed": 1, "read": "Glossy sauce over a tall crust band with a slight lip, rounded point, white gloves; the most saucy and the most slice-like."},
+  "10": {"tag": "i1", "seed": 2, "read": "Same wedge with a flat-matte crust band and a deadpan frown; the cleanest silhouette of the set."},
+  "11": {"tag": "i2", "seed": 1, "read": "Taller band variant: a deeper crust wall over a slightly shorter wedge, glossy sauce."},
+  "12": {"tag": "i2", "seed": 2, "read": "Band drawn with pan-pie creases, darker sauce and a frown; the most pan-baked looking."}}}},
  "slice-jumbo": {"top": "3", "options": {
   "1": {"tag": "a", "seed": 2, "read": "Rounded corners and a fuller body, crust edge thinner and smoother; the tip is only slightly droopy."},
   "2": {"tag": "a", "seed": 3, "read": "A thin plain crust edge (the rolled tube is gone) over a softly curved body; closest to the plain-crust note."},
@@ -18,7 +24,12 @@
   "round3": {"top": "5", "intent": "Guide: a very long, wide, thin slice with a plain flat crust strip; the front third folds under its own weight and the tip droops and curls. Honest read: the thin plain crust and the folded, drooping tip finally appear and it is clearly floppier, but the wide top gives a cup or bowl look and the tiny legs hang below it.",
    "options": {
   "5": {"tag": "h1", "seed": 1, "read": "Thin plain crust strip, wide body, front folding over into a drooping, curling tip, wavy mouth kept. The floppiest by far."},
-  "6": {"tag": "h2", "seed": 1, "read": "Same fold lower down and longer: the tip hangs between the legs. More droop, more cup-like."}}}},
+  "6": {"tag": "h2", "seed": 1, "read": "Same fold lower down and longer: the tip hangs between the legs. More droop, more cup-like."}}},
+  "round4": {"top": "7", "intent": "Guide: a long wedge that tapers like a slice with a thin plain crust edge, the bottom third bending forward and down into a drooping tip, long legs coming out below the middle. Honest read: it no longer reads as a cup and the legs can stand, but it tapers so hard that it looks like an inverted cone or ice-cream wedge, the fold reads as a banana-shaped tail, and only Phil 7 kept its gloves (8 and 9 have bare arm ends).",
+   "options": {
+  "7": {"tag": "i1", "seed": 1, "read": "Thin plain crust, tapering wedge, fold ending in a curling tip, round gloves, long legs. The only one with hands and the best droop."},
+  "8": {"tag": "i1", "seed": 2, "read": "Same shape in softer, flatter yellow with a short drooping tail; no gloves on the arms."},
+  "9": {"tag": "i2", "seed": 1, "read": "Longer drop of the folded part, tail hanging down beside the right leg; no gloves."}}}},
  "slice-naples": {"top": "2", "options": {
   "1": {"tag": "b", "seed": 2, "read": "Puffy leopard-spotted crust with a bulging, sagging body and rounded tip; the softest outline of rounds 1-2."},
   "2": {"tag": "c", "seed": 3, "read": "Plump blistered crust, curved sides and a softly rounded tip; still reads as the same Contessa."},

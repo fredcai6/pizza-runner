@@ -29,7 +29,14 @@ CHARS = {  # name: (label, canvas, city/area, variants)
 }
 
 
+def gfile(name, tag):
+    """The guide image a round 3/4 tag was painted from (round 4's i1/i2 are guides g3/g4)."""
+    return f"{name}-g{int(tag[1]) + (2 if tag[0] == 'i' else 0)}.png"
+
+
 def src(name, tag, seed):
+    if tag[0] == "i":  # round 4 (Stan, Phil): guide + style only, guides halfway between the master and round 3
+        return RUNS / name / "soft4_masters/qwen-edit" / f"i_{tag[1]}" / f"{seed}.png"
     if tag[0] in "gh":  # round 3: g1/g2 = guide + Vinny's master + style; h1/h2 (3b) = guide + style only
         return RUNS / name / ("soft3_masters" if tag[0] == "g" else "soft3b_masters") / "qwen-edit" / f"{tag[0]}_{tag[1]}" / f"{seed}.png"
     return RUNS / name / ("soft_masters2" if tag in "de" else "soft_masters") / "qwen-edit" / f"s_{tag}" / f"{seed}.png"
@@ -53,7 +60,7 @@ def checker_bg(w, h, c=(150, 164, 190, 255)):
 def contact():
     TMP.mkdir(exist_ok=True)
     for name, (label, canvas, _, variants) in CHARS.items():
-        tags = (["h1", "h2"] if name in ("slice-deep", "slice-jumbo", "slice-ny") else ["g1", "g2"]) if "r3" in sys.argv else list(variants)  # `contact r3` screens round 3
+        tags = ["i1", "i2"] if "r4" in sys.argv else (["h1", "h2"] if name in ("slice-deep", "slice-jumbo", "slice-ny") else ["g1", "g2"]) if "r3" in sys.argv else list(variants)  # `contact r3` screens round 3
         items = [("current", master(name))] + [(f"{t}{s}", src(name, t, s)) for t in tags for s in (1, 2, 3)]
         W, H = canvas
         cols = 4
@@ -144,11 +151,13 @@ def page(out):
                          f"<div class=game><div><span>1x</span><img class=px src='{b64(sp)}'></div><div><span>2x</span><img class=px src='{b64(sp2)}'></div></div>"
                          f"<img class='street px' src='{b64(st)}' alt='{title} in street'></div>")
         parts.append("</div>")
-        r3 = o.get("round3")
-        if r3:
-            parts.append(f"<h2 style='border:0;margin-top:22px'>{label}: Round 3 <small>painted from a hand-built soft silhouette</small></h2>"
+        for rkey, rnum, gids, sub in (("round3", 3, ("g1", "g2"), "painted from a hand-built soft silhouette"),
+                                      ("round4", 4, ("g3", "g4"), "guides halfway between the current master and round 3")):
+          r3 = o.get(rkey)
+          if r3:
+            parts.append(f"<h2 style='border:0;margin-top:22px'>{label}: Round {rnum} <small>{sub}</small></h2>"
                          f"<p class=note>{r3['intent']} The guides are what Qwen was asked to paint; each result sits beside its guide.</p><div class=row>")
-            for g in ("g1", "g2"):
+            for g in gids:
                 gim = Image.open(HERE / "guides" / f"{name}-{g}.png").convert("RGB").resize((360, 360), Image.LANCZOS)
                 parts.append(f"<div class=card><h3>Guide {g[1]}</h3><img src='{b64(gim, 'JPEG', quality=80)}' alt='guide {g[1]}'></div>")
             parts.append("</div><div class=row>")
@@ -158,7 +167,7 @@ def page(out):
                 full = Image.open(p).convert("RGB").resize((640, 640), Image.LANCZOS)
                 sp = Image.fromarray(a, "RGBA")
                 sp2 = sp.resize((sp.width * 2, sp.height * 2), Image.NEAREST)
-                gim = Image.open(HERE / "guides" / f"{name}-g{v['tag'][1]}.png").convert("RGB").resize((240, 240), Image.LANCZOS)
+                gim = Image.open(HERE / "guides" / gfile(name, v["tag"])).convert("RGB").resize((240, 240), Image.LANCZOS)
                 top = " <b class=top>Top pick.</b>" if r3.get("top") == k else ""
                 parts.append(f"<div class=card><h3>{label} {k}</h3><p class=read>{v['read']}{top}</p>"
                              f"<div style='display:flex;gap:10px;align-items:flex-start'><img src='{b64(gim, 'JPEG', quality=80)}' alt='guide' style='width:200px;border-radius:6px'>"
