@@ -3,7 +3,7 @@ painted room live, from the campaign: receipts, suspects, notes, the final photo
 
     ~/projects/sprite-forge/.venv/bin/python art/cutscenes/board/build.py
 
-Cut-outs came with a soft glow in their alpha: keep alpha >= 200, trim 1 px (the tickets carry a yellow/red fringe there), feather.
+Cut-outs came with a soft glow in their alpha (the ninja and mutant Polaroids came opaque, on dark brown): keep alpha >= 200, trim 1 px (the tickets carry a yellow/red fringe there), feather.
 room-front.webp is the four recruits seen from behind, cut from the room itself, drawn over Dayold so he sits behind them.
 """
 from pathlib import Path
@@ -15,11 +15,18 @@ from scipy import ndimage
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parents[2] / "assets/cutscenes/board"
 ROOM_W = 1672                       # native: the board shots zoom in
-CUTS = {"dayold": 900, "polaroid-teen": 600, "polaroid-turtle": 600, "order-1": 300, "order-2": 300}   # longest side, px (close-ups zoom to ~3x)
+CUTS = {"dayold": 900, "polaroid-teen": 600, "polaroid-turtle": 600, "polaroid-ninja": 600, "polaroid-mutant": 600, "order-1": 300, "order-2": 300}   # longest side, px (close-ups zoom to ~3x)
 
 
 def cut(name, size):
-    im = np.asarray(Image.open(HERE / f"{name}.png").convert("RGBA")).copy()
+    src = Image.open(HERE / f"{name}.png")
+    im = np.asarray(src.convert("RGBA")).copy()
+    if src.mode == "RGB":
+        # an opaque one (ninja, mutant) sits on dark brown: the backdrop is the dark joined to the edge
+        dark = im[..., :3].max(-1) < 130
+        lab, _ = ndimage.label(dark)
+        edge = np.unique(np.r_[lab[0], lab[-1], lab[:, 0], lab[:, -1]])
+        im[..., 3] = np.where(np.isin(lab, edge[edge > 0]), 0, 255)
     solid = im[..., 3] >= 200
     lab, n = ndimage.label(solid)
     solid = lab == 1 + int(np.argmax(ndimage.sum(solid, lab, range(1, n + 1))))

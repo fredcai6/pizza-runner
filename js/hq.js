@@ -243,10 +243,11 @@
 
   // Tommy's board room (art/cutscenes/board): the painted room, the live evidence pinned on its cork, Dayold at his chair, and the
   // recruits from behind, cut from the same painting, drawn last so he sits behind them. Room space is 1280x720.
-  const BOARD_ART = ['room', 'room-front', 'dayold', 'polaroid-teen', 'polaroid-turtle', 'order-1', 'order-2'];
+  const BOARD_ART = ['room', 'room-front', 'dayold', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
   const paintedReady = () => BOARD_ART.every(n => { const i = pic(`board/${n}`); return i.complete && i.naturalWidth; });
-  // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; the rest go up once met.
-  const SUSPECTS = [['teen', 450, 205, 210, -4], ['turtle', 462, 378, 210, 3], ['ninja', 668, 196, 160, 3], ['mutant', 676, 346, 160, -3]];
+  // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; ninjas and mutants go up after the
+  // level that reveals them (once met: headquarters().known).
+  const SUSPECTS = [['teen', 450, 205, 210, -4], ['turtle', 462, 378, 210, 3], ['ninja', 668, 200, 180, 3], ['mutant', 672, 360, 180, -3]];
   // A cut-out pinned on the cork. Returns where its pin goes.
   function stuck(ctx, img, cx, cy, w, tilt) {
     const h = w * img.naturalHeight / img.naturalWidth, r = tilt * Math.PI / 180;
@@ -255,19 +256,6 @@
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.restore();
     return [cx + Math.sin(r) * h * 0.42, cy - Math.cos(r) * h * 0.42];
-  }
-  // A suspect Tommy has not painted a Polaroid for yet: its photo in a paper frame.
-  function framed(ctx, type, cx, cy, w, tilt) {
-    const h = w * 0.86, photo = still(`assets/polaroids/${type}.png`);
-    ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
-    ctx.fillStyle = 'rgba(20,8,0,.35)'; ctx.fillRect(3, 5, w, h);
-    ctx.fillStyle = '#efe6d2'; ctx.fillRect(0, 0, w, h);
-    const ix = w * 0.07, iy = w * 0.07, iw = w * 0.86, ih = h * 0.68;
-    ctx.fillStyle = '#4b3a30'; ctx.fillRect(ix, iy, iw, ih);
-    if (photo.complete && photo.naturalWidth) ctx.drawImage(photo, ix, iy, iw, ih);
-    else { ctx.save(); ctx.beginPath(); ctx.rect(ix, iy, iw, ih); ctx.clip(); S.draw(ctx, type, 'idle', 0, ix + iw / 2, iy + ih * 1.02, ih * 0.98); ctx.restore(); }
-    ctx.restore();
-    return [cx, cy - h * 0.42];
   }
   function paintedBoard(ctx, hq, ms, view) {
     const art = n => pic(`board/${n}`);
@@ -284,7 +272,7 @@
     }
     for (const [type, cx, cy, w, tilt] of SUSPECTS) {
       if (!(hq.known || ['teen', 'turtle']).includes(type)) continue;
-      posts[type] = type === 'teen' || type === 'turtle' ? stuck(ctx, art(`polaroid-${type}`), cx, cy, w, tilt) : framed(ctx, type, cx, cy, w, tilt);
+      posts[type] = stuck(ctx, art(`polaroid-${type}`), cx, cy, w, tilt);
     }
     // His notes along the foot of the cork. The first one (WHO IS THE ORDER?) is painted on.
     const notes = [];
