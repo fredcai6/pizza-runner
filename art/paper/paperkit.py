@@ -91,8 +91,12 @@ def backdrop(rgb, thr=0.12):
     return np.isin(l, big[big > 0])
 
 
-def key(path):
+def key(path, clip=None):
+    """clip: fraction of the image height; everything below it is painted over with the backdrop (a ledge the pose rests on)."""
     rgb = np.asarray(Image.open(path).convert("RGB"))
+    if clip:
+        rgb = rgb.copy()
+        rgb[int(clip * rgb.shape[0]):] = rgb[0, 0]
     outer = fg_mask(rgb) & ~backdrop(rgb)
     outer = ndimage.binary_opening(outer, iterations=2)
     band, width = border_band(rgb, outer)
@@ -131,10 +135,10 @@ class Geometry:
         self.pal = palette(rgb, inner)
         self.lab = srgb_to_oklab(self.pal)
 
-    def core(self, path, dx=0, dy=0, scale=1.0):
+    def core(self, path, dx=0, dy=0, scale=1.0, clip=None):
         """One frame on the stage grid. scale 1 keeps the model's placement (the master's); another scale resizes the figure
         about this frame's own feet-centre, which then stands where the master's does."""
-        rgb, inner, _ = key(path)
+        rgb, inner, _ = key(path, clip)
         if scale == 1.0:
             cell = self.cell
             origin = (self.cx - self.W / 2 * cell, self.bot - (self.H - (self.border + 1)) * cell)
@@ -163,7 +167,7 @@ def build(anim_path):
     for f in spec["frames"]:
         pose = f["pose"]
         path = master if pose == "master" else run_dir / pose.split("/")[0] / f"{pose.split('/')[1]}.png"
-        c = g.core(path, f.get("dx", 0), f.get("dy", 0), f.get("scale", 1.0))
+        c = g.core(path, f.get("dx", 0), f.get("dy", 0), f.get("scale", 1.0), f.get("clip"))
         if f.get("sink"):
             # a settle: everything above `split` of the canvas height drops `sink` px into the torso
             c = c.copy()

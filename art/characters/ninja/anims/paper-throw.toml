@@ -1,0 +1,13 @@
+master = "characters/ninja/references/paper-master.png"
+canvas = [128, 118]
+job = 239
+frame_ms = 110
+loop = false
+run = "paper"
+[[frames]]
+pose = "throw_a/2"
+hold = 3
+
+[[frames]]
+pose = "throw_b/1"
+hold = 4

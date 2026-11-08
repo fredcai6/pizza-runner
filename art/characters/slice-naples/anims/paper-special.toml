@@ -1,0 +1,21 @@
+master = "characters/slice-naples/references/paper-master.png"
+canvas = [130, 104]
+job = 239
+frame_ms = 80
+loop = false
+run = "paper"
+[[frames]]
+pose = "special_a/1"
+hold = 2
+
+[[frames]]
+pose = "special_a/3"
+hold = 2
+
+[[frames]]
+pose = "special_a/2"
+hold = 2
+
+[[frames]]
+pose = "special_a/3"
+hold = 2

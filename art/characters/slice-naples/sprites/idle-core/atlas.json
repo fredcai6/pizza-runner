@@ -12,13 +12,13 @@
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "b432b5f81e13a8e38a79cfc9ba0b84c54a9db18a",
+  "sha": "e8bcc47823c022bfeaffecdb74f130f7ded33ea9",
   "dirty": true
  },
  "source": {
   "run": "paper",
   "model": "qwen-edit",
-  "job": 233,
+  "job": 239,
   "master": "characters/slice-naples/references/paper-master.png",
   "cell": 9.01,
   "border": 3,
@@ -29,7 +29,7 @@
    "master",
    "master",
    "master",
-   "master"
+   "idle_c/2"
   ]
  }
 }

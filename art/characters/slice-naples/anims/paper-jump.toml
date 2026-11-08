@@ -1,0 +1,9 @@
+master = "characters/slice-naples/references/paper-master.png"
+canvas = [130, 104]
+job = 239
+frame_ms = 90
+loop = false
+run = "paper"
+[[frames]]
+pose = "jump_rise/3"
+hold = 2

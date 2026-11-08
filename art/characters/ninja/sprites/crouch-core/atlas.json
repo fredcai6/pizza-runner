@@ -1,0 +1,35 @@
+{
+ "frame": {
+  "w": 128,
+  "h": 118
+ },
+ "count": 6,
+ "frame_ms": 260,
+ "loop": true,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "e8bcc47823c022bfeaffecdb74f130f7ded33ea9",
+  "dirty": true
+ },
+ "source": {
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 239,
+  "master": "characters/ninja/references/paper-master.png",
+  "cell": 9.602,
+  "border": 4,
+  "palette": 48,
+  "poses": [
+   "crouch_b/1",
+   "crouch_b/1",
+   "crouch_b/1",
+   "crouch_b/1",
+   "crouch_b/1",
+   "crouch_b/1"
+  ]
+ }
+}
