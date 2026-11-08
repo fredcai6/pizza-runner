@@ -7,21 +7,29 @@
  "frame_ms": 150,
  "loop": true,
  "rev": {
-  "sha": "37a6cf7995d18801bbf096d00e6074acc57974a7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "d52e4caec880cf8dfe9444e755e127dff2649a01",
+  "dirty": true
+ },
  "source": {
-  "run": "keys2",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 5.9625,
+  "job": 239,
+  "master": "characters/alewife/references/paper-master.png",
+  "cell": 5.963,
+  "border": 4,
+  "palette": 48,
   "poses": [
-   "wave_a/1",
-   "wave_b/1",
-   "wave_a/1",
-   "wave_b/1",
-   "idle_a/1",
-   "idle_a/1"
+   "wave_a/3",
+   "wave_b/3",
+   "wave_a/3",
+   "wave_b/2",
+   "wave_a/3",
+   "wave_b/3"
   ]
  }
 }

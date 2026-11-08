@@ -48,6 +48,14 @@ PIZZAS = {
         "crouch": (260, True, [dict(pose="crouch_b/1", clip=0.71, hold=2), dict(pose="crouch_b/1", clip=0.71, dy=1, hold=2), dict(pose="crouch_b/1", clip=0.71, dx=-1), dict(pose="crouch_b/1", clip=0.71, dy=1)]),
         "hurt": (130, False, [dict(pose="hurt_a/1", hold=3), dict(pose="hurt_b/2", hold=5)]),
     }),
+    "mutant": ("mutant", (170, 120), 239, {
+        "idle": (200, True, [dict(pose="master", hold=2), dict(pose="idle_b/1", hold=2), dict(pose="idle_c/3"), dict(pose="idle_b/1")]),
+        "bite": (90, False, [dict(pose="bite_a/1", hold=2), dict(pose="bite_b/2", hold=4)]),
+    }),
+    "alewife": ("alewife", (150, 170), 239, {
+        "idle": (200, True, [dict(pose="master", hold=2), dict(pose="master", sink=1), dict(pose="idle_b/2"), dict(pose="master"), dict(pose="master", sink=1)]),
+        "wave": (150, True, [dict(pose="wave_a/3"), dict(pose="wave_b/3"), dict(pose="wave_a/3"), dict(pose="wave_b/2"), dict(pose="wave_a/3"), dict(pose="wave_b/3")]),
+    }),
 }
 
 if __name__ == "__main__":
