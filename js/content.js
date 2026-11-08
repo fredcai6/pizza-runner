@@ -123,7 +123,7 @@
           { who: 'old', text: "**Turtles.** Slow. But I've seen them take a bite out of many a tough slice." },
           { who: 'old', text: 'Slow is what they want you to think.' },
         ] },
-        { comp: 'deep', lines: [
+        { pic: 'assign-chicago', pan: [[0.3, 0.5, 1.25], [0.64, 0.48, 1.1]], ms: 9000, lines: [
           { who: 'old', text: 'Big Stan. Deep undercover needs a deep dish.' },
           { who: 'deep', text: "I'm a dish. I don't dig." },
           { who: 'old', text: 'Dig anyway.' },
@@ -152,7 +152,7 @@
           { who: 'deep', text: "Vinny wasn't lying, boss. Something came up out of the storm drain. Some kind of mutant." },
           { who: 'deep', text: 'It chased me three blocks. I do not do three blocks. Is any of this worth it?' },
         ] },
-        { comp: 'oldtimer', lines: [
+        { comp: 'boardDayold', sticker: 'salute', lines: [
           { who: 'old', thump: true, text: '**THAT** is why we do this!' },
           { who: 'old', text: 'Why we keep the ovens hot! So tonight, somewhere, a family sleeps warm!' },
           { who: 'old', text: "A whole pie, shoulder to shoulder in the box. Lid down. Cozy. They'll never know your name." },
@@ -164,7 +164,7 @@
           { who: 'old', text: "Nobody spells their own name six ways. That's not a name. That's a cover with a typo." },
           { who: 'old', text: 'This goes **all the way to the top**.' },
         ] },
-        { comp: 'jumbo', lines: [
+        { pic: 'assign-dc', pan: [[0.3, 0.5, 1.25], [0.66, 0.48, 1.1]], ms: 9000, lines: [
           { who: 'old', text: "The top of the government is Washington. Phil, nobody turns you away. You're the size of a door." },
           { who: 'jumbo', text: 'I accept with humility, and shall begin with a statement of no more than four hours.' },
           { who: 'old', text: 'Go.' },
@@ -194,7 +194,7 @@
           { who: 'jumbo', text: 'But I read every lid in the capital. Every one says **Original Italian.**' },
           { who: 'deep', text: "Mine says it too. I'm from Chicago." },
         ] },
-        { comp: 'naples', lines: [
+        { pic: 'assign-naples', pan: [[0.66, 0.48, 1.2], [0.36, 0.5, 1.1]], ms: 14000, lines: [
           { who: 'naples', text: "Then somebody copies me. Is flattery, not a clue. Everybody knows where I'm from." },
           { who: 'old', text: 'Nothing honest announces itself.' },
           { who: 'naples', text: 'Honest things announce themselves **constantly**. This is Italy.' },
@@ -222,7 +222,7 @@
         { comp: 'wide', lines: [
           { who: 'old', text: "Look at what's left of you. Good. Nobody swings that hard at a bluff. We're close." },
         ] },
-        { comp: 'board', sticker: 'pointer', lines: [
+        { comp: 'board', sticker: 'think', lines: [
           { who: 'old', text: 'Twelve tickets. Twelve spellings. Twelve disguises.' },
           { who: 'old', text: 'Then Long Beach prints. Three stops. One spelled **right**. K-A-T-E-L-Y-N.' },
           { who: 'deep', text: "Or she's just a person who can spell." },
@@ -234,7 +234,7 @@
           { who: 'jumbo', text: 'A point of order. Will you be joining us in the field, sir?' },
           { who: 'naples', text: 'Sì. You send us out. You come too, yes?' },
         ] },
-        { comp: 'oldtimer', lines: [
+        { comp: 'boardDayold', sticker: 'think', lines: [
           { who: 'deep', text: 'You never leave the building.' },
           { who: 'old', text: 'Not since 1987.' },
           { who: 'deep', text: 'What happened in 1987?' },

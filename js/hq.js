@@ -27,6 +27,7 @@
     boardTeen: { from: [455, 215, 2.4], to: [460, 205, 2.6] },
     boardTurtle: { from: [470, 380, 2.4], to: [475, 370, 2.6] },
     polaroid: { from: [930, 280, 1.6], to: [930, 270, 1.75] },
+    boardDayold: { from: [250, 390, 1.7], to: [260, 375, 1.85] },
   };
   const cameraOf = comp => (paintedReady() && BOARD_CAMERAS[comp]) || CAMERAS[comp] || CAMERAS.wide;
 
@@ -107,7 +108,7 @@
   }
 
   // These shots lean over the table, so the recruits are out of the picture.
-  const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle']);
+  const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle', 'boardDayold']);
   let spots = { ny: [], deep: [], jumbo: [], naples: [] };
   fetch('assets/backgrounds/hq/recruit-spots.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) spots = j; }).catch(() => {});
 
@@ -243,7 +244,7 @@
 
   // Tommy's board room (art/cutscenes/board): the painted room, the live evidence pinned on its cork, Dayold at his chair, and the
   // recruits from behind, cut from the same painting, drawn last so he sits behind them. Room space is 1280x720.
-  const BOARD_ART = ['room', 'room-front', 'dayold', 'dayold-pointer', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
+  const BOARD_ART = ['room', 'room-front', 'dayold', 'dayold-pointer', 'dayold-think', 'dayold-salute', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
   const paintedReady = () => BOARD_ART.every(n => { const i = pic(`board/${n}`); return i.complete && i.naturalWidth; });
   // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; ninjas and mutants go up after the
   // level that reveals them (once met: headquarters().known).
@@ -295,7 +296,8 @@
       pin(ctx, pw / 2, 6, 6); tape(ctx, pw * 0.1, 3, pw * 0.2, 14, -35);
       ctx.restore();
     }
-    // Dayold at his chair, rocking a little while he talks: pointing in scene 1, with his pointer for the intel (`sticker: 'pointer'`).
+    // Dayold at his chair, rocking a little while he talks. `sticker` picks the pose: pointing (scene 1), pointer (the intel),
+    // think (stroking the mustache), salute.
     const d = art(shot.sticker ? `dayold-${shot.sticker}` : 'dayold'), dw = 340, dh = dw * d.naturalHeight / d.naturalWidth;
     const bob = view.mood === 'talk' ? Math.sin(ms / 110) * 3 : Math.sin(ms / 900) * 1.5;
     ctx.drawImage(d, -6, 538 - dh + bob, dw, dh);
