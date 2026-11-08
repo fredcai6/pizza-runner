@@ -111,6 +111,30 @@ def pizzas2():
         (ART / "characters" / name / "runs/paper_masters2.toml").write_text(shots(name, [VINNY, cur, SQ], out[0], out[1], (1024, 1024)))
 
 
+SPIN3 = {
+    "slice-deep": ("Big Stan, a heavy Chicago deep dish pizza slice: keep image 1's body plan but make the slice a tall, thick, heavy wedge with a thick golden-brown crust wall along the top and sides, "
+                   "the top brimming with thick glossy red tomato sauce over the cheese, long red sauce drips running down the sides with a fat drop at the bottom, three round pepperoni, "
+                   "burly thick arms, white gloves, and heavy black boots instead of sneakers. Stocky and wide",
+                   "a flat heavy downturned line mouth, grumpy and stubborn"),
+    "slice-jumbo": ("Phil A. Buster, an absurdly big, floppy pizza slice: keep image 1's body plan but make the slice far longer and larger than the legs, with a big rolled tube of crust along the top, "
+                    "the long pointed tip drooping and bending over to one side, thick melted yellow cheese dripping down the sides, three round pepperoni, thin small arms and white gloves, "
+                    "tiny thin legs and small red sneakers that look far too small for the huge slice",
+                    "a small wobbly wavy line mouth, pompous and anxious"),
+}
+
+
+def pizzas3():
+    """Third round, deep and jumbo: the pixel-art references kept dragging the old brows and big cartoon eyes in. Image 1 is Vinny alone."""
+    for name, (text, mouth) in SPIN3.items():
+        out = []
+        for flat in (True, False):
+            out.append("Image 1 is Vinny, a finished paper standee pizza slice mascot. Redraw it as a different character: " + text + ". "
+                       "Keep exactly image 1's material, thick white paper cut border, clean flat colours" + ("" if flat else " with one soft shade") + ", simple bold shapes, and above all its face: "
+                       "two small plain blank black dot eyes, no eyebrows, no white eyeballs, no pupils, " + mouth + ". Standing and facing slightly right, the whole figure visible head to feet. "
+                       "Image 2 shows only the paper material to borrow; do not copy its characters. " + TAIL.split("do not copy their characters or animals. ")[1])
+        (ART / "characters" / name / "runs/paper_masters3.toml").write_text(shots(name, [VINNY, SQ], out[0], out[1], (1024, 1024)))
+
+
 def customers():
     for name, text in CUSTOMER.items():
         d = ART / "characters" / name
@@ -184,4 +208,4 @@ def polaroids():
 
 
 if __name__ == "__main__":
-    pizzas(); pizzas2(); customers(); lincoln2(); others(); polaroids()
+    pizzas(); pizzas2(); pizzas3(); customers(); lincoln2(); others(); polaroids()

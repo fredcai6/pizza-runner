@@ -12,13 +12,13 @@
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "b432b5f81e13a8e38a79cfc9ba0b84c54a9db18a",
+  "sha": "12fabd2975451d09d89bf55bb497549744e0f3f5",
   "dirty": true
  },
  "source": {
   "run": "paper",
   "model": "qwen-edit",
-  "job": 233,
+  "job": 238,
   "master": "characters/customer-chicago-lincolnpark/paper-master.png",
   "cell": 6.964,
   "border": 4,

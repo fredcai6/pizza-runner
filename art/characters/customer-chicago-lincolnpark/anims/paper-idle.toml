@@ -1,6 +1,6 @@
 master = "characters/customer-chicago-lincolnpark/paper-master.png"
 canvas = [120, 150]
-job = 233
+job = 238
 frame_ms = 240
 loop = true
 run = "paper"

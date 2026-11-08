@@ -2,7 +2,7 @@
 
     python3 art/paper/contact.py OUT.png [CHARACTER/ANIM ...]     (default: the New York cast)
 """
-import json, sys
+import json, os, sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -19,7 +19,8 @@ Z, COLS, BG = 2, 8, (150, 164, 190, 255)
 def main(out, names):
     rows = []
     for n in names:
-        d = ASSETS / n
+        c, a = n.split("/")
+        d = (ASSETS / n) if not os.environ.get("CONTACT_SRC") else (ASSETS.parents[1] / "art/characters" / c / "sprites" / a)
         a = json.loads((d / "atlas.json").read_text())
         w, h = a["frame"]["w"], a["frame"]["h"]
         sheet = Image.open(d / "sheet.png").convert("RGBA")

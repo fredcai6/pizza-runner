@@ -2,7 +2,7 @@
  "model": "qwen-edit",
  "shot": "m_A",
  "seed": 1,
- "prompt": "Full body character art for a 2D platformer, the whole figure visible head to feet, standing facing the viewer in three-quarter view. The character is a Lincoln Park jogging mom in a bright pink athletic top, purple leggings, a white visor and ponytail, running shoes, a clear water bottle in one hand, pushing a jogging stroller with a baby in it, mid-stride, smiling and distracted, redrawn from image 1 with the same clothes and props. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple and readable: two small black dot eyes and a small simple mouth that shows her mood, almost no detail. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "prompt": "Full body character art for a 2D platformer, the whole figure visible head to feet, standing facing the viewer in three-quarter view. The character is a Lincoln Park jogging mom in a bright turquoise athletic top, purple leggings, a white visor and ponytail, white running shoes, a clear water bottle in one hand, pushing a jogging stroller with a baby in it, mid-stride, smiling and distracted, redrawn from image 1 with the same pose and props, but with the athletic top bright TURQUOISE (not pink) and white sneakers; there is no pink anywhere. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple and readable: two small black dot eyes and a small simple smile, almost no detail. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
  "refs": [
   "characters/customer-chicago-lincolnpark/references/current.png",
   "paper/style_pm_tall.png"
@@ -12,11 +12,11 @@
   1152
  ],
  "steps": null,
- "secs": 32.7,
+ "secs": 31.2,
  "rev": {
   "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
   "dirty": false,
   "comfy": "v0.44.0"
  },
- "job": 233
+ "job": 238
 }
