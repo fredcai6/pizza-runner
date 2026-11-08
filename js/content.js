@@ -229,7 +229,7 @@
           { who: 'old', text: "That's exactly what she'd want you to think." },
           { who: 'old', text: 'Twelve disguises, then one real name. You only drop the disguise at **home**.' },
         ] },
-        { comp: 'wide', lines: [
+        { pic: 'group-long-beach', pan: [[0.5, 0.5, 1], [0.48, 0.5, 1.08]], ms: 12000, lines: [
           { who: 'old', text: "One slice won't do it. This takes all four of you." },
           { who: 'jumbo', text: 'A point of order. Will you be joining us in the field, sir?' },
           { who: 'naples', text: 'Sì. You send us out. You come too, yes?' },
