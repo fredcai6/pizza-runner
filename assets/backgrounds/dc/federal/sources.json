@@ -1,43 +1,153 @@
 {
  "rev": {
-  "sha": "4d761747244052940b92f529139362abf544fc39",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "federal/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 4,
-   "seam_start_x": 166
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "federal_far",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.2,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 213,
+   "dark_lifted": true,
+   "erased_text_boxes": []
   },
   "mid": {
-   "run": "federal/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 1,
-   "shifted_by": -55,
-   "seam_start_x": 44
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "federal_mid",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.3,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 58,
+   "shifted_by": -105,
+   "erased_text_boxes": []
   },
   "near": {
-   "run": "federal/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 208
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "planter",
+     4,
+     {
+      "colors": [
+       "green",
+       "sage"
+      ],
+      "box": "cream",
+      "w": [
+       70,
+       100
+      ],
+      "h": [
+       72,
+       96
+      ]
+     }
+    ],
+    [
+     "bush",
+     3,
+     {
+      "colors": [
+       "sage",
+       "mint"
+      ],
+      "w": [
+       110,
+       190
+      ],
+      "h": [
+       54,
+       80
+      ]
+     }
+    ],
+    [
+     "tuft",
+     4,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "federal/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 2
+   "procedural": "running_bond in paper_build.py (slabs)",
+   "slab": [
+    64,
+    40
+   ],
+   "tones": [
+    [
+     214,
+     210,
+     200
+    ],
+    [
+     206,
+     202,
+     192
+    ],
+    [
+     220,
+     216,
+     206
+    ]
+   ],
+   "cut_line": [
+    170,
+    166,
+    156
+   ]
   },
   "door": {
-   "run": "federal/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "federal_door",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 24.1,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

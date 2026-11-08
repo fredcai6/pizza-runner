@@ -1,31 +1,33 @@
 {
  "rev": {
-  "sha": "bff2222efdec18e5684ea1c3f6e8ae502bf61be7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
-  "far": {
-   "run": "chicago/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 4,
-   "seam_start_x": 14
+  "props": {
+   "run": "paper/chicago-1",
+   "job": 234,
+   "model": "qwen-edit",
+   "shot": "props",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 14.5,
+   "size": [
+    1280,
+    720
+   ],
+   "upscaled_2x": false
   },
-  "mid": {
-   "run": "chicago/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 5,
-   "shifted_by": -2,
-   "seam_start_x": 112
-  },
-  "near": {
-   "run": "chicago/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 1,
-   "seam_start_x": 79
+  "platform": {
+   "procedural": "platform_tile in paper_ny_build.py",
+   "card": [
+    176,
+    190,
+    214
+   ]
   }
  }
 }

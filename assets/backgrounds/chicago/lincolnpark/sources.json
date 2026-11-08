@@ -1,43 +1,155 @@
 {
  "rev": {
-  "sha": "2970646fedeb0920c42fb1717b9238aa98ce1b13",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "lincolnpark/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 1,
-   "seam_start_x": 52
+   "run": "paper/chicago-1",
+   "job": 234,
+   "model": "qwen-edit",
+   "shot": "lincolnpark_far",
+   "seed": 2,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.5,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 128,
+   "dark_lifted": true,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
-   "run": "lincolnpark/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 2,
-   "shifted_by": -40,
-   "seam_start_x": 210
+   "run": "paper/chicago-1",
+   "job": 234,
+   "model": "qwen-edit",
+   "shot": "lincolnpark_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 16.2,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 0,
+   "shifted_by": -104,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "near": {
-   "run": "lincolnpark/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 181
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "bush",
+     6,
+     {
+      "colors": [
+       "green",
+       "sage",
+       "rose",
+       "mint"
+      ],
+      "w": [
+       120,
+       220
+      ],
+      "h": [
+       54,
+       90
+      ]
+     }
+    ],
+    [
+     "tuft",
+     7,
+     {
+      "colors": [
+       "sage",
+       "green",
+       "mint"
+      ],
+      "w": [
+       40,
+       72
+      ],
+      "h": [
+       26,
+       46
+      ]
+     }
+    ],
+    [
+     "flower",
+     7,
+     {
+      "colors": [
+       "rose",
+       "butter",
+       "lilac",
+       "peach"
+      ],
+      "h": [
+       34,
+       58
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "lincolnpark/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "running_bond in paper_build.py (slabs)",
+   "slab": [
+    64,
+    40
+   ],
+   "tones": [
+    [
+     222,
+     212,
+     184
+    ],
+    [
+     214,
+     204,
+     174
+    ],
+    [
+     228,
+     218,
+     192
+    ]
+   ],
+   "cut_line": [
+    186,
+    172,
+    140
+   ]
   },
   "door": {
-   "run": "lincolnpark/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/chicago-1",
+   "job": 234,
+   "model": "qwen-edit",
+   "shot": "lincolnpark_door",
+   "seed": 2,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.5,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

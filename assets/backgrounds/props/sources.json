@@ -1,29 +1,36 @@
 {
  "rev": {
-  "sha": "f26b022d0f12321f4c3dca4c5b86e8c90673e8cd",
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
   "dirty": false,
   "comfy": "v0.44.0"
  },
- "run": "shared/props",
- "seeds": {
-  "box": 1,
-  "box_broken": 1,
-  "drain": 1,
-  "sign": 1,
-  "star": 1,
-  "pickup_pepperoni": 1,
-  "shot_pepperoni": 1,
-  "pickup_jalapeno": 1,
-  "shot_jalapeno": 1,
-  "pickup_garlic": 1,
-  "shot_garlic": 1,
-  "pickup_mushroom": 1,
-  "shot_mushroom": 1,
-  "pickup_basil": 1,
-  "shot_basil": 1,
-  "pickup_pineapple": 1,
-  "shot_pineapple": 1,
-  "pickup_sausage": 1,
-  "shot_sausage": 1
+ "layers": {
+  "paper": {
+   "procedural": "art/backgrounds/paper_props_shared.py",
+   "files": [
+    "box",
+    "box-broken",
+    "box-pile",
+    "drain",
+    "ledge",
+    "pickup-basil",
+    "pickup-garlic",
+    "pickup-jalapeno",
+    "pickup-mushroom",
+    "pickup-pepperoni",
+    "pickup-pineapple",
+    "pickup-sausage",
+    "sign",
+    "star"
+   ],
+   "note": "drawn in code, seeded; box, box-pile, ledge, star and the pickups carry the sticker border, drain/sign/box-broken do not"
+  },
+  "unchanged": {
+   "files": [
+    "shot-*.png",
+    "piece-*.png"
+   ],
+   "note": "topping shots and pieces are still the earlier art; see pieces-sources.json"
+  }
  }
 }
