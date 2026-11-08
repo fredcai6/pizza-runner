@@ -1,43 +1,156 @@
 {
  "rev": {
-  "sha": "2970646fedeb0920c42fb1717b9238aa98ce1b13",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "wallstreet/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 2,
-   "seam_start_x": 107
+   "run": "paper/ny-2",
+   "job": 232,
+   "model": "qwen-edit",
+   "shot": "wallstreet_far",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 25.1,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 180,
+   "erased_text_boxes": []
   },
   "mid": {
-   "run": "wallstreet/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 5,
-   "shifted_by": -50,
-   "seam_start_x": 55
+   "run": "paper/ny-2",
+   "job": 232,
+   "model": "qwen-edit",
+   "shot": "wallstreet_mid",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.5,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 199,
+   "shifted_by": -99,
+   "erased_text_boxes": [
+    [
+     1076,
+     524,
+     1102,
+     552
+    ]
+   ]
   },
   "near": {
-   "run": "wallstreet/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 106
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "planter",
+     3,
+     {
+      "colors": [
+       "green",
+       "mint"
+      ],
+      "box": "cream",
+      "w": [
+       70,
+       100
+      ],
+      "h": [
+       72,
+       96
+      ]
+     }
+    ],
+    [
+     "bush",
+     4,
+     {
+      "colors": [
+       "mint",
+       "lilac",
+       "green"
+      ],
+      "w": [
+       110,
+       200
+      ],
+      "h": [
+       54,
+       84
+      ]
+     }
+    ],
+    [
+     "tuft",
+     6,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "wallstreet/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "tiles_ground in paper_ny_build.py",
+   "tones": [
+    [
+     196,
+     190,
+     212
+    ],
+    [
+     188,
+     182,
+     206
+    ],
+    [
+     202,
+     196,
+     218
+    ]
+   ],
+   "cut_line": [
+    150,
+    142,
+    172
+   ]
   },
   "door": {
-   "run": "wallstreet/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/ny-1",
+   "job": 229,
+   "model": "qwen-edit",
+   "shot": "wallstreet_door",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.5,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

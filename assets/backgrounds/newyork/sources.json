@@ -1,57 +1,28 @@
 {
  "rev": {
-  "sha": "bff2222efdec18e5684ea1c3f6e8ae502bf61be7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
-  "far": {
-   "run": "newyork/layers2",
-   "model": "klein",
-   "shot": "far",
-   "seed": 4,
-   "seam_start_x": 131
-  },
-  "mid": {
-   "run": "newyork/mid3",
-   "model": "klein",
-   "shot": "mid",
+  "props": {
+   "run": "paper/ny-1",
+   "job": 229,
+   "model": "qwen-edit",
+   "shot": "props",
    "seed": 3,
-   "erased_text_boxes": [
-    [
-     688,
-     395,
-     933,
-     426
-    ],
-    [
-     938,
-     393,
-     954,
-     420
-    ],
-    [
-     1430,
-     395,
-     1662,
-     426
-    ],
-    [
-     1300,
-     592,
-     1338,
-     608
-    ]
+   "refs": [
+    "paper/style_pm_sq.png"
    ],
-   "shifted_by": -36,
-   "seam_start_x": 36
+   "secs": 14.6,
+   "size": [
+    1280,
+    720
+   ],
+   "upscaled_2x": false
   },
-  "near": {
-   "run": "newyork/layers2",
-   "model": "klein",
-   "shot": "near",
-   "seed": 1,
-   "seam_start_x": 78
+  "platform": {
+   "procedural": "platform_tile in paper_ny_build.py"
   }
  }
 }

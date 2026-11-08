@@ -1,43 +1,163 @@
 {
  "rev": {
-  "sha": "2970646fedeb0920c42fb1717b9238aa98ce1b13",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "brooklyn/layers",
-   "model": "klein",
-   "shot": "far",
+   "run": "paper/ny-1",
+   "job": 229,
+   "model": "qwen-edit",
+   "shot": "brooklyn_far",
    "seed": 2,
-   "seam_start_x": 33
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 22.1,
+   "size": [
+    2816,
+    720
+   ],
+   "upscaled_2x": false,
+   "seam_start_x": 110,
+   "erased_text_boxes": []
   },
   "mid": {
-   "run": "brooklyn/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 3,
-   "shifted_by": -50,
-   "seam_start_x": 139
+   "run": "paper/ny-2",
+   "job": 232,
+   "model": "qwen-edit",
+   "shot": "brooklyn_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.7,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 0,
+   "shifted_by": -106,
+   "erased_text_boxes": []
   },
   "near": {
-   "run": "brooklyn/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 135
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "planter",
+     3,
+     {
+      "colors": [
+       "green",
+       "rose"
+      ],
+      "box": "terracotta",
+      "w": [
+       70,
+       100
+      ],
+      "h": [
+       72,
+       96
+      ]
+     }
+    ],
+    [
+     "bush",
+     4,
+     {
+      "colors": [
+       "sage",
+       "green",
+       "peach"
+      ],
+      "w": [
+       110,
+       200
+      ],
+      "h": [
+       54,
+       84
+      ]
+     }
+    ],
+    [
+     "tuft",
+     5,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ],
+    [
+     "flower",
+     4,
+     {
+      "colors": [
+       "butter",
+       "rose"
+      ],
+      "h": [
+       34,
+       56
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "brooklyn/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "tiles_ground in paper_ny_build.py",
+   "tones": [
+    [
+     226,
+     190,
+     164
+    ],
+    [
+     218,
+     182,
+     156
+    ],
+    [
+     232,
+     198,
+     172
+    ]
+   ],
+   "cut_line": [
+    184,
+    140,
+    120
+   ]
   },
   "door": {
-   "run": "brooklyn/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 1
+   "run": "paper/ny-1",
+   "job": 229,
+   "model": "qwen-edit",
+   "shot": "brooklyn_door",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.5,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }
