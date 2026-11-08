@@ -56,6 +56,9 @@ PIZZAS = {
         "cold": (140, True, [dict(pose="cold_a/1", dx=-1), dict(pose="cold_a/2", dx=1)]),
         "special": (110, False, [dict(pose="jump_rise/2", hold=3), dict(pose="special_b/2", hold=6)]),
     }),
+    "recruit-deep": ("recruit-deep", (230, 170), 242, {"idle": (220, True, [dict(pose="master", hold=3), dict(pose="master", sink=2, hold=2), dict(pose="master")])}),
+    "recruit-jumbo": ("recruit-jumbo", (330, 240), 242, {"idle": (220, True, [dict(pose="master", hold=3), dict(pose="master", sink=2, hold=2), dict(pose="master")])}),
+    "recruit-naples": ("recruit-naples", (130, 104), 242, {"idle": (220, True, [dict(pose="master", hold=3), dict(pose="master", sink=1, hold=2), dict(pose="master")])}),
     "ninja": ("ninja", (128, 118), 239, {
         "idle": (240, True, [dict(pose="master", hold=2), dict(pose="idle_b/1", hold=2), dict(pose="master"), dict(pose="idle_b/3")]),
         "throw": (110, False, [dict(pose="throw_a/2", hold=3), dict(pose="throw_b/1", hold=4)]),
