@@ -297,7 +297,7 @@
       const tint = ['#ff3fa4', '#4fd8ff', '#ffe14f', '#b45cff'][Math.floor(ms / 240) % 4];
       ctx.save(); ctx.globalAlpha = 0.3; ctx.fillStyle = tint; ctx.beginPath(); ctx.moveTo(760, 260); ctx.lineTo(240, 720); ctx.lineTo(1240, 720); ctx.fill(); ctx.restore();
     }
-    const who = final ? 'alewife' : `customer-${city.id}-${area.id}`, height = final ? 340 : 300;
+    const who = final ? 'alewife' : `customer-${city.id}-${area.id}`, height = final ? 220 : 200;
     if (!S.draw(ctx, who, 'idle', ms, 760, 610, height, -1)) placeholderAlewife(ctx, 760, 610, 300);
     const style = view.slice && view.slice.style ? view.slice.style : (city.style || 'ny');
     const worn = view.slice && view.slice.topping, dress = worn ? { piece: P.pieceArt(worn, style), count: view.slice.left } : null;
