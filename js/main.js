@@ -124,31 +124,22 @@
   const CLASS = { shot: 'Ranged', bounce: 'Ricochet', aura: 'Area', leap: 'Mobility', reheat: 'Recovery', scatter: 'Spread', slam: 'Ground' };
   const COLS = 4;
 
-  // Bits of a topping, scattered the same way every time so the pie does not shimmer as the cursor moves.
-  function bits(t, cx, cy, r, count, scale = 1) {
-    let seed = [...t].reduce((h, c) => h * 31 + c.charCodeAt(0), 7), out = '';
-    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    const color = C.TOPPINGS[t].color;
-    for (let i = 0; i < count; i++) {
-      const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * r * 0.82, x = (cx + Math.cos(a) * d).toFixed(1), y = (cy + Math.sin(a) * d).toFixed(1), rot = Math.floor(rnd() * 360);
-      const k = 11 * scale;
-      if (t === 'pepperoni') out += `<circle cx="${x}" cy="${y}" r="${k * 1.15}" fill="#c8321e" stroke="#7a1a10" stroke-width="2"/><circle cx="${x}" cy="${y}" r="${k * 0.35}" fill="#e46a4c"/>`;
-      else if (t === 'jalapeno') out += `<circle cx="${x}" cy="${y}" r="${k}" fill="#6cc15a" stroke="#2f6d28" stroke-width="2.5"/><circle cx="${x}" cy="${y}" r="${k * 0.45}" fill="#d7ef9a"/>`;
-      else if (t === 'garlic') out += `<ellipse cx="${x}" cy="${y}" rx="${k * 0.9}" ry="${k * 0.5}" transform="rotate(${rot} ${x} ${y})" fill="#f3efd2" stroke="#b8ad7d" stroke-width="2"/>`;
-      else if (t === 'mushroom') out += `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M-${k} 2 A${k} ${k} 0 0 1 ${k} 2 Z" fill="#b99573" stroke="#6b4c34" stroke-width="2"/><rect x="-${k * 0.3}" y="2" width="${k * 0.6}" height="${k * 0.7}" fill="#e6d3bb" stroke="#6b4c34" stroke-width="2"/></g>`;
-      else if (t === 'basil') out += `<path transform="translate(${x} ${y}) rotate(${rot})" d="M0 -${k} Q${k} -${k * 0.2} 0 ${k} Q-${k} -${k * 0.2} 0 -${k} Z" fill="#3f9b4a" stroke="#1d5a2a" stroke-width="2"/>`;
-      else if (t === 'pineapple') out += `<rect x="${x - k * 0.8}" y="${y - k * 0.8}" width="${k * 1.6}" height="${k * 1.6}" transform="rotate(${rot} ${x} ${y})" rx="3" fill="#ffd84a" stroke="#b58a12" stroke-width="2.5"/>`;
-      else if (t === 'sausage') out += `<circle cx="${x}" cy="${y}" r="${k * 0.85}" fill="#8b4a2b" stroke="#4a2414" stroke-width="2"/><circle cx="${x - 2}" cy="${y - 2}" r="${k * 0.25}" fill="#b56a45"/>`;
-      else out += `<circle cx="${x}" cy="${y}" r="${k}" fill="${color}"/>`;
-    }
-    return out;
+  // The fighter on the left is the city's pizza character, idle-animated, wearing the highlighted topping.
+  // It is drawn through the sprite loader and scaled to fit its stage, whatever size the art is.
+  function fighter(canvas, style, topping) {
+    const art = `slice-${style}`, frame = S.size(art, 'idle'), box = 420;
+    if (!frame) return;
+    canvas.width = box; canvas.height = box;
+    const k = Math.min((box - 24) / frame.w, (box - 36) / frame.h), ctx = canvas.getContext('2d');
+    const dress = { piece: P.pieceArt(topping, style), count: C.CHARGES };
+    const tick = ms => {
+      if (!canvas.isConnected) return;
+      ctx.clearRect(0, 0, box, box);
+      S.draw(ctx, art, 'idle', ms, box / 2, box - 18, frame.h * k, 1, 1, { dress });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
-
-  const pieSvg = t => `<svg class="bigpie" viewBox="0 0 300 300"><ellipse cx="150" cy="276" rx="110" ry="14" fill="rgba(0,0,0,.25)"/>
-    <circle cx="150" cy="150" r="136" fill="#d9954a" stroke="#6b3c18" stroke-width="6"/><circle cx="150" cy="150" r="116" fill="#c8321e"/>
-    <circle cx="150" cy="150" r="108" fill="#f6c94a"/><path d="M60 120 Q110 90 150 112 T240 120" stroke="#ffe27a" stroke-width="8" fill="none" opacity=".7"/>
-    ${bits(t, 150, 150, 120, 13)}</svg>`;
-  const tileSvg = t => `<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="#f6c94a" stroke="#c28a3a" stroke-width="4"/>${bits(t, 30, 30, 24, 3, 0.62)}</svg>`;
 
   function pieBuilder(city) {
     let pick = city.menu[0];
@@ -169,19 +160,14 @@
       else if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); done(); }
     };
     const render = () => {
-      if (city.menu.length === 1) {
-        removeEventListener('keydown', keys);
-        show(`<h2>Build your pie</h2><p>This order is ${C.TOPPINGS[pick].name.toLowerCase()}. Just ${C.TOPPINGS[pick].name.toLowerCase()}.</p><p class="blurb">${C.TOPPINGS[pick].blurb}</p>`, [['Box it', () => box(city, pick)]]);
-        return;
-      }
-      const T = C.TOPPINGS[pick];
-      const tiles = TOPPING_ORDER.concat([null]).map(t => !t ? '<div class="tile lock"><span>?</span></div>'
-        : city.menu.includes(t) ? `<button class="tile${pick === t ? ' on' : ''}" data-t="${t}" aria-label="${C.TOPPINGS[t].name}">${tileSvg(t)}<span>${C.TOPPINGS[t].name}</span></button>`
-        : `<div class="tile lock"><span>?</span></div>`).join('');
-      show(`<div class="select"><div class="selgrid"><h2>Pick the topping</h2><div class="tiles">${tiles}</div><p class="hint">Arrows to move, Enter to box it.</p></div>
-        <div class="fighter"><div class="stage">${pieSvg(pick)}</div>
-          <div class="plate"><b class="fname">${T.name}</b><span class="fclass">${CLASS[T.kind] || T.kind}</span><p class="blurb">${T.blurb}</p></div></div></div>`,
+      const T = C.TOPPINGS[pick], style = city.style;
+      const tiles = TOPPING_ORDER.concat([null]).map(t => !t || !city.menu.includes(t) ? '<div class="tile lock"><span>?</span></div>'
+        : `<button class="tile${pick === t ? ' on' : ''}" data-t="${t}" aria-label="${C.TOPPINGS[t].name}"><img src="assets/backgrounds/props/pickup-${t}.png" alt=""><span>${C.TOPPINGS[t].name}</span></button>`).join('');
+      show(`<div class="select"><div class="fighter"><div class="stage"><canvas class="fighterart" aria-label="${C.SPEAKERS[style]} wearing ${T.name.toLowerCase()}"></canvas></div>
+          <div class="plate"><b class="fname">${T.name}</b><span class="fclass">${CLASS[T.kind] || T.kind}</span><p class="blurb">${T.blurb}</p><p class="byline">${C.SPEAKERS[style]}, ${C.STYLES[style].name}</p></div></div>
+        <div class="selgrid"><h2>Pick the topping</h2><div class="tiles">${tiles}</div><p class="hint">Arrows to move, Enter to box it.</p></div></div>`,
         [['Box it', done]]);
+      fighter(screen.querySelector('.fighterart'), style, pick);
       screen.querySelectorAll('.tile[data-t]').forEach(b => { b.onclick = () => { if (pick === b.dataset.t) done(); else { pick = b.dataset.t; render(); } }; });
     };
     addEventListener('keydown', keys);
@@ -212,7 +198,7 @@
         <h2>${city.name}</h2>
         <p class="tally">Address ${world.delivery + 1} of ${city.areas.length}. ${list.length} slice${list.length === 1 ? '' : 's'} left.</p>
         ${line ? `<p class="dispatch">${line}</p>` : ''}
-        <div class="slices">${groups.map(s => `<button class="slice${s === chosen ? ' on' : ''}" data-id="${s.id}"><b>${C.STYLES[s.style].name}</b><span>${C.TOPPINGS[s.topping].name} (${n(s)})</span></button>`).join('')}</div>
+        <div class="slices">${groups.map(s => `<button class="slice${s === chosen ? ' on' : ''}" data-id="${s.id}"><img src="${S.portraitUrl(s.style, s.topping)}" alt=""><span class="sl"><b>${C.STYLES[s.style].name}</b><span>${C.TOPPINGS[s.topping].name} (${n(s)})</span></span></button>`).join('')}</div>
         <p class="tally">Start from <b>${world.nodes[node].name}</b></p>
         <div class="mapactions"></div></div></div>`, [['Deploy', () => startRun(chosen, node)], boardButton(mapScreen)]);
       screen.querySelector('.mapactions').appendChild(screen.querySelector('.actions'));
@@ -288,7 +274,7 @@
   $('pauseBoardBtn').onclick = () => B.open(overlay, camp, () => overlay.classList.add('hidden'));
   $('pauseMapBtn').onclick = () => {
     overlay.classList.remove('hidden');
-    overlay.innerHTML = `<div class="mapview">${M.svg(camp, { live: { street: run.street.id, x: run.p.x } })}<button class="mapback">◀ Back to the street</button></div>`;
+    overlay.innerHTML = `<div class="mapview">${M.svg(camp, { live: { street: run.street.id, x: run.p.x, style: run.slice.style, topping: run.held() } })}<button class="mapback">◀ Back to the street</button></div>`;
     overlay.querySelector('.mapback').onclick = () => overlay.classList.add('hidden');
   };
   $('pausePlaytestBtn').onclick = playtestMenu;

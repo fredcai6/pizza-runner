@@ -972,9 +972,9 @@
       }
     }
 
-    // The delivery sign: a wooden shingle with a pizza slice on it, no words, glowing gold when this is the door.
+    // The delivery sign: a wooden shingle with the pizza character on it, no words, glowing gold when this is the door.
     drawDoorSign(x, y, w, h, active) {
-      const { ctx, frame } = this, cx = x + w / 2, cy = y + h / 2 + 1;
+      const { ctx, frame } = this, cx = x + w / 2;
       ctx.save();
       ctx.lineJoin = 'round';
       if (active) { ctx.shadowColor = '#ffd76a'; ctx.shadowBlur = 14 + Math.sin(frame / 8) * 6; }
@@ -985,13 +985,8 @@
       ctx.fillStyle = active ? '#6e4223' : '#4a342b'; ctx.fillRect(x + 4, y + h * 0.5 - 1, w - 8, 2);
       ctx.strokeStyle = active ? '#e8b64a' : '#a08a5a'; ctx.lineWidth = 2; ctx.strokeRect(x + 7, y + 7, w - 14, h - 14);
       ctx.fillStyle = '#e9d8a0'; for (const [rx, ry] of [[x + 9, y + 9], [x + w - 12, y + 9], [x + 9, y + h - 12], [x + w - 12, y + h - 12]]) ctx.fillRect(rx, ry, 3, 3);
-      // The slice, point down, with its crust on top.
-      const big = Math.min(1.35, h / 33); ctx.translate(cx, cy); ctx.scale(big, big); ctx.translate(-cx, -cy);
-      ctx.strokeStyle = INK; ctx.lineWidth = 3.2;
-      ctx.beginPath(); ctx.moveTo(cx - 12, cy - 8); ctx.lineTo(cx + 12, cy - 8); ctx.lineTo(cx, cy + 12); ctx.closePath(); ctx.stroke();
-      ctx.fillStyle = active ? '#ffcc33' : '#d6b25a'; ctx.fill();
-      ctx.fillStyle = '#d59a4c'; ctx.fillRect(cx - 14, cy - 13, 28, 6); ctx.strokeRect(cx - 14, cy - 13, 28, 6);
-      ctx.fillStyle = '#c8321e'; for (const [px, py] of [[-5, -2], [5, -3], [0, 5]]) dot(ctx, cx + px, cy + py, 3);
+      // The pizza character on it, wearing its topping, greyed when this is not the door.
+      S.stamp(ctx, this.slice.style, this.slice.topping, cx, y + h - 8, w - 16, h - 14, { grey: !active, count: C.CHARGES });
       ctx.restore();
     }
 
@@ -1086,20 +1081,15 @@
       ctx.fillStyle = K.TEXT; ctx.fillText(speech.text.slice(0, shown), x + 15, y + 28);
     }
 
-    // The pie this slice came from. Each wedge goes as it is delivered or lost.
-    drawPie(x, y, r) {
-      const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, n = slices.length, turn = Math.PI * 2 / n;
-      K.disc(ctx, x, y, r + 2, '#ffe9b8', { b: 5, shadow: 4 });
-      slices.forEach((s, i) => {
-        if (s.status !== 'ready') return;
-        const a = -Math.PI / 2 + i * turn, mid = a + turn / 2, out = s === this.slice ? 4 + Math.sin(frame / 9) * 2 : 0;
-        const ox = x + Math.cos(mid) * out, oy = y + Math.sin(mid) * out;
-        const wedge = (radius, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.arc(ox, oy, radius, a + 0.03, a + turn - 0.03); ctx.fill(); };
-        wedge(r, '#e59a3a'); wedge(r - 5, '#ffc933');
-        const topping = s === this.slice ? this.held() : s.topping;
-        if (!topping) return;
-        ctx.fillStyle = C.TOPPINGS[topping].color;
-        dot(ctx, ox + Math.cos(mid) * r * 0.6, oy + Math.sin(mid) * r * 0.6, r * 0.11);
+    // The slices this city started with, as small portraits of their characters wearing their toppings. The one
+    // out on the street bobs on a gold chip; delivered, eaten and lost slices are greyed on an empty chip.
+    drawSlices(x, top) {
+      const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, CW = 40, CH = 46, STEP = 46;
+      slices.forEach((sl, i) => {
+        const cx = x + i * STEP + CW / 2, here = sl === this.slice, spent = !here && sl.status !== 'ready';
+        const lift = here ? Math.round(Math.sin(frame / 9) * 2) - 3 : 0, held = here ? this.held() : sl.topping;
+        K.card(ctx, cx - CW / 2, top + lift, CW, CH, { fill: here ? K.SUN : spent ? '#d9cfb8' : K.PAPER, r: 8, b: 2, shadow: 2 });
+        S.stamp(ctx, sl.style, held, cx, top + lift + CH - 3, CW - 4, CH - 6, { grey: spent, count: here ? this.left() : C.CHARGES });
       });
     }
 
@@ -1138,10 +1128,10 @@
       ctx.fillStyle = K.TEXT; ctx.fillText(text, x, y + 1);
     }
 
-    // Health is a slice on its side: crust at the left, cheese running out to the tip. Heat fills it from
-    // the crust, a bite takes a scalloped chunk off the tip for good, and a lost chunk drains away slowly.
+    // Health is a heat bar, a thermometer sticker with the active pizza as its bulb. Heat fills it from the bulb,
+    // a bite takes a scalloped chunk off the far end for good, and a lost chunk drains away slowly in cream.
     drawHealth(x, y) {
-      const { ctx } = this, GW = 336, GH = 60, PAD = 10, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame;
+      const { ctx } = this, GW = 322, GH = 34, PAD = 10, R = 34, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame, bx = R - 4, bodyLen = GW - bx;
       if (!this.gauge) { this.gauge = document.createElement('canvas'); this.gaugeInk = document.createElement('canvas'); for (const c of [this.gauge, this.gaugeInk]) { c.width = w; c.height = h; } }
       // Smooth: the bar eases to the true heat, and what a hit took trails behind in cream.
       const heat = Math.max(0, this.heat);
@@ -1152,37 +1142,17 @@
       const g = this.gauge.getContext('2d');
       g.clearRect(0, 0, w, h);
       g.save(); g.translate(PAD, PAD);
-      const CR = 26, bx = CR - 4, bodyLen = GW - bx;
-      // The whole slice: a rounded crust end and a cheese wedge that narrows to a rounded tip.
-      const shape = () => {
-        g.beginPath();
-        g.moveTo(CR, 0); g.quadraticCurveTo(GW * 0.66, GH * 0.04, GW - 10, GH * 0.4); g.quadraticCurveTo(GW, GH * 0.5, GW - 10, GH * 0.6); g.quadraticCurveTo(GW * 0.66, GH * 0.96, CR, GH);
-        g.closePath();
-        if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4);
-      };
-      const crust = () => { g.beginPath(); if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4); };
+      const shape = () => { g.beginPath(); if (g.roundRect) g.roundRect(0, 0, GW, GH, GH / 2); else g.rect(0, 0, GW, GH); };
       shape(); g.fillStyle = '#e8dcc0'; g.fill();
       g.save(); shape(); g.clip();
-      // Cheese colour runs warm to cold with the heat.
+      // Colour runs warm to cold with the heat.
       const mix = (a, b, k) => { const n = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = n(a), B = n(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`; };
       const hot = fill > 0.5, k = Math.max(0, Math.min(1, hot ? (fill - 0.5) * 2 : fill * 2));
-      const c1 = hot ? mix('#e8bc55', '#ffd23a', k) : mix('#a9c6d8', '#e8bc55', k), c2 = hot ? mix('#c98a44', '#ff8a24', k) : mix('#6f97b3', '#c98a44', k);
+      const c1 = hot ? mix('#ffb23a', '#ff6a1f', k) : mix('#8fc4e0', '#ffb23a', k);
       const edge = bx + bodyLen * ghostF, mid = bx + bodyLen * fill;
       if (ghostF > fill) { g.fillStyle = '#fff'; g.fillRect(mid, 0, edge - mid, GH); }
-      const grad = g.createLinearGradient(bx, 0, GW, 0); grad.addColorStop(0, c1); grad.addColorStop(1, c2);
-      g.fillStyle = c1; g.fillRect(bx, 0, Math.max(0, mid - bx), GH);
-      // Pepperoni along it, dimmed where the heat has gone, and a few cheese highlights.
-      for (const [px, py, pr] of [[0.2, 0.3, 8], [0.38, 0.68, 7], [0.5, 0.3, 6], [0.66, 0.6, 5], [0.8, 0.45, 4]]) {
-        const cx = bx + bodyLen * px, cy = GH * py, lit = cx < mid;
-        g.fillStyle = lit ? '#fff' : '#d9ceb2'; g.beginPath(); g.arc(cx, cy, pr + 2, 0, 7); g.fill();
-        g.fillStyle = lit ? '#e8362b' : '#bfb394'; g.beginPath(); g.arc(cx, cy, pr, 0, 7); g.fill();
-      }
-      g.fillStyle = 'rgba(255,248,214,.5)';
-      for (const [px, py] of [[0.1, 0.78], [0.3, 0.14], [0.58, 0.82], [0.72, 0.3]]) { const cx = bx + bodyLen * px; if (cx < mid) g.fillRect(Math.round(cx), Math.round(GH * py), 7, 3); }
-      // The crust, always warm, with its seam against the cheese.
-      crust(); g.fillStyle = '#d59a4c'; g.fill();
-      g.fillStyle = '#f0c27a'; g.fillRect(5, 3, CR - 14, 6); g.fillStyle = '#b97a38'; g.fillRect(5, GH - 8, CR - 14, 5);
-      g.fillStyle = '#a8662b'; g.fillRect(CR - 4, 0, 3, GH);
+      g.fillStyle = c1; g.fillRect(0, 0, Math.max(0, mid), GH);
+      g.fillStyle = 'rgba(255,255,255,.38)'; g.fillRect(0, 4, Math.max(0, mid), 5);
       // Marks along the edge, one per bite the slice can take.
       g.fillStyle = INK;
       for (let i = 1; i < C.BITES; i++) { const mx = Math.round(bx + bodyLen * i / C.BITES); g.globalAlpha = 0.55; g.fillRect(mx - 1, 0, 2, 7); g.fillRect(mx - 1, GH - 7, 2, 7); }
@@ -1192,12 +1162,12 @@
       if (capF < 0.999) {
         const cut = bx + bodyLen * capF;
         g.globalCompositeOperation = 'destination-out';
-        g.fillRect(cut + 14, -4, GW, GH + 8);
-        for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cut + 14, GH * (0.17 + i * 0.33), GH * 0.2, 0, 7); g.fill(); }
+        g.fillRect(cut + 8, -4, GW, GH + 8);
+        for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cut + 8, GH * (0.17 + i * 0.33), GH * 0.22, 0, 7); g.fill(); }
         g.globalCompositeOperation = 'source-over';
       }
       g.restore();
-      // The outline: the slice's silhouette stamped around itself, heavy, in the game's ink.
+      // The cut: the bar's silhouette stamped around itself in the game's ink, then white, with a solid shadow.
       const k2 = this.gaugeInk.getContext('2d');
       k2.clearRect(0, 0, w, h); k2.globalCompositeOperation = 'source-over'; k2.drawImage(this.gauge, 0, 0);
       k2.globalCompositeOperation = 'source-in'; k2.fillStyle = INK; k2.fillRect(0, 0, w, h);
@@ -1205,13 +1175,17 @@
       const kc = k3.getContext('2d'); kc.drawImage(this.gauge, 0, 0); kc.globalCompositeOperation = 'source-in'; kc.fillStyle = '#fff'; kc.fillRect(0, 0, w, h);
       ctx.save();
       // A hit shakes the gauge.
-      const shake = this.invuln > 70 ? Math.sin(f * 2.4) * 3 : 0;
+      const shake = this.invuln > 70 ? Math.sin(f * 2.4) * 3 : 0, hit = this.invuln > 70;
       ctx.translate(x + shake, y);
-      // Violet drop shadow, violet rim, white cut border, then the slice itself.
-      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, 4 + Math.round(Math.cos(a / 20 * 6.2832) * 5), 5 + Math.round(Math.sin(a / 20 * 6.2832) * 5));
-      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, Math.round(Math.cos(a / 20 * 6.2832) * 5), Math.round(Math.sin(a / 20 * 6.2832) * 5));
-      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeCut, Math.round(Math.cos(a / 20 * 6.2832) * 3), Math.round(Math.sin(a / 20 * 6.2832) * 3));
-      ctx.drawImage(this.gauge, 0, 0);
+      const left = R * 2 - 36, top = R - GH / 2 - PAD;
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, left + 3 + Math.round(Math.cos(a / 20 * 6.2832) * 5), top + 4 + Math.round(Math.sin(a / 20 * 6.2832) * 5));
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, left + Math.round(Math.cos(a / 20 * 6.2832) * 5), top + Math.round(Math.sin(a / 20 * 6.2832) * 5));
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeCut, left + Math.round(Math.cos(a / 20 * 6.2832) * 3), top + Math.round(Math.sin(a / 20 * 6.2832) * 3));
+      ctx.drawImage(this.gauge, left, top);
+      // The bulb: a sticker disc with the pizza in it, tinted blue as it cools and red when it is hit.
+      const cx = R + 4, cy = R + 4, bob = Math.round(Math.sin(f / 14) * 1.5);
+      K.disc(ctx, cx, cy, R, hit ? '#ffb3a8' : fill < 0.3 ? '#cfe6f0' : K.PAPER, { b: 4, shadow: 4 });
+      S.stamp(ctx, this.slice.style, this.held(), cx, cy + R - 5 + bob, R * 1.75, R * 1.8, { count: this.left() });
       ctx.restore();
     }
 
@@ -1254,15 +1228,15 @@
 
     hud() {
       const { ctx, world, city } = this;
-      this.drawPie(444, 62, 36);
       this.drawHealth(14, 12);
+      this.drawSlices(24, 104);
       const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
-      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 26, 120, 19);
+      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 26, 186, 19);
       // Addresses done, and the street we are on.
       city.areas.forEach((a, i) => {
-        K.disc(ctx, 36 + i * 32, 152, 8, i < world.delivery ? '#4fcf6a' : i === world.delivery ? K.SUN : '#e6dcc0', { b: 3, shadow: 2 });
+        K.disc(ctx, 36 + i * 32, 218, 8, i < world.delivery ? '#4fcf6a' : i === world.delivery ? K.SUN : '#e6dcc0', { b: 3, shadow: 2 });
       });
-      this.inkText(this.street.name, 36 + city.areas.length * 32 + 8, 158, 17);
+      this.inkText(this.street.name, 36 + city.areas.length * 32 + 8, 224, 17);
       this.syncSpecialButton();
       this.guideBar();
       if (this.barkT > 0) {
@@ -1281,6 +1255,7 @@
 
   // Placeholder slices: wedge, charred round, jumbo wedge, or thick pan square.
   function drawSlice(ctx, x, y, style, topping, cheese, scale = 1, dead = false, facing = 1, squash = 1) {
+    api.fallbackDraws++;
     ctx.save(); ctx.translate(x, y); ctx.scale(scale * facing, scale * squash);
     if (dead) ctx.rotate(1.35);
     const crust = dead ? '#77736b' : { ny: '#d59a4c', naples: '#c98a44', deep: '#a8662b', jumbo: '#d59a4c' }[style];
@@ -1299,5 +1274,5 @@
     ctx.restore();
   }
 
-  root.PR_PLAY = { Run, W, H, drawSlice, dot, pieceArt };
+  const api = root.PR_PLAY = { Run, W, H, drawSlice, dot, pieceArt, fallbackDraws: 0 };
 })(window);
