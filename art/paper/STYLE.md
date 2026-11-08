@@ -75,3 +75,17 @@ and sprite-forge's venv.
 4. **Frame heights:** figure plus border plus rim fills the canvas height of the old art (hero 124, old timer 130, teen 118,
    turtle 92, customers 150), so collision and the game's foot-pad grounding are untouched.
 5. **Check:** every frame at 2x for extra limbs, lettering and stray cast shadow before it is imported.
+
+## Rest of the cast (settled 2026-11-07)
+Same recipe, plus what the other twenty characters taught. Specs are scripts, not hand-edited tomls: `make_rest_spec.py` (masters, Polaroid prompts),
+`make_rest_frames.py` (key poses), `make_rest_anims.py` (anim files with the picked shot/seed), `pick.py` (copies a pick in with its record and job).
+- **Image 1 is the finished paper art, never the old pixel art, for a pizza.** With the pixel master as image 1 the model kept the old brows and big
+  cartoon eyes (Stan, Phil); with Vinny's paper master as image 1 and the new character described in words, the dot-eye face came back every time.
+  Humans (customers, ninja, mutant, DJ Alewife) are fine with the old art as image 1.
+- **No pink or magenta on a figure.** The backdrop key is magenta: Lincoln Park's pink top and sneakers were keyed away with it.
+- Recruits are the picked pizza master redrawn as plain cheese; their idle is the master held with a settle (no extra key poses).
+- paperkit frame keys: `clip` (paint over everything below a height, for a pose the model drew resting on a ledge), `rot` (turn the source picture),
+  `own_palette` (a recoloured pose such as cold cuts its own 48 colours; the master's palette has no blue).
+- Decals: a pose rotated or squashed past forge.decals' registration range keeps its toppings (see the jumbo flop); use an upright pose before it.
+- Candid Polaroids: `polaroids.py` (generation to `assets/polaroids/TYPE.png`, softened). DJ Alewife's ending photo is `alewife_polaroid.py`: the model drew pixel art
+  and a laptop logo, so the room is drawn in code around her master.

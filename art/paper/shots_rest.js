@@ -10,6 +10,7 @@ const serve = http.createServer((q, s) => {
   const u = q.url.split('?')[0], f = path.join(root, u === '/' ? 'index.html' : u);
   fs.readFile(f, (e, d) => { if (e) { s.writeHead(404); s.end(); } else { s.writeHead(200, { 'content-type': types[path.extname(f)] || 'text/plain' }); s.end(d); } });
 });
+const ONLY = process.env.ONLY || '';
 const CITIES = [['chicago', 1, ['loop', 'lincolnpark', 'wickerpark']], ['dc', 2, ['georgetown', 'mall', 'federal']], ['naples', 3, ['harbor', 'center', 'hillside']], ['california', 4, ['downtown', 'beach', 'alewife']]];
 
 (async () => {
@@ -18,7 +19,7 @@ const CITIES = [['chicago', 1, ['loop', 'lincolnpark', 'wickerpark']], ['dc', 2,
   const browser = await chromium.launch({ executablePath: process.env.CHROME });
   const page = await (await browser.newContext({ viewport: { width: 1280, height: 720 } })).newPage();
   const errors = [], bad = [];
-  page.on('pageerror', e => errors.push(e.message));
+  page.on('pageerror', e => errors.push(e.message + ' @ ' + (e.stack || '').split('\n').slice(1, 3).join(' | ')));
   page.on('response', r => { if (r.status() >= 400) bad.push(r.url()); });
   const shot = async n => { await page.screenshot({ path: path.join(out, `${n}.png`) }); console.log('shot', n); };
   const click = t => page.getByRole('button', { name: t, exact: true }).first().click();
@@ -30,6 +31,7 @@ const CITIES = [['chicago', 1, ['loop', 'lincolnpark', 'wickerpark']], ['dc', 2,
   };
 
   // HQ: the opening has Dayold and every recruit.
+  if (!ONLY) {
   await page.goto(url);
   await click('Start');
   await page.locator('#dialog:not(.hidden)').waitFor();
@@ -38,7 +40,8 @@ const CITIES = [['chicago', 1, ['loop', 'lincolnpark', 'wickerpark']], ['dc', 2,
     await page.locator('#dialog').click();
   }
 
-  for (const [name, c, areas] of CITIES) {
+  }
+  if (!ONLY) for (const [name, c, areas] of CITIES) {
     await warp(c, 0);
     await click('Deploy').catch(() => {});
     await page.waitForTimeout(500);
@@ -75,6 +78,7 @@ const CITIES = [['chicago', 1, ['loop', 'lincolnpark', 'wickerpark']], ['dc', 2,
   }
 
   // The corkboard's enemy tab, from the map.
+  if (!ONLY) {
   await warp(1, 0);
   await click('Corkboard');
   await page.waitForTimeout(400);
@@ -82,12 +86,15 @@ const CITIES = [['chicago', 1, ['loop', 'lincolnpark', 'wickerpark']], ['dc', 2,
   await page.waitForTimeout(500); await shot('corkboard-enemies');
   await page.locator('.polaroid').nth(2).click().catch(() => {}); await page.waitForTimeout(300); await shot('corkboard-ninja-file');
 
+  }
   // The ending: the Polaroid.
   await page.goto(url);
   await click('Playtest');
   await click('See the door and ending scenes');
+  await page.waitForTimeout(1500); await shot('ending-start'); console.log(await page.evaluate(() => document.body.innerText.slice(0, 300)));
   for (let i = 0; i < 80 && await page.locator('#dialog:not(.hidden)').count(); i++) {
-    await page.waitForTimeout(350);
+    await page.waitForTimeout(1300);
+    if (i % 6 === 0) await shot(`ending-${i}`);
     const txt = await page.locator('#dialog').innerText().catch(() => '');
     if (/Know thy enemy/.test(txt)) { await page.waitForTimeout(900); await shot('ending-polaroid'); break; }
     await page.locator('#dialog').click();
