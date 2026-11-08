@@ -43,3 +43,18 @@ that file's rules on the 1:1 stage-pixel grid, sprite heights and no fake text s
 
 ## No fake text
 Unchanged: no model-drawn lettering may reach an asset. Prompt against it and inspect at 2x.
+
+## Backgrounds recipe (settled on New York, 2026-11-07)
+Scripts: `art/backgrounds/{paper_prep,paper_prep_props,paper_edit,paper,paper_near,paper_ny_build}.py`,
+`newyork/make_paper_spec.py` (all prompts), `hq/make_paper_spec.py`, `hq/paper_build.py`. Picks in `paper_picks.json`.
+- Qwen-Image-Edit 2511 edits the old layer (image 1) with `style_pm_sq.png` as image 2, prompt "Rebuild it as cut paper ... in
+  the material of image 2". The input is first median-filtered and cut to 20 colours so the model has no pen lines to copy.
+- Work at half scale (layer 1408x360 with a 128-column wrap overhang, 13 s). At 2560x720 the model re-inks every window; at half
+  scale it draws bold flat shapes. Upscale 2x with Lanczos, key, then `tile_seam` cuts where the overhang closes.
+- Far must be asked for as skyline only ("remove everything near the camera"): the old far layers were whole street scenes.
+- Mid and doors go on magenta. `paper.key_rgb` measures the key colour (Qwen darkens it), `peel_halo` removes the white sticker
+  border Qwen adds. Touchable things then get the build's own border (`paper.sticker`): 4 px white, 1 px #2a1830 rim, solid
+  shadow, feet on the bottom row. Scenery gets none.
+- Near is drawn in code (`paper_near.py`): Qwen turned dark clutter into big white-bordered stickers at the wrong scale.
+- Paper grain is added after palette reduction (`paper.add_grain`, seeded white noise plus short fibres), so it survives.
+- Hazard tape, door numbers and white highlight bricks read as letters: redraw or fill them (see `clean_tape`, `ERASE`).

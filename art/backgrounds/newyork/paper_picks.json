@@ -1,0 +1,6 @@
+{
+ "wallstreet": {"far": {"run": "ny-2", "seed": 1}, "mid": {"run": "ny-2", "seed": 3}, "door": {"run": "ny-1", "seed": 3}},
+ "centralpark": {"far": {"run": "ny-1", "seed": 1}, "mid": {"run": "ny-2", "seed": 3}, "door": {"run": "ny-1", "seed": 2}},
+ "brooklyn": {"far": {"run": "ny-1", "seed": 2}, "mid": {"run": "ny-2", "seed": 1}, "door": {"run": "ny-1", "seed": 3}},
+ "props": {"run": "ny-1", "seed": 3}
+}
