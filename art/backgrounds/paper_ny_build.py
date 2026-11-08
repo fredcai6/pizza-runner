@@ -18,7 +18,7 @@ from forge.generate import DATA
 from forge.layers import quantize, tile_seam, write_sources
 
 W, H, GROUND = 2560, 720, 600
-OUT = Path(sys.argv[1]) / "newyork"
+OUT = Path(sys.argv[1]) / "newyork" if len(sys.argv) > 1 else None   # paper_build.py imports the steps below
 RUN = DATA / "runs/paper"
 # shot -> seed. Jobs: ny-1 = #229
 JOBS = {"ny-1": 229, "ny-2": 232, "hq-1": 230}
@@ -69,6 +69,18 @@ def build_near(area):
     return rgba, {"procedural": "paper_near.near_layer", "spec": NEAR[area], "seed": 7}
 
 
+LIFT_DARK = False   # paper_build.py turns this on: a far layer carries no near-black, whatever the model drew
+
+
+def lift_dark(rgba, to=(140, 146, 182)):
+    """Pale layers only: pixels darker than luma 110 are pulled toward a slate, the darkest most, so a black tower becomes a blue-grey one."""
+    out = rgba.astype(float)
+    luma = out[..., :3] @ np.array([0.299, 0.587, 0.114])
+    w = np.clip((110 - luma) / 60, 0, 1)[..., None] * 0.8
+    out[..., :3] = out[..., :3] * (1 - w) + np.array(to, float) * w
+    return out.clip(0, 255).astype(np.uint8)
+
+
 def build_layer(area, layer, run, seed):
     rgb, meta = qwen(run, f"{area}_{layer}", seed)
     if layer == "far":
@@ -78,6 +90,9 @@ def build_layer(area, layer, run, seed):
         rgba[..., :3] = np.where(rgba[..., 3:] > 0, rgba[..., :3], 0)
     rgba = tile_seam(rgba, W, blend=40)
     meta["seam_start_x"] = int(tile_seam.last)
+    if layer == "far" and LIFT_DARK:
+        rgba = lift_dark(rgba)
+        meta["dark_lifted"] = True
     if layer == "mid":
         # the street line: the lowest row that is mostly paper becomes y 600, and nothing hangs below it. Qwen leaves a band of
         # magenta-blended pixels where the lawn or kerb meets the key: rows whose median is still key-tinted are not paper.
@@ -207,11 +222,11 @@ def fit_prop(crop, w, h, seed):
     return np.asarray(canvas)
 
 
-def platform_tile():
+def platform_tile(card=(196, 182, 226), plank=(170, 154, 206), edge=(214, 202, 238)):
     """64x28 paper walkway that tiles: dark rim row, a white cut border (the walkable top), lilac card with plank cuts, white
     border below, rim, and a solid shadow. The top row is where feet stand."""
     t = np.zeros((28, 64, 4), np.uint8)
-    white, ink, card, plank, edge = (255, 255, 255), INK, (196, 182, 226), (170, 154, 206), (214, 202, 238)
+    white, ink = (255, 255, 255), INK
     t[0, :, :3] = ink
     t[1:4, :, :3] = white
     t[4:18, :, :3] = card

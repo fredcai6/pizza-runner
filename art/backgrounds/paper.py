@@ -69,28 +69,31 @@ def disk(r):
     return x * x + y * y <= r * r + r * 0.5
 
 
-def sticker(rgba, border=4, shadow=(5, 4), pad=None):
+def sticker(rgba, border=4, shadow=(5, 4), pad=None, floor=True):
     """White paper border (then a 1 px #2a1830 rim) around the art and a solid drop shadow, for touchable things.
-    The art keeps its feet on the bottom row: the border and shadow stop there, so nothing sinks into the ground."""
+    The art keeps its feet on the bottom row: the border and shadow stop there, so nothing sinks into the ground.
+    floor=False is for things that float (pickups, throwing stars): border and shadow go all the way round."""
     pad = pad or border + 1 + max(shadow) + 1
     h, w = rgba.shape[:2]
     big = np.zeros((h + 2 * pad, w + 2 * pad, 4), np.uint8)
     big[pad:pad + h, pad:pad + w] = rgba
     art0 = big[..., 3] > 127
     art = ndimage.binary_erosion(art0, iterations=1)   # drop the keyed fringe pixel, but keep the feet row
-    art[pad + h - 1] = art0[pad + h - 1]
+    if floor:
+        art[pad + h - 1] = art0[pad + h - 1]
     big[..., 3] = np.where(art, 255, 0)
     white = ndimage.binary_dilation(art, structure=disk(border))
     rim = ndimage.binary_dilation(white, structure=disk(1)) & ~white
     body = white | rim
     sh = np.roll(np.roll(body, shadow[1], 0), shadow[0], 1) & ~body
     feet = pad + h
-    for m in (white, rim, sh):
-        m[feet:] = False
+    if floor:
+        for m in (white, rim, sh):
+            m[feet:] = False
     out = np.zeros_like(big)
     out[sh] = (*SHADOW, 255)
     out[rim] = (*INK, 255)
     out[white] = (255, 255, 255, 255)
     out[art] = big[art]
     ys, xs = np.where(out[..., 3] > 0)
-    return out[ys.min():feet, xs.min():xs.max() + 1]
+    return out[ys.min():(feet if floor else ys.max() + 1), xs.min():xs.max() + 1]

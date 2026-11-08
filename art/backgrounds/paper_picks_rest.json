@@ -1,0 +1,10 @@
+{
+ "loop": {"far": {"run": "chicago-1", "seed": 3}, "mid": {"run": "chicago-2", "seed": 1}, "door": {"run": "chicago-1", "seed": 1}},
+ "lincolnpark": {"far": {"run": "chicago-1", "seed": 2}, "mid": {"run": "chicago-1", "seed": 1}, "door": {"run": "chicago-1", "seed": 2}},
+ "wickerpark": {"far": {"run": "chicago-1", "seed": 3}, "mid": {"run": "chicago-1", "seed": 1}, "door": {"run": "chicago-1", "seed": 3}},
+ "chicago": {"props": {"run": "chicago-1", "seed": 3}},
+ "georgetown": {"far": {"run": "dc-1", "seed": 3}, "mid": {"run": "dc-1", "seed": 1}, "door": {"run": "dc-1", "seed": 1}},
+ "mall": {"far": {"run": "dc-1", "seed": 2}, "mid": {"run": "dc-1", "seed": 3}, "door": {"run": "dc-1", "seed": 3}},
+ "federal": {"far": {"run": "dc-1", "seed": 3}, "mid": {"run": "dc-1", "seed": 3}, "door": {"run": "dc-1", "seed": 1}},
+ "dc": {"props": {"run": "dc-1", "seed": 2}}
+}

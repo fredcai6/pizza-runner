@@ -18,6 +18,11 @@ PAL = {
     "terracotta": ((226, 154, 124), (194, 120, 100)),
     "butter": ((248, 220, 130), (222, 190, 100)),
     "peach": ((250, 190, 150), (222, 156, 122)),
+    "sand": ((240, 224, 186), (212, 190, 150)),
+    "coral": ((240, 150, 130), (208, 116, 104)),
+    "pink": ((244, 176, 200), (212, 140, 170)),
+    "teal": ((150, 208, 200), (112, 176, 172)),
+    "slate": ((176, 190, 214), (142, 156, 186)),
 }
 
 
@@ -148,4 +153,78 @@ NEAR = {
                  ("bush", 4, dict(colors=["sage", "green", "peach"], w=(110, 200), h=(54, 84))),
                  ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44))),
                  ("flower", 4, dict(colors=["butter", "rose"], h=(34, 56)))],
+    # the rest of the cities (paper_build.py)
+    "loop": [("planter", 3, dict(colors=["green", "mint"], box="slate", w=(70, 100), h=(72, 96))),
+             ("bush", 3, dict(colors=["mint", "lilac", "green"], w=(110, 190), h=(54, 84))),
+             ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44)))],
+    "lincolnpark": [("bush", 6, dict(colors=["green", "sage", "rose", "mint"], w=(120, 220), h=(54, 90))),
+                    ("tuft", 7, dict(colors=["sage", "green", "mint"], w=(40, 72), h=(26, 46))),
+                    ("flower", 7, dict(colors=["rose", "butter", "lilac", "peach"], h=(34, 58)))],
+    "wickerpark": [("planter", 3, dict(colors=["green", "rose"], box="terracotta", w=(70, 100), h=(72, 96))),
+                   ("bush", 4, dict(colors=["sage", "green", "lilac"], w=(110, 200), h=(54, 84))),
+                   ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44))),
+                   ("flower", 4, dict(colors=["butter", "rose"], h=(34, 56)))],
+    "georgetown": [("planter", 3, dict(colors=["green", "rose"], box="terracotta", w=(70, 100), h=(72, 96))),
+                   ("bush", 3, dict(colors=["sage", "green"], w=(110, 190), h=(54, 84))),
+                   ("tuft", 4, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44))),
+                   ("flower", 4, dict(colors=["butter", "rose", "lilac"], h=(34, 56)))],
+    "mall": [("bush", 3, dict(colors=["green", "sage", "mint"], w=(120, 210), h=(54, 84))),
+             ("tuft", 8, dict(colors=["sage", "green", "mint"], w=(40, 72), h=(26, 46))),
+             ("flower", 4, dict(colors=["butter", "lilac", "peach"], h=(34, 56)))],
+    "federal": [("planter", 4, dict(colors=["green", "sage"], box="cream", w=(70, 100), h=(72, 96))),
+                ("bush", 3, dict(colors=["sage", "mint"], w=(110, 190), h=(54, 80))),
+                ("tuft", 4, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44)))],
+    "harbor": [("tuft", 6, dict(colors=["sage", "sand"], w=(40, 72), h=(26, 46))),
+               ("bush", 2, dict(colors=["sage", "mint"], w=(110, 180), h=(54, 80))),
+               ("flower", 4, dict(colors=["coral", "butter"], h=(34, 56)))],
+    "center": [("planter", 3, dict(colors=["green", "rose"], box="terracotta", w=(70, 100), h=(72, 96))),
+               ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44))),
+               ("flower", 4, dict(colors=["coral", "butter", "pink"], h=(34, 56)))],
+    "hillside": [("bush", 4, dict(colors=["sage", "green", "mint"], w=(110, 200), h=(54, 84))),
+                 ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44))),
+                 ("flower", 5, dict(colors=["pink", "butter", "coral", "lilac"], h=(34, 58)))],
+    "downtown": [("planter", 3, dict(colors=["green", "coral"], box="sand", w=(70, 100), h=(72, 96))),
+                 ("bush", 2, dict(colors=["green", "mint"], w=(110, 180), h=(54, 80))),
+                 ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44)))],
+    "beach": [("tuft", 8, dict(colors=["sage", "sand", "green"], w=(40, 72), h=(26, 46))),
+              ("bush", 3, dict(colors=["sage", "green"], w=(110, 190), h=(54, 80))),
+              ("flower", 5, dict(colors=["coral", "butter", "pink"], h=(34, 56)))],
+    "bungalows": [("bush", 5, dict(colors=["green", "sage", "lilac"], w=(120, 210), h=(54, 88))),
+                  ("tuft", 5, dict(colors=["sage", "green"], w=(40, 70), h=(26, 44))),
+                  ("flower", 6, dict(colors=["pink", "butter", "lilac"], h=(34, 58)))],
 }
+
+
+def elevated_line():
+    """The Loop's elevated railway as cut paper, RGBA 2560x720, to sit BEHIND the mid buildings: a lattice girder deck with
+    triangular cut-outs, a flat pillar every 640 px, and a two-car train. Every period divides 2560, so it wraps."""
+    deck_top, deck_bot = 62, 114
+    card, shade, pale = (200, 188, 228), (170, 156, 206), (244, 238, 250)
+    mask = _canvas(W, H)
+    d = ImageDraw.Draw(mask)
+    d.rectangle([0, deck_top * SS, W * SS, deck_bot * SS], fill=255)
+    for k in range(0, W, 640):
+        x = k + 330
+        d.polygon([((x - 22) * SS, deck_bot * SS), ((x + 22) * SS, deck_bot * SS), ((x + 30) * SS, 600 * SS), ((x - 30) * SS, 600 * SS)], fill=255)
+    cut = _canvas(W, H)
+    dc = ImageDraw.Draw(cut)
+    for x in range(0, W, 40):   # triangular lattice cut-outs along the girder, alternating up and down
+        dc.polygon([((x + 3) * SS, (deck_top + 14) * SS), ((x + 37) * SS, (deck_top + 14) * SS), ((x + 20) * SS, (deck_bot - 6) * SS)], fill=255)
+    for k in range(0, W, 640):   # a window cut through each pillar between its cross-ties
+        x = k + 330
+        for y0 in (190, 300, 410, 520):
+            dc.rectangle([(x - 10) * SS, y0 * SS, (x + 10) * SS, (y0 + 70) * SS], fill=255)
+    art = np.asarray(_layer(mask, card, shade, 3, 3)).copy()
+    art[np.asarray(cut.resize((W, H), Image.BOX)) > 127, 3] = 0
+    art[deck_top:deck_top + 6, :, :3] = pale   # a pale cap rail along the top of the girder
+    train = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    td = ImageDraw.Draw(train)
+    for x0 in (1010, 1390):   # cream cards with a row of blue-grey windows and a lilac stripe
+        td.rounded_rectangle([x0, 24, x0 + 360, deck_top], radius=10, fill=(246, 238, 226, 255))
+        td.rectangle([x0, deck_top - 12, x0 + 360, deck_top - 6], fill=(*shade, 255))
+        for wx in range(x0 + 20, x0 + 340, 52):
+            td.rounded_rectangle([wx, 34, wx + 34, 52], radius=3, fill=(176, 192, 216, 255))
+    out = np.asarray(Image.alpha_composite(Image.fromarray(art, "RGBA"), train)).copy()
+    out[..., 3] = np.where(out[..., 3] > 127, 255, 0)
+    out[..., :3] = np.where(out[..., 3:] > 0, out[..., :3], 0)
+    return out
