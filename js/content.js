@@ -148,7 +148,7 @@
       ],
       briefing: [
 
-        { comp: 'deep', lines: [
+        { pic: 'stan-beat-up', pan: [[0.42, 0.5, 1.15], [0.48, 0.48, 1.04]], ms: 10000, lines: [
           { who: 'deep', text: "Vinny wasn't lying, boss. Something came up out of the storm drain. Some kind of mutant." },
           { who: 'deep', text: 'It chased me three blocks. I do not do three blocks. Is any of this worth it?' },
         ] },
@@ -188,7 +188,7 @@
       ],
       briefing: [
 
-        { comp: 'jumbo', lines: [
+        { pic: 'phil-beat-up', pan: [[0.4, 0.5, 1.15], [0.46, 0.48, 1.04]], ms: 12000, lines: [
           { who: 'jumbo', text: 'Mr. Chairman, I rise today a mere fraction of my former self.' },
           { who: 'jumbo', text: 'I entered that city whole. The record shows nothing. It is classified.' },
           { who: 'jumbo', text: 'But I read every lid in the capital. Every one says **Original Italian.**' },
@@ -219,7 +219,7 @@
       ],
       briefing: [
 
-        { comp: 'wide', lines: [
+        { pic: 'contessa-beat-up', pan: [[0.42, 0.5, 1.06], [0.47, 0.5, 1]], ms: 8000, lines: [
           { who: 'old', text: "Look at what's left of you. Good. Nobody swings that hard at a bluff. We're close." },
         ] },
         { comp: 'board', sticker: 'think', lines: [
