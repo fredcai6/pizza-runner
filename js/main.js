@@ -142,7 +142,8 @@
   }
 
   function pieBuilder(city) {
-    let pick = city.menu[0];
+    const options = R.menu(camp, city);
+    let pick = city.signature;
     const done = () => { removeEventListener('keydown', keys); box(city, pick); };
     const slot = TOPPING_ORDER.indexOf.bind(TOPPING_ORDER);
     // Cursor moves over the tiles on the order's menu, nearest in the direction pressed, wrapping around.
@@ -150,7 +151,7 @@
       const n = TOPPING_ORDER.length, jump = dx || dy * COLS;
       for (let k = 1; k <= n * 2; k++) {
         const t = TOPPING_ORDER[(((slot(pick) + jump * k) % n) + n) % n];
-        if (city.menu.includes(t) && t !== pick) return t;
+        if (options.includes(t) && t !== pick) return t;
       }
       return pick;
     };
@@ -161,7 +162,7 @@
     };
     const render = () => {
       const T = C.TOPPINGS[pick], style = city.style;
-      const tiles = TOPPING_ORDER.concat([null]).map(t => !t || !city.menu.includes(t) ? '<div class="tile lock"><span>?</span></div>'
+      const tiles = TOPPING_ORDER.concat([null]).map(t => !t || !options.includes(t) ? '<div class="tile lock"><span>?</span></div>'
         : `<button class="tile${pick === t ? ' on' : ''}" data-t="${t}" aria-label="${C.TOPPINGS[t].name}"><img src="assets/backgrounds/props/pickup-${t}.png" alt=""><span>${C.TOPPINGS[t].name}</span></button>`).join('');
       show(`<div class="select"><div class="fighter"><div class="stage"><canvas class="fighterart" aria-label="${C.SPEAKERS[style]} wearing ${T.name.toLowerCase()}"></canvas></div>
           <div class="plate"><b class="fname">${T.name}</b><span class="fclass">${CLASS[T.kind] || T.kind}</span><p class="blurb">${T.blurb}</p><p class="byline">${C.SPEAKERS[style]}, ${C.STYLES[style].name}</p></div></div>

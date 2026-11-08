@@ -151,7 +151,7 @@
   function newCampaign() {
     return {
       version: 3, cityIndex: 0, phase: 'briefing', pies: {}, world: null, reserves: {}, attempts: {}, receipts: [], seen: {}, papers: [],
-      undercover: [], counts: { fed: 0, lost: 0, delivered: 0, defeated: 0 },
+      undercover: [], counts: { fed: 0, lost: 0, delivered: 0, defeated: 0 }, collected: [],
     };
   }
 
@@ -171,9 +171,23 @@
     camp.phase = 'map';
   }
 
+  // Toppings a pie can wear: every signature up to this city, then every pickup collected so far.
+  function menu(camp, city = currentCity(camp)) {
+    const upTo = C.CITIES.slice(0, C.CITIES.indexOf(city) + 1).filter(c => c.signature).map(c => c.signature);
+    return [...new Set([...upTo, ...(camp.collected || [])])];
+  }
+
+  // A pickup in hand unlocks its topping for every pie after this one.
+  function collect(camp, topping) {
+    camp.collected = camp.collected || [];
+    if (camp.collected.includes(topping)) return false;
+    camp.collected.push(topping);
+    return true;
+  }
+
   function placeOrder(camp, topping) {
     const city = currentCity(camp);
-    if (!city.menu.includes(topping)) throw new Error(`${topping} is not on the ${city.id} menu`);
+    if (!menu(camp, city).includes(topping)) throw new Error(`${topping} is not unlocked for ${city.id}`);
     startCity(camp, buildPie(city, topping));
   }
 
@@ -228,11 +242,11 @@
     camp.cityIndex = cityIndex;
     camp.test = true;
     C.CITIES.slice(0, cityIndex).forEach(c => {
-      camp.pies[c.id] = buildPie(c, c.menu[0]);
-      camp.reserves[c.id] = [0, 1].map(() => ({ style: c.style, topping: c.menu[0], from: c.id }));
+      camp.pies[c.id] = buildPie(c, c.signature);
+      camp.reserves[c.id] = [0, 1].map(() => ({ style: c.style, topping: c.signature, from: c.id }));
     });
     const city = C.CITIES[cityIndex];
-    if (city.final) startFinale(camp); else placeOrder(camp, city.menu[0]);
+    if (city.final) startFinale(camp); else placeOrder(camp, city.signature);
     const world = camp.world;
     world.delivery = delivery;
     for (const s of Object.values(world.streets)) {
@@ -402,6 +416,6 @@
     return { name: file.name, claim: file.claim, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { epitaph, GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { menu, collect, epitaph, GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);

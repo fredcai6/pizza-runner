@@ -677,7 +677,9 @@
         if (Math.abs(k.x - p.x - p.w / 2) < p.w / 2 + 26 && k.y > p.y - 26 && k.y < p.y + p.h + 26) {
           this.taken.add(key);
           this.grab(k.topping);
-          this.say(`${C.TOPPINGS[k.topping].name}! ${C.BARKS.pickup}`);
+          // A first pickup of a topping also unlocks it for every pie after this one.
+          const fresh = R.collect(this.camp, k.topping);
+          this.say(`${C.TOPPINGS[k.topping].name}! ${fresh ? C.BARKS.unlocked : C.BARKS.pickup}`);
         }
       });
     }
