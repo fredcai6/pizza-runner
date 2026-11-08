@@ -19,10 +19,10 @@ const TRIALS = Number(process.argv[2] || 12);
         const camp = R.newCampaign(); camp.cityIndex = index;
         const skill = trial % 2 ? 'mash' : 'walk';
         if (city.final) {
-          for (const c of C.CITIES.filter(c => !c.final)) camp.reserves[c.id] = [0, 1].map(() => ({ style: c.style, topping: c.menu[(trial >> 1) % c.menu.length], from: c.id }));
+          for (const c of C.CITIES.filter(c => !c.final)) camp.reserves[c.id] = [0, 1].map(() => ({ style: c.style, topping: c.signature, from: c.id }));
           R.startFinale(camp);
         } else {
-          R.placeOrder(camp, city.menu[Math.floor(trial / 2) % city.menu.length]);
+          R.placeOrder(camp, R.menu(camp)[Math.floor(trial / 2) % R.menu(camp).length]);
         }
         const secs = [];
         const outcomes = { delivered: 0, cold: 0, dead: 0 };

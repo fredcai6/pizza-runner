@@ -6,7 +6,7 @@ const C = require('../js/content.js');
 const { MAPS } = require('../js/maps.js');
 const city = c => R.currentCity(c);
 const pie = c => c.pies[city(c).id];
-const order = (c, a) => R.placeOrder(c, a || city(c).menu[0]);
+const order = (c, a) => R.placeOrder(c, a || city(c).signature);
 const fresh = () => { const c = R.newCampaign(); order(c); return c; };
 const lose = c => R.finishRun(c, R.ready(pie(c))[0], { outcome: 'cold', x: 100 });
 const deliver = c => { R.finishRun(c, R.ready(pie(c))[0], { outcome: 'delivered', x: 100 }); R.afterDoor(c); };
@@ -186,6 +186,7 @@ test('winning on the last slice wins', () => {
 test('Long Beach is exactly eight slices, two from each city, same on every retry', () => {
   const c = R.newCampaign();
   finishCity(c);
+  R.collect(c, 'sausage');
   finishCity(c, 'sausage');
   finishCity(c, 'garlic');
   finishCity(c, 'basil');
@@ -289,7 +290,7 @@ test('a used-up pie is taped over as deep undercover', () => {
 test('every topping named by a city exists', () => {
   for (const x of C.CITIES) {
     for (const t of x.pickups) assert.ok(C.TOPPINGS[t], t);
-    if (x.menu) for (const t of x.menu) assert.ok(C.TOPPINGS[t], t);
+    if (x.signature) assert.ok(C.TOPPINGS[x.signature], x.signature);
   }
 });
 
@@ -351,4 +352,15 @@ test('a deploy keeps a safe zone clear of enemies, photo arrivals included', () 
     checked++;
   }
   assert.ok(checked > 0);
+});
+
+test('toppings unlock by signature city and by pickup', () => {
+  const camp = R.newCampaign();
+  assert.deepEqual(R.menu(camp), ['pepperoni']);
+  assert.equal(R.collect(camp, 'mushroom'), true);
+  assert.equal(R.collect(camp, 'mushroom'), false);
+  assert.deepEqual(R.menu(camp), ['pepperoni', 'mushroom']);
+  assert.deepEqual(R.menu(camp, C.CITIES[2]), ['pepperoni', 'garlic', 'jalapeno', 'mushroom']);
+  assert.throws(() => R.placeOrder(camp, 'basil'));
+  R.placeOrder(camp, 'mushroom');
 });
