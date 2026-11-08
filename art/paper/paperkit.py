@@ -25,6 +25,7 @@ An anim file:
     hold = 2                    # repeat the frame
     dx = 0
     dy = 0
+    presample = true            # box-average onto the stage grid before the palette vote (smooth sources, e.g. sheet poses)
     scale = 1.0                 # 0.97 shrinks the figure about its feet-centre when a pose came out larger
 """
 import json, os, subprocess, sys, tomllib
@@ -137,6 +138,7 @@ class Geometry:
         self.cx = (self.left + self.right) / 2
         self.pal = palette(rgb, inner)
         self.lab = srgb_to_oklab(self.pal)
+        self.presample = False
 
     def core(self, path, dx=0, dy=0, scale=1.0, clip=None, rot=0):
         """One frame on the stage grid. scale 1 keeps the model's placement (the master's); another scale resizes the figure
@@ -151,6 +153,17 @@ class Geometry:
             cell = self.cell / scale
             origin = (fx - self.W / 2 * cell, fy - (self.H - (self.border + 1)) * cell)
         origin = (origin[0] - dx * cell, origin[1] - dy * cell)
+        if self.presample:
+            # box-average onto the stage grid first: a smooth source shaded between two close palette colours otherwise
+            # flips cell by cell with the beat of a non-integer cell, a dot grid (the sheet poses at cell 2.85)
+            H, W = inner.shape
+            nw, nh = round(W / cell), round(H / cell)
+            rgb = np.asarray(Image.fromarray(np.where(inner[..., None], rgb, 0).astype(np.uint8)).resize((nw, nh), Image.BOX)).astype(float)
+            cov = np.asarray(Image.fromarray(inner.astype(np.uint8) * 255).resize((nw, nh), Image.BOX)) / 255.0
+            rgb = np.clip(rgb / np.maximum(cov, 1e-3)[..., None], 0, 255).astype(np.uint8)
+            inner = cov >= 0.5
+            origin = (origin[0] * nw / W, origin[1] * nh / H)
+            cell = 1.0
         sp = to_sprite(rgb, inner, self.pal, self.lab, cell, origin, (self.W, self.H), accent=1.3)
         return despeckle(sp)
 
@@ -165,6 +178,7 @@ def build(anim_path):
     border = spec.get("border", 4 if canvas[1] >= 110 else 3)
     master = art / spec["master"]
     g = Geometry(master, canvas, border)
+    g.presample = spec.get("presample", False)
     run_dir = DATA / "runs" / name / spec.get("run", "paper") / "qwen-edit"
     if spec.get("own_palette"):
         # a recoloured pose (cold, stale) has colours the master's palette lacks: cut this animation's own 48

@@ -1,9 +1,11 @@
+# From Tommy's sheet (references/sheet.png, cut by art/paper/sheetcut.py).
 master = "characters/slice-naples/references/paper-master.png"
 canvas = [130, 104]
-job = 239
 frame_ms = 90
 loop = false
-run = "paper"
+run = "sheet"
+presample = true
+
 [[frames]]
-pose = "jump_rise/3"
+pose = "jump/1"
 hold = 2

@@ -3,24 +3,24 @@
   "w": 330,
   "h": 240
  },
- "count": 6,
+ "count": 5,
  "frame_ms": 200,
  "loop": true,
  "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
   "dirty": false,
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "89a41869ca70a26af6ff2c07cfd6231a46b663a7",
+  "sha": "0fae5bcd3d6c8ce12c5c34dc3a2fa8788a29a4b7",
   "dirty": true
  },
  "source": {
-  "run": "paper",
+  "run": "sheet",
   "model": "qwen-edit",
-  "job": 242,
+  "job": null,
   "master": "characters/slice-jumbo/references/paper-master.png",
-  "cell": 3.765,
+  "cell": 3.93,
   "border": 4,
   "palette": 48,
   "poses": [
@@ -28,8 +28,7 @@
    "master",
    "master",
    "master",
-   "master",
-   "idle_b/2"
+   "master"
   ]
  }
 }

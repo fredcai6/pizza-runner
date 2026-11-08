@@ -1,0 +1,14 @@
+# Poses on references/sheet.png (Tommy, 2026-11-08). See art/paper/sheetcut.py.
+master = "front"
+write_master = false   # the master is the pepperoni-free redraw (runs/sheet_plain.toml)
+row = ["idle", "run", "jump", "land"]
+row_scale = 1.64
+scale = { hero = 0.85 }
+[seeds]
+front = [600, 250]
+threequarter = [900, 250]
+hero = [250, 450]
+idle = [420, 880]
+run = [660, 870]
+jump = [890, 800]
+land = [1120, 880]

@@ -1,22 +1,9 @@
 {
- "model": "qwen-edit",
- "shot": "m_A",
- "seed": 3,
- "prompt": "Full body character art for a 2D platformer, standing and facing slightly right, the whole figure visible head to sneakers. The character is La Contessa, the small, quick Neapolitan pizza slice mascot from image 1: a neat small triangle with a puffy charred thin crust with dark leopard spots along the top, red tomato sauce, white mozzarella, three round slices of red tomato and three green basil leaves as toppings, thin arms with white gloves, brown sneakers. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is a Charlie the Unicorn style flat deadpan face: two small plain blank black dot eyes, no eyebrows, a small flat line mouth tilted into a proud knowing smirk, almost no detail. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
- "refs": [
-  "characters/slice-naples/references/master.png",
-  "paper/style_pm_sq.png"
+ "from": "references/sheet.png",
+ "pose": "front",
+ "seed": [
+  600,
+  220
  ],
- "size": [
-  1024,
-  1024
- ],
- "steps": null,
- "secs": 15.5,
- "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
-  "dirty": false,
-  "comfy": "v0.44.0"
- },
- "job": 233
+ "tool": "art/paper/sheetcut.py"
 }

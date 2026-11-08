@@ -39,12 +39,13 @@
       ],
       briefing: [
 
-        { comp: 'wide', lines: [
+        // Scene 1 is Tommy's paintings (assets/cutscenes), panned; see `pic` in js/hq.js.
+        { pic: 'order-board', pan: [[0.5, 0.5, 1], [0.36, 0.5, 1.15]], ms: 9000, lines: [
           { who: 'old', text: 'New recruits. Look at you. Warm, plain, and full of hope.' },
           { who: 'old', text: 'Welcome to Pizza HQ.' },
           { who: 'old', text: 'Slices are vanishing all over the world.' },
         ] },
-        { comp: 'naples', lines: [
+        { pic: 'recruits-table', pan: [[0.2, 0.46, 1.8], [0.19, 0.44, 1.95]], ms: 5000, lines: [
           { who: 'naples', text: 'Mamma mia! The whole world? And nobody tells Napoli?' },
           { who: 'old', text: "**Pipe down**, Contessa. I'm getting to the string." },
         ] },
@@ -56,26 +57,28 @@
           { who: 'old', text: "Most come back with a report. The best don't come back at all. That is **deep undercover**." },
           { who: 'old', text: 'So you go out there, get in close, and find out who.' },
         ] },
-        { comp: 'naples', card: ['La Contessa', 'Margherita of Naples'], lines: [
+        { pic: 'recruits-table', pan: [[0.17, 0.46, 1.6], [0.21, 0.43, 1.75]], ms: 6000, card: ['La Contessa', 'Margherita of Naples'], cardSide: 'right', lines: [
           { who: 'old', text: 'La Contessa. Fastest thing in the oven. Cools just as fast. Certified a pizza by a government.' },
           { who: 'naples', text: 'Ninety seconds in the fire. You would not last **nine**.' },
         ] },
-        { comp: 'deep', card: ['Big Stan', 'Deep Dish of Chicago'], lines: [
+        { pic: 'recruits-table', pan: [[0.82, 0.46, 1.6], [0.86, 0.43, 1.75]], ms: 6000, card: ['Big Stan', 'Deep Dish of Chicago'], lines: [
           { who: 'old', text: 'Big Stan. Two inches of sauce, four inches of grudge. Slow to start. Slower to stop.' },
           { who: 'deep', text: "It's not a casserole." },
           { who: 'old', text: 'Nobody said it was.' },
           { who: 'deep', text: 'Somebody will.' },
         ] },
-        { comp: 'jumbo', card: ['Phil A. Buster', 'Jumbo Slice of Washington'], lines: [
+        { pic: 'recruits-table', pan: [[0.37, 0.42, 1.5], [0.42, 0.39, 1.65]], ms: 6000, card: ['Phil A. Buster', 'Jumbo Slice of Washington'], cardSide: 'right', lines: [
           { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Three names, because one would not hold him.' },
           { who: 'old', text: 'Reads every lid. Twice. Structural integrity, none.' },
           { who: 'jumbo', text: 'Thank you. I wish to yield my time to myself, for brief remarks on the subject of...' },
           { who: 'old', text: 'You may not.' },
         ] },
-        { comp: 'ny', card: ['Vinny Two-Fold', 'Slice of New York'], lines: [
+        { pic: 'recruits-table', pan: [[0.6, 0.46, 1.6], [0.64, 0.43, 1.75]], ms: 6000, card: ['Vinny Two-Fold', 'Slice of New York'], lines: [
           { who: 'old', text: 'And last, Vinny Two-Fold. Off the streets. Nobody would take him indoors.' },
           { who: 'ny', text: "Disappearances? Boss, that's a **Tuesday** where I'm from. I ain't scared a nothin'." },
           { who: 'ny', text: 'I fold for nobody.' },
+        ] },
+        { pic: 'vinny-new-york', pan: [[0.4, 0.5, 1.1], [0.62, 0.5, 1]], ms: 10000, lines: [
           { who: 'old', text: 'I like a brave slice. New York first. Nobody looks twice at a loud one.' },
           { who: 'ny', text: 'Wait, what?' },
           { who: 'old', text: "Lid's open. Get in the box." },

@@ -3,7 +3,7 @@
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.resolve(__dirname, '..'), out = process.argv[2];
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png' };
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp' };
 const forge = path.join(process.env.HOME, 'projects/sprite-forge/characters/derek/sprites/nod');
 const serve = http.createServer((q, s) => {
   const u = q.url.split('?')[0], f = path.join(root, u === '/' ? 'index.html' : u);

@@ -1,0 +1,11 @@
+# Written by art/paper/make_sheet_runs.py
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.master]
+refs = ["characters/slice-naples/references/paper-master.png", "characters/slice-naples/references/sheet.png"]
+prompt = "Image 1 is a cartoon pizza mascot cut out as a paper sticker. Redraw the same character: the same shapes, colours, bold dark outline, thick white sticker border all around the silhouette, the same face style, white cartoon gloves and red sneakers. Make it a plain cheese slice: plain melted yellow cheese with no toppings, no tomato sauce, no basil leaf, the same crust, the same simple dot-eyed smiling face, standing straight, arms relaxed at the sides. The whole figure is visible in frame with the white border complete. Image 2 is this character's model sheet: match its drawing style; do not copy its layout, labels or other poses. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

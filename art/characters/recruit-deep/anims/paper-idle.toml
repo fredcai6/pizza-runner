@@ -1,9 +1,10 @@
 master = "characters/recruit-deep/references/paper-master.png"
 canvas = [230, 170]
-job = 242
+job = 251
 frame_ms = 220
 loop = true
-run = "paper"
+run = "sheet_keys"
+presample = true
 [[frames]]
 pose = "master"
 hold = 3
