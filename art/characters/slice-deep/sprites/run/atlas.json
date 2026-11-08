@@ -7,13 +7,19 @@
  "frame_ms": 70,
  "loop": true,
  "rev": {
-  "sha": "25f7bb128e14f102d8d40a47ef3ffe06f6e1e51e",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "89a41869ca70a26af6ff2c07cfd6231a46b663a7",
+  "dirty": true
  },
  "source": {
   "rig": "characters/slice-deep/rig/run.toml",
-  "body": "characters/slice-deep/sprites/idle/sheet.png",
-  "gait": "run"
+  "body": "characters/slice-deep/sprites/idle-body/sheet.png",
+  "gait": "run",
+  "border": 4,
+  "palette": "master"
  }
 }

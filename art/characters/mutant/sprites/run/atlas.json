@@ -7,13 +7,31 @@
  "frame_ms": 70,
  "loop": true,
  "rev": {
-  "sha": "e4e2ff669d1359157d90fcf93b34779fce580be2",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "d52e4caec880cf8dfe9444e755e127dff2649a01",
+  "dirty": true
+ },
  "source": {
-  "rig": "characters/mutant/rig/run.toml",
-  "body": "characters/mutant/sprites/run/sheet.png",
-  "gait": "run"
+  "poseguide": "qwen-pose-paper",
+  "motion": "run",
+  "seed": 2,
+  "place": "skel",
+  "frames": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "master": "characters/mutant/references/paper-master.png",
+  "border": 4,
+  "palette": 48
  }
 }

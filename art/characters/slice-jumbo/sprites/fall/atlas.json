@@ -7,14 +7,22 @@
  "frame_ms": 90,
  "loop": true,
  "rev": {
-  "sha": "37a6cf7995d18801bbf096d00e6074acc57974a7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "89a41869ca70a26af6ff2c07cfd6231a46b663a7",
+  "dirty": true
+ },
  "source": {
-  "run": "keys2",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 3.925438596491228,
+  "job": 242,
+  "master": "characters/slice-jumbo/references/paper-master.png",
+  "cell": 3.765,
+  "border": 4,
+  "palette": 48,
   "poses": [
    "fall/1",
    "fall/2"

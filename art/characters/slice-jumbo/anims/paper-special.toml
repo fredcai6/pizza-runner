@@ -1,0 +1,13 @@
+master = "characters/slice-jumbo/references/paper-master.png"
+canvas = [330, 240]
+job = 242
+frame_ms = 110
+loop = false
+run = "paper"
+[[frames]]
+pose = "jump_rise/2"
+hold = 3
+
+[[frames]]
+pose = "special_b/2"
+hold = 6

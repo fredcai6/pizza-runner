@@ -7,21 +7,29 @@
  "frame_ms": 90,
  "loop": false,
  "rev": {
-  "sha": "37a6cf7995d18801bbf096d00e6074acc57974a7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "d52e4caec880cf8dfe9444e755e127dff2649a01",
+  "dirty": true
+ },
  "source": {
-  "run": "keys2",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 7.794642857142857,
+  "job": 239,
+  "master": "characters/mutant/references/paper-master.png",
+  "cell": 7.936,
+  "border": 4,
+  "palette": 48,
   "poses": [
    "bite_a/1",
    "bite_a/1",
-   "bite_b/1",
-   "bite_b/1",
-   "bite_b/1",
-   "bite_b/1"
+   "bite_b/2",
+   "bite_b/2",
+   "bite_b/2",
+   "bite_b/2"
   ]
  }
 }

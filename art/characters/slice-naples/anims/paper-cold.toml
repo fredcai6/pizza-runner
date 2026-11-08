@@ -1,0 +1,14 @@
+own_palette = true
+master = "characters/slice-naples/references/paper-master.png"
+canvas = [130, 104]
+job = 239
+frame_ms = 140
+loop = true
+run = "paper"
+[[frames]]
+pose = "cold_a/2"
+dx = -1
+
+[[frames]]
+pose = "cold_a/1"
+dx = 1

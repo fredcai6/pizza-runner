@@ -1,0 +1,31 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "Redraw the character from image 1 exactly as it is: the same paper standee, the same thick white paper border all around the silhouette like a sticker, the same flat colours, the same face style. Exactly two arms and two legs, two hands. {action} The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+refs = ["characters/slice-naples/references/paper-master.png", "paper/style_pm_sq.png"]
+
+[shots.idle_b]
+prompt = "Idle: standing proudly, drawing a breath, slightly taller, chin up, a hand on the hip."
+
+[shots.idle_c]
+prompt = "Idle: standing, exhaling, slightly lower and relaxed, head tilted a little, arms folded."
+
+[shots.jump_rise]
+prompt = "Jumping upward: legs stretched down and apart, both arms thrown up, mouth a small flat open line."
+
+[shots.fall]
+prompt = "Falling down through the air: legs dangling and kicking, arms flung up and out."
+
+[shots.cold_a]
+prompt = "Cold and stale: the whole body pale grey-blue and stiff, dull wilted basil, hugging itself shivering, hunched. The face stays deadpan with the same dot eyes and a flat wobbly line mouth."
+
+[shots.cold_b]
+prompt = "Cold and stale: pale grey-blue stiff body, hunched over shivering. The face stays deadpan with the same dot eyes and a flat wobbly line mouth."
+
+[shots.special_a]
+prompt = "Fast dash wind-up: leaning far forward at a sharp angle facing right, one arm pulled back, knees bent, mouth a determined flat line, a few thin speed lines behind."
+
+[shots.special_b]
+prompt = "Fast dash streak: stretched almost horizontal and low facing right, one arm forward, legs trailing straight behind, long thin speed lines behind, mouth a flat line."

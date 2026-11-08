@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/alewife/references/paper-master.png", "characters/alewife/references/channel-avatar.png", "paper/style_pm_sq.png"]
+prompt = "A candid snapshot photo of DJ Alewife from image 1, the same cheerful woman with long wavy bright pink-red hair, pale blue headband, big warm smile and a wink, in a navy tank top, standing behind a DJ booth with two turntables and a laptop at a party, a mug of golden beer in one hand, caught mid-laugh. The whole image is a papercraft diorama made of cut card, flat bold shapes, a faint paper grain texture, a purple paper wall with paper string lights behind her. Warm snapshot colours, a soft vignette, square framing. Image 2 shows only the paper material to borrow; do not copy its characters. Absolutely no text, letters, numbers, logos or borders anywhere in the image."
+
+[shots.m_B]
+refs = ["characters/alewife/references/paper-master.png", "characters/alewife/references/channel-avatar.png", "paper/style_pm_sq.png"]
+prompt = "A candid snapshot photo of DJ Alewife from image 1, the same cheerful woman with long wavy bright pink-red hair, pale blue headband, big warm smile and a wink, in a navy tank top, standing behind a DJ booth with two turntables and a laptop at a party, a mug of golden beer in one hand, caught mid-laugh. The whole image is a papercraft diorama made of cut card, flat bold shapes, a faint paper grain texture, a purple paper wall with paper string lights behind her. Warm snapshot colours, a soft vignette, square framing. Image 2 shows only the paper material to borrow; do not copy its characters. Absolutely no text, letters, numbers, logos or borders anywhere in the image."

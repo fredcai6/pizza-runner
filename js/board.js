@@ -50,7 +50,7 @@
   function enemies(camp) {
     return scatter(Object.keys(C.ENEMIES).map(type => {
       const file = R.enemyFile(camp, type);
-      return `<button class="polaroid" data-enemy="${type}"><div class="shot ${type}"></div><b>${file.name}</b><span>${file.notes.length ? `${file.notes.length} note${file.notes.length > 1 ? 's' : ''}` : '???'}</span></button>`;
+      return `<button class="polaroid" data-enemy="${type}"><img class="shot" src="assets/polaroids/${type}.png" alt=""><b>${file.name}</b><span>${file.notes.length ? `${file.notes.length} note${file.notes.length > 1 ? 's' : ''}` : '???'}</span></button>`;
     }), { cell: [140, 170], salt: 2 });
   }
 

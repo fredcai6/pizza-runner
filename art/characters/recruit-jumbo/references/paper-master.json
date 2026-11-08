@@ -1,0 +1,22 @@
+{
+ "model": "qwen-edit",
+ "shot": "rc_B",
+ "seed": 2,
+ "prompt": "Redraw the character from image 1 as its plain cheese recruit version: the same slice, the same paper standee, the same thick white paper border, the same flat colours, the same deadpan face with two small blank black dot eyes and a flat line mouth, but with NO pepperoni, NO tomato, NO basil and no toppings at all, only plain melted cheese on the huge floppy slice. Standing facing slightly right, both white gloves hanging at the sides. The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "refs": [
+  "characters/slice-jumbo/references/paper-master.png",
+  "paper/style_pm_sq.png"
+ ],
+ "size": [
+  1024,
+  1024
+ ],
+ "steps": null,
+ "secs": 15.2,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "job": 242
+}

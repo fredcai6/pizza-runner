@@ -3,24 +3,31 @@
   "w": 120,
   "h": 150
  },
- "count": 5,
+ "count": 4,
  "frame_ms": 240,
  "loop": true,
  "rev": {
-  "sha": "3053c38aea55f821c01898c6b907219205d1f236",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "b432b5f81e13a8e38a79cfc9ba0b84c54a9db18a",
+  "dirty": true
+ },
  "source": {
-  "run": "keys",
-  "model": "klein",
-  "cell": 6.746478873239437,
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 233,
+  "master": "characters/customer-dc-federal/paper-master.png",
+  "cell": 6.929,
+  "border": 4,
+  "palette": 48,
   "poses": [
-   "idle_a/1",
-   "idle_a/1",
-   "idle_a/1",
-   "idle_a/1",
-   "idle_a/1"
+   "master",
+   "master",
+   "master",
+   "master"
   ]
  }
 }

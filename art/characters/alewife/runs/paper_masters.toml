@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/alewife/references/master.png", "paper/style_pm_sq.png"]
+prompt = "Full body character art for a 2D platformer, standing, facing the viewer, the whole figure visible head to sneakers. The character is DJ Alewife from image 1: a cheerful woman with long wavy bright pink-red hair and a pale blue headband, tan skin, a big warm smile with one eye winking, a navy tank top, blue jeans, white high-top sneakers, holding a tall frothy mug of golden beer in one hand. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple, friendly and kind, a little wink and a smile, almost no detail. Keep her likeness: the same hair, headband, smile and outfit. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.m_B]
+refs = ["characters/alewife/references/master.png", "paper/style_pm_sq.png"]
+prompt = "Full body character art for a 2D platformer, standing, facing the viewer, the whole figure visible head to sneakers. The character is DJ Alewife from image 1: a cheerful woman with long wavy bright pink-red hair and a pale blue headband, tan skin, a big warm smile with one eye winking, a navy tank top, blue jeans, white high-top sneakers, holding a tall frothy mug of golden beer in one hand. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple, friendly and kind, a little wink and a smile, almost no detail. Keep her likeness: the same hair, headband, smile and outfit. Gentle soft shading with a little highlight and a soft shade under each fold, still clean and flat. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

@@ -1,0 +1,31 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "Redraw the character from image 1 exactly as it is: the same paper standee, the same thick white paper border all around the silhouette like a sticker, the same flat colours, the same face style. Exactly two arms and two legs, two hands. {action} The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+refs = ["characters/slice-deep/references/paper-master.png", "paper/style_pm_sq.png"]
+
+[shots.idle_b]
+prompt = "Idle: standing heavy, drawing a slow breath, slightly taller, a fat drop of red sauce hanging from the crust, mouth a flat heavy line."
+
+[shots.idle_c]
+prompt = "Idle: standing, exhaling, slightly lower and sagging, head tilted, the sauce drips sagging, mouth a flat line."
+
+[shots.jump_rise]
+prompt = "Jumping upward: legs stretched down and apart, both arms thrown up, mouth a small flat open line, red sauce streaming up off the top."
+
+[shots.fall]
+prompt = "Falling down through the air: legs dangling, arms flung up and out, red sauce drips flying upward."
+
+[shots.cold_a]
+prompt = "Cold and stale: the whole body pale grey-blue and stiff, the sauce dull and dark, hugging itself shivering, hunched. The face stays deadpan with the same dot eyes and a flat wobbly line mouth."
+
+[shots.cold_b]
+prompt = "Cold and stale: pale grey-blue stiff body, hunched over shivering. The face stays deadpan with the same dot eyes and a flat wobbly line mouth."
+
+[shots.special_a]
+prompt = "Ground pound wind-up: leaping high with both white-gloved fists clenched together above the head, legs tucked up, mouth a flat open line, red sauce splashing off the top."
+
+[shots.special_b]
+prompt = "Ground pound landing: crouched hard on the ground with one white-gloved fist slammed into the floor, a flat puddle of red sauce splatted around the feet. The face stays deadpan."

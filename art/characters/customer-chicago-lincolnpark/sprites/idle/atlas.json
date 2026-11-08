@@ -3,24 +3,31 @@
   "w": 120,
   "h": 150
  },
- "count": 5,
+ "count": 4,
  "frame_ms": 240,
  "loop": true,
  "rev": {
-  "sha": "28602d92b26127757059f4ed0f9d3ff2cea0ec6a",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "12fabd2975451d09d89bf55bb497549744e0f3f5",
+  "dirty": true
+ },
  "source": {
-  "run": "keys",
-  "model": "klein",
-  "cell": 6.359154929577465,
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 238,
+  "master": "characters/customer-chicago-lincolnpark/paper-master.png",
+  "cell": 6.964,
+  "border": 4,
+  "palette": 48,
   "poses": [
-   "idle_a/1",
-   "idle_a/1",
-   "idle_a/1",
-   "idle_a/1",
-   "idle_a/1"
+   "master",
+   "master",
+   "master",
+   "master"
   ]
  }
 }

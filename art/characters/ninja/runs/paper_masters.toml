@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 896
+height = 1152
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/ninja/references/master.png", "paper/style_pm_tall.png"]
+prompt = "Full body character art for a 2D platformer, standing in a side view facing right, the whole figure visible head to feet. The character is the ninja from image 1: a black hooded ninja suit with a black face mask leaving only a narrow strip of eyes, a grey sash belt, grey wraps on the wrists and ankles, black ninja shoes, hands in a ready stance. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is just a narrow strip of two small blank black dot eyes between mask and hood; no eyebrows. The suit is flat black with grey fold shades, bold and clean. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.m_B]
+refs = ["characters/ninja/references/master.png", "paper/style_pm_tall.png"]
+prompt = "Full body character art for a 2D platformer, standing in a side view facing right, the whole figure visible head to feet. The character is the ninja from image 1: a black hooded ninja suit with a black face mask leaving only a narrow strip of eyes, a grey sash belt, grey wraps on the wrists and ankles, black ninja shoes, hands in a ready stance. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is just a narrow strip of two small blank black dot eyes between mask and hood; no eyebrows. The suit is flat black with grey fold shades, bold and clean. Gentle soft shading with a little highlight and a soft shade under each fold, still clean and flat. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

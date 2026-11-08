@@ -91,8 +91,15 @@ def backdrop(rgb, thr=0.12):
     return np.isin(l, big[big > 0])
 
 
-def key(path):
-    rgb = np.asarray(Image.open(path).convert("RGB"))
+def key(path, clip=None, rot=0):
+    """clip: fraction of the image height; everything below it is painted over with the backdrop (a ledge the pose rests on)."""
+    img = Image.open(path).convert("RGB")
+    if rot:  # turn the whole picture about its centre (a leap drawn upright, laid over), backdrop-coloured corners
+        img = img.rotate(rot, resample=Image.BICUBIC, fillcolor=tuple(int(v) for v in np.asarray(img)[0, 0]))
+    rgb = np.asarray(img)
+    if clip:
+        rgb = rgb.copy()
+        rgb[int(clip * rgb.shape[0]):] = rgb[0, 0]
     outer = fg_mask(rgb) & ~backdrop(rgb)
     outer = ndimage.binary_opening(outer, iterations=2)
     band, width = border_band(rgb, outer)
@@ -131,10 +138,10 @@ class Geometry:
         self.pal = palette(rgb, inner)
         self.lab = srgb_to_oklab(self.pal)
 
-    def core(self, path, dx=0, dy=0, scale=1.0):
+    def core(self, path, dx=0, dy=0, scale=1.0, clip=None, rot=0):
         """One frame on the stage grid. scale 1 keeps the model's placement (the master's); another scale resizes the figure
         about this frame's own feet-centre, which then stands where the master's does."""
-        rgb, inner, _ = key(path)
+        rgb, inner, _ = key(path, clip, rot)
         if scale == 1.0:
             cell = self.cell
             origin = (self.cx - self.W / 2 * cell, self.bot - (self.H - (self.border + 1)) * cell)
@@ -159,11 +166,24 @@ def build(anim_path):
     master = art / spec["master"]
     g = Geometry(master, canvas, border)
     run_dir = DATA / "runs" / name / spec.get("run", "paper") / "qwen-edit"
+    if spec.get("own_palette"):
+        # a recoloured pose (cold, stale) has colours the master's palette lacks: cut this animation's own 48
+        px = []
+        for f in spec["frames"]:
+            pose = f["pose"]
+            pth = master if pose == "master" else run_dir / pose.split("/")[0] / f"{pose.split('/')[1]}.png"
+            r_, i_, _ = key(pth, f.get("clip"), f.get("rot", 0))
+            px.append(np.where(i_[..., None], r_, 0)[i_])
+        allpx = np.concatenate(px)
+        side = int(np.ceil(np.sqrt(len(allpx))))
+        pad = np.zeros((side * side, 3), np.uint8); pad[:len(allpx)] = allpx
+        g.pal = palette(pad.reshape(side, side, 3), np.ones((side, side), bool))
+        g.lab = srgb_to_oklab(g.pal)
     cores, poses = [], []
     for f in spec["frames"]:
         pose = f["pose"]
         path = master if pose == "master" else run_dir / pose.split("/")[0] / f"{pose.split('/')[1]}.png"
-        c = g.core(path, f.get("dx", 0), f.get("dy", 0), f.get("scale", 1.0))
+        c = g.core(path, f.get("dx", 0), f.get("dy", 0), f.get("scale", 1.0), f.get("clip"), f.get("rot", 0))
         if f.get("sink"):
             # a settle: everything above `split` of the canvas height drops `sink` px into the torso
             c = c.copy()

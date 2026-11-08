@@ -1,0 +1,35 @@
+{
+ "frame": {
+  "w": 130,
+  "h": 104
+ },
+ "count": 6,
+ "frame_ms": 220,
+ "loop": true,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "46fbf5f3581cddf74a3469612a87de8103e5001d",
+  "dirty": true
+ },
+ "source": {
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 242,
+  "master": "characters/recruit-naples/references/paper-master.png",
+  "cell": 9.01,
+  "border": 3,
+  "palette": 48,
+  "poses": [
+   "master",
+   "master",
+   "master",
+   "master",
+   "master",
+   "master"
+  ]
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "model": "qwen-edit",
+ "shot": "m_A",
+ "seed": 1,
+ "prompt": "Full body character art for a 2D platformer, standing in a side view facing right, the whole figure visible head to feet. The character is the ninja from image 1: a black hooded ninja suit with a black face mask leaving only a narrow strip of eyes, a grey sash belt, grey wraps on the wrists and ankles, black ninja shoes, hands in a ready stance. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is just a narrow strip of two small blank black dot eyes between mask and hood; no eyebrows. The suit is flat black with grey fold shades, bold and clean. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "refs": [
+  "characters/ninja/references/master.png",
+  "paper/style_pm_tall.png"
+ ],
+ "size": [
+  896,
+  1152
+ ],
+ "steps": null,
+ "secs": 31.9,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "job": 233
+}

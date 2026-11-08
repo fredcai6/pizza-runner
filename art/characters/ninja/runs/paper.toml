@@ -1,0 +1,34 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 896
+height = 1152
+comfy_args = ["--reserve-vram", "1.5"]
+template = "Redraw the character from image 1 exactly as it is: the same paper standee, the same thick white paper border all around the silhouette like a sticker, the same flat colours, the same face style. Exactly two arms and two legs, two hands. {action} The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+refs = ["characters/ninja/references/paper-master.png", "paper/style_pm_tall.png"]
+
+[shots.idle_b]
+prompt = "Idle: standing in a calm ready stance facing right, knees slightly bent and lower, both hands loose at the sides, head tilted a little."
+
+[shots.throw_a]
+prompt = "Throwing wind-up: facing right, the throwing arm cocked far back behind the head holding a small round black pebble, the other arm forward for balance, body twisted, weight on the back leg."
+
+[shots.throw_b]
+prompt = "Throwing release: facing right, the throwing arm swung fully forward with the hand open, body leaning forward on the front leg, back leg trailing, follow-through."
+
+[shots.leap_a]
+prompt = "Leaping: facing right, launching upward off the legs, body stretched, arms trailing behind, knees bent."
+
+[shots.leap_b]
+prompt = "Leaping: facing right, at the top of the jump, body curled, knees tucked, one arm forward, flying."
+
+[shots.crouch_a]
+prompt = "Perched crouching: facing right, balanced in a low crouch on both feet with one hand touching a ledge, watching, ready to pounce."
+
+[shots.crouch_b]
+prompt = "Perched crouching: facing right, balanced low with the body leaning forward over an edge, one hand out, eyes narrow."
+
+[shots.hurt_a]
+prompt = "Hurt: facing right, recoiling backward, head thrown back, arms flung out, eyes squeezed shut as thin lines, off balance."
+
+[shots.hurt_b]
+prompt = "Hurt: facing right, doubled over holding the stomach, one knee bent, a few small yellow stars circling above the head."

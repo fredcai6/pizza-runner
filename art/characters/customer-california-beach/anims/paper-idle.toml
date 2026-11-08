@@ -1,0 +1,17 @@
+master = "characters/customer-california-beach/paper-master.png"
+canvas = [120, 150]
+job = 233
+frame_ms = 240
+loop = true
+run = "paper"
+[[frames]]
+pose = "master"
+hold = 2
+
+[[frames]]
+pose = "master"
+sink = 1
+
+[[frames]]
+pose = "master"
+hold = 1
