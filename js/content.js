@@ -39,8 +39,8 @@
       ],
       briefing: [
 
-        // Scene 1 is Tommy's paintings (assets/cutscenes), panned; see `pic` in js/hq.js.
-        { pic: 'order-board', pan: [[0.5, 0.5, 1], [0.36, 0.5, 1.15]], ms: 9000, lines: [
+        // Scene 1 is Tommy's paintings (assets/cutscenes), panned (`pic` in js/hq.js), and his painted board room.
+        { comp: 'board', lines: [
           { who: 'old', text: 'New recruits. Look at you. Warm, plain, and full of hope.' },
           { who: 'old', text: 'Welcome to Pizza HQ.' },
           { who: 'old', text: 'Slices are vanishing all over the world.' },
@@ -102,24 +102,24 @@
       ],
       briefing: [
 
-        { comp: 'ny', lines: [
+        { pic: 'vinny-beat-up', pan: [[0.4, 0.5, 1.15], [0.46, 0.48, 1.04]], ms: 12000, lines: [
           { who: 'ny', text: "Boss. It's hell out there." },
           { who: 'ny', text: 'Teenagers. Turtles. Teenagers with cameras. I got my picture took four times.' },
           { who: 'ny', text: "And I ain't sayin' I'm rattled. I'm sayin' some a me didn't come back." },
           { who: 'old', text: "Some of the best don't. These jobs aren't for the **limp crusted**." },
           { who: 'old', text: "Silence from a slice? That's **deep undercover**. Intel goes on the board." },
         ] },
-        { comp: 'board', lines: [
+        { comp: 'board', sticker: 'pointer', lines: [
           { who: 'old', text: 'Every scrap we ever pulled is up here. A lot of good slices paid for this cork.' },
           { who: 'old', text: 'Anything out there is an agent of The Order until proven otherwise. Nothing has been.' },
           { who: 'ny', text: "Has anybody tried? Provin' it?" },
           { who: 'old', text: "That's how they get you." },
         ] },
-        { comp: 'boardTeen', lines: [
+        { comp: 'boardTeen', sticker: 'pointer', lines: [
           { who: 'old', text: '**Teenagers.** One picture, then more show up next time. Why would a teenager need that many?' },
           { who: 'old', text: 'Think about it.' },
         ] },
-        { comp: 'boardTurtle', lines: [
+        { comp: 'boardTurtle', sticker: 'pointer', lines: [
           { who: 'old', text: "**Turtles.** Slow. But I've seen them take a bite out of many a tough slice." },
           { who: 'old', text: 'Slow is what they want you to think.' },
         ] },
@@ -158,7 +158,7 @@
           { who: 'old', text: "A whole pie, shoulder to shoulder in the box. Lid down. Cozy. They'll never know your name." },
           { who: 'old', text: 'They sleep warm because you stand out there in the cold! One nation, under cheese. **Indivisible!**' },
         ] },
-        { comp: 'board', lines: [
+        { comp: 'board', sticker: 'pointer', lines: [
           { who: 'old', text: "And these tickets. K8lyn. Cat Lynn. Kæthlynn. Tell me that's a coincidence." },
           { who: 'ny', text: 'I mean, it could be a popular name, boss.' },
           { who: 'old', text: "Nobody spells their own name six ways. That's not a name. That's a cover with a typo." },
@@ -222,7 +222,7 @@
         { comp: 'wide', lines: [
           { who: 'old', text: "Look at what's left of you. Good. Nobody swings that hard at a bluff. We're close." },
         ] },
-        { comp: 'board', lines: [
+        { comp: 'board', sticker: 'pointer', lines: [
           { who: 'old', text: 'Twelve tickets. Twelve spellings. Twelve disguises.' },
           { who: 'old', text: 'Then Long Beach prints. Three stops. One spelled **right**. K-A-T-E-L-Y-N.' },
           { who: 'deep', text: "Or she's just a person who can spell." },

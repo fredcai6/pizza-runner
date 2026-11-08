@@ -15,7 +15,7 @@ from scipy import ndimage
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parents[2] / "assets/cutscenes/board"
 ROOM_W = 1672                       # native: the board shots zoom in
-CUTS = {"dayold": 900, "polaroid-teen": 600, "polaroid-turtle": 600, "polaroid-ninja": 600, "polaroid-mutant": 600, "order-1": 300, "order-2": 300}   # longest side, px (close-ups zoom to ~3x)
+CUTS = {"dayold": 900, "dayold-pointer": 900, "polaroid-teen": 600, "polaroid-turtle": 600, "polaroid-ninja": 600, "polaroid-mutant": 600, "order-1": 300, "order-2": 300}   # longest side, px (close-ups zoom to ~3x)
 
 
 def cut(name, size):

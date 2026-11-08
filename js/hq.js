@@ -243,7 +243,7 @@
 
   // Tommy's board room (art/cutscenes/board): the painted room, the live evidence pinned on its cork, Dayold at his chair, and the
   // recruits from behind, cut from the same painting, drawn last so he sits behind them. Room space is 1280x720.
-  const BOARD_ART = ['room', 'room-front', 'dayold', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
+  const BOARD_ART = ['room', 'room-front', 'dayold', 'dayold-pointer', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
   const paintedReady = () => BOARD_ART.every(n => { const i = pic(`board/${n}`); return i.complete && i.naturalWidth; });
   // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; ninjas and mutants go up after the
   // level that reveals them (once met: headquarters().known).
@@ -257,7 +257,7 @@
     ctx.restore();
     return [cx + Math.sin(r) * h * 0.42, cy - Math.cos(r) * h * 0.42];
   }
-  function paintedBoard(ctx, hq, ms, view) {
+  function paintedBoard(ctx, hq, ms, view, shot) {
     const art = n => pic(`board/${n}`);
     ctx.save();
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
@@ -295,8 +295,8 @@
       pin(ctx, pw / 2, 6, 6); tape(ctx, pw * 0.1, 3, pw * 0.2, 14, -35);
       ctx.restore();
     }
-    // Dayold at his chair, rocking a little while he talks.
-    const d = art('dayold'), dw = 340, dh = dw * d.naturalHeight / d.naturalWidth;
+    // Dayold at his chair, rocking a little while he talks: pointing in scene 1, with his pointer for the intel (`sticker: 'pointer'`).
+    const d = art(shot.sticker ? `dayold-${shot.sticker}` : 'dayold'), dw = 340, dh = dw * d.naturalHeight / d.naturalWidth;
     const bob = view.mood === 'talk' ? Math.sin(ms / 110) * 3 : Math.sin(ms / 900) * 1.5;
     ctx.drawImage(d, -6, 538 - dh + bob, dw, dh);
     ctx.drawImage(art('room-front'), 0, 0, W, H);
@@ -483,7 +483,7 @@
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
         ctx.translate(-x + Math.round(whip / z), -y);
-        if (OVER_TABLE.has(shot.comp) && paintedReady()) paintedBoard(ctx, view.hq, now, view);
+        if (OVER_TABLE.has(shot.comp) && paintedReady()) paintedBoard(ctx, view.hq, now, view, shot);
         else room(ctx, view.hq, now, view);
       }
       ctx.restore();
