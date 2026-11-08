@@ -1,6 +1,6 @@
 // One slice, out on the city's streets. Reads the world, changes it through the rules, reports how it ended.
 (function (root) {
-  const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND;
+  const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND, K = root.PR_PAPER;
   const W = 1280, H = 720, GROUND = R.GROUND;
   const TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
@@ -677,7 +677,9 @@
         if (Math.abs(k.x - p.x - p.w / 2) < p.w / 2 + 26 && k.y > p.y - 26 && k.y < p.y + p.h + 26) {
           this.taken.add(key);
           this.grab(k.topping);
-          this.say(`${C.TOPPINGS[k.topping].name}! ${C.BARKS.pickup}`);
+          // A first pickup of a topping also unlocks it for every pie after this one.
+          const fresh = R.collect(this.camp, k.topping);
+          this.say(`${C.TOPPINGS[k.topping].name}! ${fresh ? C.BARKS.unlocked : C.BARKS.pickup}`);
         }
       });
     }
@@ -813,11 +815,17 @@
     // The next stretch comes in like a comic panel turning over.
     drawWipe() {
       const { ctx } = this, half = WIPE / 2, cover = 1 - Math.abs(this.wipe - half) / half;
-      ctx.fillStyle = '#17110e';
+      ctx.fillStyle = INK;
       ctx.fillRect(0, 0, W, H / 2 * cover); ctx.fillRect(0, H - H / 2 * cover, W, H / 2 * cover);
+      ctx.fillStyle = K.CORAL; ctx.fillRect(0, H / 2 * cover - 10, W, 10 * Math.min(1, cover * 4)); ctx.fillRect(0, H - H / 2 * cover, W, 10 * Math.min(1, cover * 4));
       if (cover > 0.8 && this.pending) {
-        ctx.fillStyle = '#ffd76a'; ctx.font = 'bold 34px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.fillText(this.world.streets[this.pending.id].name, W / 2, H / 2 + 12);
+        const name = this.world.streets[this.pending.id].name;
+        ctx.font = K.display(40, 700); ctx.textAlign = 'center';
+        const w = ctx.measureText(name).width + 70;
+        ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(-0.025); ctx.translate(-W / 2, -H / 2);
+        K.card(ctx, W / 2 - w / 2, H / 2 - 38, w, 76, { r: 14, shadow: 6 });
+        ctx.fillStyle = K.TEXT; ctx.fillText(name, W / 2, H / 2 + 14);
+        ctx.restore();
       }
     }
 
@@ -861,10 +869,10 @@
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
       const label = (text, y, color) => {
-        ctx.font = 'bold 21px system-ui, sans-serif'; ctx.textAlign = 'left';
-        const w = ctx.measureText(text).width + 22;
-        ctx.fillStyle = color; ctx.fillRect(x + 160, y, w, 32);
-        ctx.fillStyle = '#fff'; ctx.fillText(text, x + 171, y + 23);
+        ctx.font = K.display(22, 600); ctx.textAlign = 'left';
+        const w = ctx.measureText(text).width + 24;
+        K.card(ctx, x + 164, y, w, 32, { fill: color, r: 8, b: 3, shadow: 3 });
+        ctx.fillStyle = '#fff'; ctx.fillText(text, x + 176, y + 24);
       };
       label(`${j.keep.name} ▶`, GROUND - 232, '#2f6b3f');
       if (j.turn) label(`▲ ${j.turn.name}`, GROUND - 194, j.open ? '#2b5f8a' : '#6b5a4a');
@@ -966,9 +974,9 @@
       }
     }
 
-    // The delivery sign: a wooden shingle with a pizza slice on it, no words, glowing gold when this is the door.
+    // The delivery sign: a wooden shingle with the pizza character on it, no words, glowing gold when this is the door.
     drawDoorSign(x, y, w, h, active) {
-      const { ctx, frame } = this, cx = x + w / 2, cy = y + h / 2 + 1;
+      const { ctx, frame } = this, cx = x + w / 2;
       ctx.save();
       ctx.lineJoin = 'round';
       if (active) { ctx.shadowColor = '#ffd76a'; ctx.shadowBlur = 14 + Math.sin(frame / 8) * 6; }
@@ -979,13 +987,8 @@
       ctx.fillStyle = active ? '#6e4223' : '#4a342b'; ctx.fillRect(x + 4, y + h * 0.5 - 1, w - 8, 2);
       ctx.strokeStyle = active ? '#e8b64a' : '#a08a5a'; ctx.lineWidth = 2; ctx.strokeRect(x + 7, y + 7, w - 14, h - 14);
       ctx.fillStyle = '#e9d8a0'; for (const [rx, ry] of [[x + 9, y + 9], [x + w - 12, y + 9], [x + 9, y + h - 12], [x + w - 12, y + h - 12]]) ctx.fillRect(rx, ry, 3, 3);
-      // The slice, point down, with its crust on top.
-      const big = Math.min(1.35, h / 33); ctx.translate(cx, cy); ctx.scale(big, big); ctx.translate(-cx, -cy);
-      ctx.strokeStyle = INK; ctx.lineWidth = 3.2;
-      ctx.beginPath(); ctx.moveTo(cx - 12, cy - 8); ctx.lineTo(cx + 12, cy - 8); ctx.lineTo(cx, cy + 12); ctx.closePath(); ctx.stroke();
-      ctx.fillStyle = active ? '#ffcc33' : '#d6b25a'; ctx.fill();
-      ctx.fillStyle = '#d59a4c'; ctx.fillRect(cx - 14, cy - 13, 28, 6); ctx.strokeRect(cx - 14, cy - 13, 28, 6);
-      ctx.fillStyle = '#c8321e'; for (const [px, py] of [[-5, -2], [5, -3], [0, 5]]) dot(ctx, cx + px, cy + py, 3);
+      // The pizza character on it, wearing its topping, greyed when this is not the door.
+      S.stamp(ctx, this.slice.style, this.slice.topping, cx, y + h - 8, w - 16, h - 14, { grey: !active, count: C.CHARGES });
       ctx.restore();
     }
 
@@ -1068,31 +1071,27 @@
       if (!speech) return;
       const shown = Math.min(speech.text.length, Math.floor(speech.age / 1.6));
       if (shown < speech.text.length && speech.age % 4 === 0) A.dit(this.slice.style);
-      ctx.font = '700 24px "Pixelify Sans", monospace'; ctx.textAlign = 'left';
-      const w = ctx.measureText(speech.text).width + 28, h = 38;
-      const cx = p.x + p.w / 2 - this.cam, x = Math.max(12, Math.min(W - w - 12, cx - w / 2)), y = Math.max(140, p.y + p.h - st.height - h - 30);
-      ctx.fillStyle = '#14122b'; ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
-      ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, h);
-      ctx.fillStyle = '#14122b'; ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
-      ctx.fillRect(Math.round(cx) - 6, y + h, 12, 10);
-      ctx.fillStyle = '#fff'; ctx.fillText(speech.text.slice(0, shown), x + 14, y + 27);
+      ctx.font = K.body(23, 800); ctx.textAlign = 'left';
+      const w = ctx.measureText(speech.text).width + 30, h = 40;
+      const cx = p.x + p.w / 2 - this.cam, x = Math.max(12, Math.min(W - w - 12, cx - w / 2)), y = Math.max(176, p.y + p.h - st.height - h - 30);
+      // The tail first, so the card's border covers where it joins.
+      const tx = Math.round(Math.max(x + 22, Math.min(x + w - 22, cx)));
+      const tail = (grow, fill) => { ctx.fillStyle = fill; ctx.beginPath(); ctx.moveTo(tx - 11 - grow, y + h - 4); ctx.lineTo(tx + 11 + grow, y + h - 4); ctx.lineTo(tx + 2, y + h + 15 + grow); ctx.closePath(); ctx.fill(); };
+      tail(4, INK); ctx.save(); ctx.translate(3, 4); tail(4, INK); ctx.restore(); tail(2, '#fff');
+      K.card(ctx, x, y, w, h, { r: 12, shadow: 3 });
+      tail(-1, K.PAPER);
+      ctx.fillStyle = K.TEXT; ctx.fillText(speech.text.slice(0, shown), x + 15, y + 28);
     }
 
-    // The pie this slice came from. Each wedge goes as it is delivered or lost.
-    drawPie(x, y, r) {
-      const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, n = slices.length, turn = Math.PI * 2 / n;
-      ctx.fillStyle = INK; dot(ctx, x, y, r + 9);
-      ctx.fillStyle = '#4a2c3c'; dot(ctx, x, y, r + 4);
-      slices.forEach((s, i) => {
-        if (s.status !== 'ready') return;
-        const a = -Math.PI / 2 + i * turn, mid = a + turn / 2, out = s === this.slice ? 4 + Math.sin(frame / 9) * 2 : 0;
-        const ox = x + Math.cos(mid) * out, oy = y + Math.sin(mid) * out;
-        const wedge = (radius, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.arc(ox, oy, radius, a + 0.03, a + turn - 0.03); ctx.fill(); };
-        wedge(r, '#b4702e'); wedge(r - 5, '#ffcc33');
-        const topping = s === this.slice ? this.held() : s.topping;
-        if (!topping) return;
-        ctx.fillStyle = C.TOPPINGS[topping].color;
-        dot(ctx, ox + Math.cos(mid) * r * 0.6, oy + Math.sin(mid) * r * 0.6, r * 0.11);
+    // The slices this city started with, as small portraits of their characters wearing their toppings. The one
+    // out on the street bobs on a gold chip; delivered, eaten and lost slices are greyed on an empty chip.
+    drawSlices(x, top) {
+      const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, CW = 40, CH = 46, STEP = 46;
+      slices.forEach((sl, i) => {
+        const cx = x + i * STEP + CW / 2, here = sl === this.slice, spent = !here && sl.status !== 'ready';
+        const lift = here ? Math.round(Math.sin(frame / 9) * 2) - 3 : 0, held = here ? this.held() : sl.topping;
+        K.card(ctx, cx - CW / 2, top + lift, CW, CH, { fill: here ? K.SUN : spent ? '#d9cfb8' : K.PAPER, r: 8, b: 2, shadow: 2 });
+        S.stamp(ctx, sl.style, held, cx, top + lift + CH - 3, CW - 4, CH - 6, { grey: spent, count: here ? this.left() : C.CHARGES });
       });
     }
 
@@ -1107,11 +1106,10 @@
       else if (past) text = C.BARKS.missed;
       else if (h.kind === 'turn') text = `${feet(h.left)} to the turn onto ${h.street.name}`;
       else text = `${feet(h.left)}, then ${h.street.name}`;
-      ctx.font = 'bold 22px system-ui, sans-serif'; ctx.textAlign = 'center';
-      const w = ctx.measureText(text).width + 36, x = 740;
-      ctx.fillStyle = INK; ctx.fillRect(x - w / 2 - 4, 12, w + 8, 50);
-      ctx.fillStyle = '#4a2c3c'; ctx.fillRect(x - w / 2, 16, w, 42);
-      ctx.fillStyle = '#fff3d2'; ctx.fillText(text, x, 45);
+      ctx.font = K.body(22, 800); ctx.textAlign = 'center';
+      const w = ctx.measureText(text).width + 40, x = 740;
+      K.card(ctx, x - w / 2, 16, w, 42, { r: 21, shadow: 4 });
+      ctx.fillStyle = K.TEXT; ctx.fillText(text, x, 46);
     }
 
     // A soft contact shadow flat on the street under whatever stands on it.
@@ -1123,18 +1121,19 @@
       ctx.restore();
     }
 
-    // Heavy-outlined text, like the rest of the game's ink.
-    inkText(text, x, y, size = 20, fill = '#fff3d2', align = 'left') {
+    // A label on a paper sticker; (x, y) is the left end of the text's baseline.
+    inkText(text, x, y, size = 20) {
       const { ctx } = this;
-      ctx.font = `700 ${size}px "Pixelify Sans", system-ui, sans-serif`; ctx.textAlign = align; ctx.lineJoin = 'round';
-      ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.strokeText(text, x, y);
-      ctx.fillStyle = fill; ctx.fillText(text, x, y);
+      ctx.font = K.body(size, 800); ctx.textAlign = 'left';
+      const w = ctx.measureText(text).width + 24;
+      K.card(ctx, x - 12, y - size - 4, w, size + 14, { r: 10, b: 3, shadow: 3 });
+      ctx.fillStyle = K.TEXT; ctx.fillText(text, x, y + 1);
     }
 
-    // Health is a slice on its side: crust at the left, cheese running out to the tip. Heat fills it from
-    // the crust, a bite takes a scalloped chunk off the tip for good, and a lost chunk drains away slowly.
+    // Health is a heat bar, a thermometer sticker with the active pizza as its bulb. Heat fills it from the bulb,
+    // a bite takes a scalloped chunk off the far end for good, and a lost chunk drains away slowly in cream.
     drawHealth(x, y) {
-      const { ctx } = this, GW = 336, GH = 60, PAD = 8, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame;
+      const { ctx } = this, GW = 322, GH = 34, PAD = 10, R = 34, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame, bx = R - 4, bodyLen = GW - bx;
       if (!this.gauge) { this.gauge = document.createElement('canvas'); this.gaugeInk = document.createElement('canvas'); for (const c of [this.gauge, this.gaugeInk]) { c.width = w; c.height = h; } }
       // Smooth: the bar eases to the true heat, and what a hit took trails behind in cream.
       const heat = Math.max(0, this.heat);
@@ -1145,37 +1144,17 @@
       const g = this.gauge.getContext('2d');
       g.clearRect(0, 0, w, h);
       g.save(); g.translate(PAD, PAD);
-      const CR = 26, bx = CR - 4, bodyLen = GW - bx;
-      // The whole slice: a rounded crust end and a cheese wedge that narrows to a rounded tip.
-      const shape = () => {
-        g.beginPath();
-        g.moveTo(CR, 0); g.quadraticCurveTo(GW * 0.66, GH * 0.04, GW - 10, GH * 0.4); g.quadraticCurveTo(GW, GH * 0.5, GW - 10, GH * 0.6); g.quadraticCurveTo(GW * 0.66, GH * 0.96, CR, GH);
-        g.closePath();
-        if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4);
-      };
-      const crust = () => { g.beginPath(); if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4); };
-      shape(); g.fillStyle = '#4a2c3c'; g.fill();
+      const shape = () => { g.beginPath(); if (g.roundRect) g.roundRect(0, 0, GW, GH, GH / 2); else g.rect(0, 0, GW, GH); };
+      shape(); g.fillStyle = '#e8dcc0'; g.fill();
       g.save(); shape(); g.clip();
-      // Cheese colour runs warm to cold with the heat.
+      // Colour runs warm to cold with the heat.
       const mix = (a, b, k) => { const n = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = n(a), B = n(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`; };
       const hot = fill > 0.5, k = Math.max(0, Math.min(1, hot ? (fill - 0.5) * 2 : fill * 2));
-      const c1 = hot ? mix('#e8bc55', '#ffd23a', k) : mix('#a9c6d8', '#e8bc55', k), c2 = hot ? mix('#c98a44', '#ff8a24', k) : mix('#6f97b3', '#c98a44', k);
+      const c1 = hot ? mix('#ffb23a', '#ff6a1f', k) : mix('#8fc4e0', '#ffb23a', k);
       const edge = bx + bodyLen * ghostF, mid = bx + bodyLen * fill;
-      if (ghostF > fill) { g.fillStyle = '#fff3d2'; g.fillRect(mid, 0, edge - mid, GH); }
-      const grad = g.createLinearGradient(bx, 0, GW, 0); grad.addColorStop(0, c1); grad.addColorStop(1, c2);
-      g.fillStyle = grad; g.fillRect(bx, 0, Math.max(0, mid - bx), GH);
-      // Pepperoni along it, dimmed where the heat has gone, and a few cheese highlights.
-      for (const [px, py, pr] of [[0.2, 0.3, 8], [0.38, 0.68, 7], [0.5, 0.3, 6], [0.66, 0.6, 5], [0.8, 0.45, 4]]) {
-        const cx = bx + bodyLen * px, cy = GH * py, lit = cx < mid;
-        g.fillStyle = lit ? '#7a1a20' : '#35202c'; g.beginPath(); g.arc(cx, cy, pr + 2, 0, 7); g.fill();
-        g.fillStyle = lit ? '#c8321e' : '#4a2c3c'; g.beginPath(); g.arc(cx, cy, pr, 0, 7); g.fill();
-      }
-      g.fillStyle = 'rgba(255,248,214,.5)';
-      for (const [px, py] of [[0.1, 0.78], [0.3, 0.14], [0.58, 0.82], [0.72, 0.3]]) { const cx = bx + bodyLen * px; if (cx < mid) g.fillRect(Math.round(cx), Math.round(GH * py), 7, 3); }
-      // The crust, always warm, with its seam against the cheese.
-      crust(); g.fillStyle = '#d59a4c'; g.fill();
-      g.fillStyle = '#f0c27a'; g.fillRect(5, 3, CR - 14, 6); g.fillStyle = '#b97a38'; g.fillRect(5, GH - 8, CR - 14, 5);
-      g.fillStyle = '#a8662b'; g.fillRect(CR - 4, 0, 3, GH);
+      if (ghostF > fill) { g.fillStyle = '#fff'; g.fillRect(mid, 0, edge - mid, GH); }
+      g.fillStyle = c1; g.fillRect(0, 0, Math.max(0, mid), GH);
+      g.fillStyle = 'rgba(255,255,255,.38)'; g.fillRect(0, 4, Math.max(0, mid), 5);
       // Marks along the edge, one per bite the slice can take.
       g.fillStyle = INK;
       for (let i = 1; i < C.BITES; i++) { const mx = Math.round(bx + bodyLen * i / C.BITES); g.globalAlpha = 0.55; g.fillRect(mx - 1, 0, 2, 7); g.fillRect(mx - 1, GH - 7, 2, 7); }
@@ -1185,21 +1164,30 @@
       if (capF < 0.999) {
         const cut = bx + bodyLen * capF;
         g.globalCompositeOperation = 'destination-out';
-        g.fillRect(cut + 14, -4, GW, GH + 8);
-        for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cut + 14, GH * (0.17 + i * 0.33), GH * 0.2, 0, 7); g.fill(); }
+        g.fillRect(cut + 8, -4, GW, GH + 8);
+        for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cut + 8, GH * (0.17 + i * 0.33), GH * 0.22, 0, 7); g.fill(); }
         g.globalCompositeOperation = 'source-over';
       }
       g.restore();
-      // The outline: the slice's silhouette stamped around itself, heavy, in the game's ink.
+      // The cut: the bar's silhouette stamped around itself in the game's ink, then white, with a solid shadow.
       const k2 = this.gaugeInk.getContext('2d');
       k2.clearRect(0, 0, w, h); k2.globalCompositeOperation = 'source-over'; k2.drawImage(this.gauge, 0, 0);
       k2.globalCompositeOperation = 'source-in'; k2.fillStyle = INK; k2.fillRect(0, 0, w, h);
+      const k3 = this.gaugeCut || (this.gaugeCut = document.createElement('canvas')); k3.width = w; k3.height = h;
+      const kc = k3.getContext('2d'); kc.drawImage(this.gauge, 0, 0); kc.globalCompositeOperation = 'source-in'; kc.fillStyle = '#fff'; kc.fillRect(0, 0, w, h);
       ctx.save();
       // A hit shakes the gauge.
-      const shake = this.invuln > 70 ? Math.sin(f * 2.4) * 3 : 0;
+      const shake = this.invuln > 70 ? Math.sin(f * 2.4) * 3 : 0, hit = this.invuln > 70;
       ctx.translate(x + shake, y);
-      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, Math.round(Math.cos(a / 20 * 6.2832) * 4), Math.round(Math.sin(a / 20 * 6.2832) * 4));
-      ctx.drawImage(this.gauge, 0, 0);
+      const left = R * 2 - 36, top = R - GH / 2 - PAD;
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, left + 3 + Math.round(Math.cos(a / 20 * 6.2832) * 5), top + 4 + Math.round(Math.sin(a / 20 * 6.2832) * 5));
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, left + Math.round(Math.cos(a / 20 * 6.2832) * 5), top + Math.round(Math.sin(a / 20 * 6.2832) * 5));
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeCut, left + Math.round(Math.cos(a / 20 * 6.2832) * 3), top + Math.round(Math.sin(a / 20 * 6.2832) * 3));
+      ctx.drawImage(this.gauge, left, top);
+      // The bulb: a sticker disc with the pizza in it, tinted blue as it cools and red when it is hit.
+      const cx = R + 4, cy = R + 4, bob = Math.round(Math.sin(f / 14) * 1.5);
+      K.disc(ctx, cx, cy, R, hit ? '#ffb3a8' : fill < 0.3 ? '#cfe6f0' : K.PAPER, { b: 4, shadow: 4 });
+      S.stamp(ctx, this.slice.style, this.held(), cx, cy + R - 5 + bob, R * 1.75, R * 1.8, { count: this.left() });
       ctx.restore();
     }
 
@@ -1211,11 +1199,10 @@
       if (this.specialCd > 0) {
         const k = 1 - this.specialCd / this.specialMax, r = 17, y = top - 24, deny = this.denied > 0 ? Math.sin(f * 1.6) * 4 : 0;
         ctx.save(); ctx.translate(Math.round(cx + deny), Math.round(y));
-        ctx.fillStyle = INK; dot(ctx, 0, 0, r + 6);
-        ctx.fillStyle = '#4a2c3c'; dot(ctx, 0, 0, r);
-        ctx.fillStyle = this.denied > 0 ? '#ff5a3c' : '#ffcc33';
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = INK; dot(ctx, 0, 0, 5);
+        K.disc(ctx, 0, 0, r, '#fff6df', { b: 3, shadow: 3 });
+        ctx.fillStyle = this.denied > 0 ? '#ff5a3c' : K.SUN;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 3, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = INK; dot(ctx, 0, 0, 4);
         ctx.restore();
       } else {
         // Ready: a golden glow at the feet and sparkles circling the pizza.
@@ -1243,23 +1230,22 @@
 
     hud() {
       const { ctx, world, city } = this;
-      this.drawPie(444, 62, 36);
       this.drawHealth(14, 12);
+      this.drawSlices(24, 104);
       const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
-      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 22, 100, 20);
+      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 26, 186, 19);
       // Addresses done, and the street we are on.
       city.areas.forEach((a, i) => {
-        const x = 34 + i * 28; ctx.fillStyle = INK; dot(ctx, x, 128, 13);
-        ctx.fillStyle = i < world.delivery ? '#7fd46a' : i === world.delivery ? '#ffd76a' : '#6b5560'; dot(ctx, x, 128, 8);
+        K.disc(ctx, 36 + i * 32, 218, 8, i < world.delivery ? '#4fcf6a' : i === world.delivery ? K.SUN : '#e6dcc0', { b: 3, shadow: 2 });
       });
-      this.inkText(this.street.name, 34 + city.areas.length * 28 + 6, 135, 19);
+      this.inkText(this.street.name, 36 + city.areas.length * 32 + 8, 224, 17);
       this.syncSpecialButton();
       this.guideBar();
       if (this.barkT > 0) {
-        ctx.font = 'italic 26px Georgia, serif'; ctx.textAlign = 'center';
-        const w = ctx.measureText(this.bark).width + 40;
-        ctx.fillStyle = 'rgba(255,248,225,0.93)'; ctx.fillRect(W / 2 - w / 2 + 110, 92, w, 46);
-        ctx.fillStyle = '#2a1a10'; ctx.fillText(this.bark, W / 2 + 110, 124);
+        ctx.font = K.body(26, 700); ctx.textAlign = 'center';
+        const w = ctx.measureText(this.bark).width + 44, bx = W / 2 + 110;
+        K.card(ctx, bx - w / 2, 96, w, 46, { r: 14, shadow: 4 });
+        ctx.fillStyle = K.TEXT; ctx.fillText(this.bark, bx, 129);
       }
     }
   }
@@ -1271,6 +1257,7 @@
 
   // Placeholder slices: wedge, charred round, jumbo wedge, or thick pan square.
   function drawSlice(ctx, x, y, style, topping, cheese, scale = 1, dead = false, facing = 1, squash = 1) {
+    api.fallbackDraws++;
     ctx.save(); ctx.translate(x, y); ctx.scale(scale * facing, scale * squash);
     if (dead) ctx.rotate(1.35);
     const crust = dead ? '#77736b' : { ny: '#d59a4c', naples: '#c98a44', deep: '#a8662b', jumbo: '#d59a4c' }[style];
@@ -1289,5 +1276,5 @@
     ctx.restore();
   }
 
-  root.PR_PLAY = { Run, W, H, drawSlice, dot, pieceArt };
+  const api = root.PR_PLAY = { Run, W, H, drawSlice, dot, pieceArt, fallbackDraws: 0 };
 })(window);

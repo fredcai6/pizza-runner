@@ -34,6 +34,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await shot('03-order');
   ok('first order shows the customer alias', (await page.locator('.receipt').innerText()).includes('K8lyn'));
   await click('Build the pie'); await shot('04-new-york-pie');
+  ok('Build Your Pie shows the character, not a drawn pizza', await page.locator('.select canvas.fighterart').count() === 1 && await page.locator('.select svg').count() === 0 && await page.locator('.tile img').count() >= 1);
   await click('Box it');
   await page.locator('#screen .citymap').waitFor();
   await shot('05-map');
@@ -153,6 +154,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   ok('final scene played', seen.has('final'));
   ok('no loading screen between cities', loadingScreens === 0);
   ok('the post-city scene is gone', ![...seen].some(k => /:cityDone$/.test(k)));
+  ok('no screen fell back to a code-drawn pizza', await page.evaluate(() => PR_PLAY.fallbackDraws === 0));
   ok('a lost city was retried, earlier cities kept', await page.evaluate(() => __pr.camp.attempts.chicago === 2 && __pr.camp.attempts.newyork === 1));
   ok('Long Beach was retried with the same eight', await page.evaluate(() => __pr.camp.attempts.california === 2 && __pr.camp.pies.california.slices.length === 8));
   await click('Back to title');
