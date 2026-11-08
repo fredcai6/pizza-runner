@@ -29,7 +29,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await click('Start');
   await page.locator('#dialog:not(.hidden)').waitFor(); await page.waitForTimeout(250); await shot('01-hq-opening');
   const firstLine = await page.locator('#dialog .line').getAttribute('data-full');
-  ok('opening scene plays', /New recruits/.test(firstLine), firstLine);
+  ok('opening scene plays', /New recruits. Look at you. Warm, plain/.test(firstLine), firstLine);
   await advance();
   await shot('03-order');
   ok('first order shows the customer alias', (await page.locator('.receipt').innerText()).includes('K8lyn'));
@@ -37,7 +37,8 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await click('Box it');
   await page.locator('#screen .citymap').waitFor();
   await shot('05-map');
-  ok('map shows the address and one checkpoint', await page.locator('#screen .addr.active').count() === 1 && await page.locator('#screen .check').count() === 1);
+  ok('map shows only the next address and one checkpoint', await page.locator('#screen .addr').count() === 1 && await page.locator('#screen .addr.active').count() === 1 && await page.locator('#screen .check').count() === 1);
+  ok('no losses yet, no lost-slice marker', await page.locator('#screen .grave').count() === 0);
   await click('Deploy');
 
   await page.waitForTimeout(150);
@@ -94,6 +95,8 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await click('Back to the map');
   await page.locator('#screen .citymap').waitFor(); await shot('12-map-second');
   ok('two checkpoints to choose from after a loss', await page.locator('#screen .check').count() >= 2);
+  ok('the loss is marked, and called out as the last', await page.locator('#screen .grave').count() === 1 && await page.locator('#screen .grave.last').count() === 1);
+  ok('still only the next address is marked', await page.locator('#screen .addr').count() === 1);
   await page.reload();
   await click('Continue');
   await page.locator('#screen .citymap').waitFor();
@@ -101,13 +104,15 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
 
   // The rest of the campaign, through every real screen. Chicago and Long Beach each lose a whole pie first.
   const seen = new Set(), losses = {};
+  let loadingScreens = 0;
   for (let guard = 0; guard < 1800; guard++) {
     if (await page.locator('.card').count()) break;
+    loadingScreens += await page.locator('h2.loading, #screen:has-text("On the way to")').count();
     if (await page.locator('#dialog:not(.hidden)').count()) {
       seen.add(await page.evaluate(() => __pr.camp.cityIndex + ':' + __pr.camp.phase));
       const line = await page.locator('#dialog .line').getAttribute('data-full');
       if (line === 'Know thy enemy...') { seen.add('final'); await page.waitForTimeout(1500); await shot('16-know-thy-enemy'); }
-      if (/DJ ALEWIFE/.test(line)) { await page.waitForTimeout(200); await shot('15-alewife-door'); }
+      if (line === 'Pizza party!') { await page.waitForTimeout(200); await shot('15-alewife-door'); }
       const door = await page.evaluate(() => __pr.camp.phase === 'door' && __pr.camp.cityIndex + '.' + __pr.camp.world.delivery);
       if (door && !seen.has(door)) { seen.add(door); await page.waitForTimeout(120); await shot(`14-door-${door}`); }
       await page.locator('#dialog').click(); continue;
@@ -120,7 +125,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
       });
       await page.waitForTimeout(20); continue;
     }
-    if (await page.locator('.top').count()) {
+    if (await page.locator('.tile[data-t], .top').count()) {
       const k = 'pie-' + await page.evaluate(() => __pr.camp.cityIndex);
       if (!seen.has(k)) { seen.add(k); await shot(`13-${k}`); }
     }
@@ -146,6 +151,8 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   const card = await page.locator('.card').innerText();
   ok('ending reaches the card', /To be continued/.test(card) && /Happy birthday Katelyn/.test(card), card.replace(/\n+/g, ' | '));
   ok('final scene played', seen.has('final'));
+  ok('no loading screen between cities', loadingScreens === 0);
+  ok('the post-city scene is gone', ![...seen].some(k => /:cityDone$/.test(k)));
   ok('a lost city was retried, earlier cities kept', await page.evaluate(() => __pr.camp.attempts.chicago === 2 && __pr.camp.attempts.newyork === 1));
   ok('Long Beach was retried with the same eight', await page.evaluate(() => __pr.camp.attempts.california === 2 && __pr.camp.pies.california.slices.length === 8));
   await click('Back to title');

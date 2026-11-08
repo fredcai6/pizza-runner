@@ -3,21 +3,77 @@
   const C = root.PR_CONTENT, R = root.PR_RULES, P = root.PR_PLAY, S = root.PR_SPRITES;
   const W = P.W, H = P.H, dot = P.dot;
 
-  // Camera targets in room coordinates.
+  // Camera targets in room coordinates: [centre x, centre y, scale]. Scales are whole numbers so
+  // pixels stay square (art/characters/STYLE.md). A shot whose scale changes steps to the new one
+  // `at` of the way through (a punch-in) while the centre keeps gliding. The camera centre is clamped
+  // so the frame never leaves the room. Shots park the speaker on one side so the dialogue box has the other.
   const CAMERAS = {
-    wide: { from: [640, 360, 1], to: [640, 360, 1.06] },
-    board: { from: [930, 250, 1.75], to: [980, 270, 2] },
-    oldtimer: { from: [300, 400, 2.1], to: [300, 380, 2.35] },
-    pies: { from: [560, 520, 1.7], to: [720, 520, 1.7] },
-    polaroid: { from: [1090, 262, 1.9], to: [1090, 252, 2.4] },
-    boardTeen: { from: [1000, 180, 2.5], to: [1040, 175, 2.9] },
-    boardTurtle: { from: [1110, 175, 2.9], to: [1150, 175, 2.9] },
+    wide: { from: [640, 360, 1], to: [640, 360, 1] },
+    board: { from: [900, 250, 2], to: [960, 270, 2] },
+    oldtimer: { from: [400, 410, 2], to: [400, 390, 2] },
+    pies: { from: [560, 410, 2], to: [720, 410, 2] },
+    polaroid: { from: [1090, 262, 2], to: [1090, 252, 2] },
+    boardTeen: { from: [1000, 180, 3], to: [1040, 175, 3] },
+    boardTurtle: { from: [1110, 175, 3], to: [1150, 175, 3] },
     boardTease: { from: [1030, 300, 3], to: [1160, 300, 3], ms: 1500 },
-    ny: { from: [470, 372, 2.1], to: [470, 362, 2.35] },
-    deep: { from: [666, 372, 1.9], to: [666, 362, 2.1] },
-    jumbo: { from: [862, 350, 1.6], to: [862, 340, 1.75] },
-    naples: { from: [1058, 390, 1.9], to: [1058, 380, 2.1] },
+    ny: { from: [500, 410, 2], to: [500, 400, 2] },
+    deep: { from: [780, 410, 2], to: [780, 400, 2] },
+    jumbo: { from: [960, 370, 2], to: [960, 360, 2] },
+    naples: { from: [900, 413, 1], to: [1060, 413, 3], at: 0.1, ms: 4000 },
   };
+  const STAGE_CENTER = [W / 2, H / 2];
+
+  // Where the camera is, in room units, a fraction t through a shot.
+  function camAt(shot, t) {
+    const cam = CAMERAS[shot.comp] || CAMERAS.wide, e = t * t * (3 - 2 * t);
+    const z = t < (cam.at == null ? 0.5 : cam.at) ? cam.from[2] : cam.to[2];
+    const lerp = i => cam.from[i] + (cam.to[i] - cam.from[i]) * e;
+    return { z, x: Math.round(Math.max(W / 2 / z, Math.min(W - W / 2 / z, lerp(0)))), y: Math.round(Math.max(H / 2 / z, Math.min(H - H / 2 / z, lerp(1)))) };
+  }
+
+  // Who stands where in room coordinates, so the dialogue box can keep clear of the speaker.
+  function standing(who, view) {
+    if (who === 'old') return { x: 300, foot: 470, h: 130 };
+    const i = view.hq.pizzas.findIndex(z => z.style === who);
+    return i < 0 ? null : { x: 470 + i * 196, foot: 480, h: C.STYLES[who].height };
+  }
+
+  // The speaker's box on the stage over the whole shot, or null when they are out of frame or in a painted scene.
+  function speakerBox(shot, who, view) {
+    if (shot.comp === 'door') {
+      const final = view.city.final && view.area === view.city.areas[view.city.areas.length - 1];
+      const sty = view.slice && view.slice.style ? view.slice.style : (view.city.style || 'ny');
+      const at = who === 'customer' || who === 'alewife' ? { x: 760, foot: 520, h: final ? 340 : 300 } : { x: 380, foot: 520, h: C.STYLES[sty].height };
+      return pad(at, 1, 640, 360, 1);
+    }
+    const at = OVER_TABLE.has(shot.comp) && who !== 'old' ? null : standing(who, view);
+    if (!at) return null;
+    const a = camAt(shot, 0), b = camAt(shot, 1), r1 = pad(at, a.z, a.x, a.y, a.z), r2 = pad(at, b.z, b.x, b.y, b.z);
+    return [Math.min(r1[0], r2[0]), Math.min(r1[1], r2[1]), Math.max(r1[2], r2[2]), Math.max(r1[3], r2[3])];
+  }
+  function pad(at, z, cx, cy) {
+    const sx = STAGE_CENTER[0] + (at.x - cx) * z, foot = STAGE_CENTER[1] + (at.foot - cy) * z, h = at.h * z;
+    return [sx - h * 0.45, foot - h, sx + h * 0.45, foot];
+  }
+
+  // Seats the box on whichever part of the stage the speaker is not in: centred, else right, else left.
+  function dock(canvas, dialog, box) {
+    const r = canvas.getBoundingClientRect(), k = r.width / W, gap = 10 * k;
+    dialog.style.setProperty('--fs', Math.max(15, 24 * k) + 'px');
+    dialog.style.bottom = (innerHeight - r.bottom + 14 * k) + 'px';
+    let best = null;
+    for (const side of ['center', 'right', 'left']) {
+      const w = r.width * (side === 'center' ? 0.625 : 0.44), margin = r.width * 0.02;
+      dialog.style.width = w + 'px';
+      dialog.style.left = (r.left + (side === 'center' ? (r.width - w) / 2 : side === 'right' ? r.width - w - margin : margin)) + 'px';
+      const d = dialog.getBoundingClientRect(), ox = box ? Math.min(d.right, r.left + box[2] * k + gap) - Math.max(d.left, r.left + box[0] * k - gap) : -1;
+      const oy = box ? Math.min(d.bottom, r.top + box[3] * k + gap) - Math.max(d.top, r.top + box[1] * k - gap) : -1;
+      const hit = ox > 0 && oy > 0 ? ox * oy : 0;
+      if (!best || hit < best.hit) best = { side, hit, w, left: dialog.style.left };
+      if (!hit) break;
+    }
+    dialog.style.width = best.w + 'px'; dialog.style.left = best.left; dialog.dataset.side = best.side;
+  }
 
   // These shots lean over the table, so the recruits are out of the picture.
   const OVER_TABLE = new Set(['board', 'polaroid', 'boardTeen', 'boardTurtle', 'boardTease']);
@@ -41,49 +97,116 @@
     }
   }
 
-  // Dossier photos on the cork, as fractions of the board.
-  const DOSSIERS = [['teen', 0.56, 0.06], ['turtle', 0.78, 0.06], ['ninja', 0.56, 0.48], ['mutant', 0.78, 0.48]];
+  // Dossier photos on the cork, as fractions of the board, each a little off true: [type, fx, fy, tilt in degrees, dx, dy].
+  const DOSSIERS = [['teen', 0.555, 0.055, -3.5, 2, 0], ['turtle', 0.775, 0.085, 2.5, 0, 3], ['ninja', 0.575, 0.47, 3, -3, 0], ['mutant', 0.785, 0.5, -2.5, 0, -2]];
 
-  function dossier(ctx, type, x, y, w, h) {
-    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(x, y, w, h);
-    const ix = x + w * 0.07, iy = y + h * 0.06, iw = w * 0.86, ih = h * 0.74;
+  // The same scatter every frame: a small seeded generator.
+  const seeded = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  // A pin: shadow, red head, glint.
+  function pin(ctx, x, y, r) {
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; dot(ctx, x + r * 0.45, y + r * 0.55, r);
+    ctx.fillStyle = '#b3201c'; dot(ctx, x, y, r);
+    ctx.fillStyle = '#ff8a73'; dot(ctx, x - r * 0.3, y - r * 0.3, r * 0.35);
+  }
+
+  // A strip of tape across a corner.
+  function tape(ctx, x, y, w, h, rot) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot * Math.PI / 180);
+    ctx.fillStyle = 'rgba(236,222,150,.78)'; ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(-w / 2, -h / 2, w, h * 0.3);
+    ctx.restore();
+  }
+
+  function dossier(ctx, type, x, y, w, h, tilt) {
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(tilt * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(3, 4, w, h);
+    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(0, 0, w, h);
+    const ix = w * 0.07, iy = h * 0.06, iw = w * 0.86, ih = h * 0.74;
     ctx.fillStyle = '#6d5a4c'; ctx.fillRect(ix, iy, iw, ih);
     ctx.save(); ctx.beginPath(); ctx.rect(ix, iy, iw, ih); ctx.clip();
     S.draw(ctx, type, 'idle', 0, ix + iw / 2, iy + ih * 1.02, ih * 0.98);
     ctx.restore();
-    ctx.fillStyle = '#c41e1e'; dot(ctx, x + w / 2, y + 2, Math.max(2, w * 0.05));
+    pin(ctx, w / 2, 3, Math.max(2.5, w * 0.045));
+    ctx.restore();
   }
 
-  // The board is live evidence on the painted cork: receipts, his notes, the dossiers.
+  // A curled receipt scrap: cream, torn along the bottom, with a few printed lines.
+  function scrap(ctx, x, y, w, h, rot, n) {
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(2, 3, w, h);
+    ctx.fillStyle = '#f1e6c8'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, 0); ctx.lineTo(w, h);
+    const teeth = 6; for (let i = teeth; i >= 0; i--) ctx.lineTo(w * i / teeth, h + (i % 2 ? 0 : 3));
+    ctx.closePath(); ctx.fill();
+    const edge = ctx.createLinearGradient(0, 0, w, 0); edge.addColorStop(0, 'rgba(90,60,20,.25)'); edge.addColorStop(0.15, 'rgba(90,60,20,0)'); edge.addColorStop(0.85, 'rgba(90,60,20,0)'); edge.addColorStop(1, 'rgba(90,60,20,.25)');
+    ctx.fillStyle = edge; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(60,45,25,.55)';
+    for (let i = 0; i < 4; i++) ctx.fillRect(w * 0.14, h * (0.16 + i * 0.19), w * (0.72 - ((n + i) % 3) * 0.15), Math.max(1, h * 0.05));
+    if (n % 3 === 0) { ctx.fillStyle = 'rgba(168,52,28,.22)'; dot(ctx, w * 0.7, h * 0.7, w * 0.16); }
+    pin(ctx, w / 2, 2, 2.4);
+    ctx.restore();
+  }
+
+  function sticky(ctx, x, y, w, h, rot, tone) {
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(2, 3, w, h);
+    ctx.fillStyle = tone ? '#ffd98a' : '#ffe66b'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(160,110,20,.18)'; ctx.fillRect(0, h * 0.82, w, h * 0.18);
+    ctx.fillStyle = 'rgba(80,50,10,.5)'; for (let i = 0; i < 3; i++) ctx.fillRect(w * 0.14, h * (0.2 + i * 0.2), w * (0.7 - i * 0.12), Math.max(1, h * 0.05));
+    tape(ctx, w / 2, 0, w * 0.45, h * 0.16, tone ? 4 : -3);
+    ctx.restore();
+  }
+
+  // Yarn from pin to pin with the sag of a real string.
+  function yarn(ctx, a, b, w) {
+    const sag = 10 + Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.16, mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 + sag;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = w + 1; ctx.beginPath(); ctx.moveTo(a[0] + 1, a[1] + 2); ctx.quadraticCurveTo(mx + 1, my + 2, b[0] + 1, b[1] + 2); ctx.stroke();
+    ctx.strokeStyle = '#c41e1e'; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.quadraticCurveTo(mx, my, b[0], b[1]); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,150,130,.55)'; ctx.lineWidth = Math.max(0.4, w * 0.3); ctx.beginPath(); ctx.moveTo(a[0], a[1] - 0.5); ctx.quadraticCurveTo(mx, my - 0.5, b[0], b[1] - 0.5); ctx.stroke();
+  }
+
+  // The board is live evidence on the painted cork: receipts, his notes, the dossiers, strung together with yarn.
   function board(ctx, x, y, w, h, hq) {
     if (!S.layer('hq/back')) {
       ctx.fillStyle = '#4a3020'; ctx.fillRect(x - w * 0.03, y - h * 0.04, w * 1.06, h * 1.08);
       ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
     }
+    const rnd = seeded(97), pins = [];
+    // Receipts overlap in a loose drift down the left of the cork.
     const n = Math.min(hq.receipts, 18);
     for (let i = 0; i < n; i++) {
-      ctx.fillStyle = '#fffef6';
-      ctx.fillRect(x + w * (0.04 + (i % 6) * 0.075), y + h * (0.06 + Math.floor(i / 6) * 0.2), w * 0.055, h * 0.15);
+      const col = i % 6, row = Math.floor(i / 6), rw = w * 0.07, rh = h * 0.17;
+      const rx = x + w * (0.03 + col * 0.072) + (rnd() - 0.5) * w * 0.03, ry = y + h * (0.05 + row * 0.2) + (rnd() - 0.5) * h * 0.05, rot = (rnd() - 0.5) * 16;
+      scrap(ctx, rx, ry, rw, rh, rot, i);
+      if (i % 4 === 1) pins.push([rx + rw / 2, ry + 3]);
     }
+    const notes = [];
     for (let i = 0; i < hq.notes; i++) {
-      ctx.fillStyle = '#ffe66b';
-      ctx.fillRect(x + w * (0.05 + i * 0.07), y + h * 0.72, w * 0.06, h * 0.17);
+      const nx = x + w * (0.05 + i * 0.066) + (rnd() - 0.5) * w * 0.02, ny = y + h * (0.7 + (i % 2) * 0.05 + (rnd() - 0.5) * 0.05), nr = (rnd() - 0.5) * 14;
+      sticky(ctx, nx, ny, w * 0.07, h * 0.17, nr, i % 2);
+      notes.push([nx + w * 0.035, ny + 2]);
     }
-    for (const [type, fx, fy] of DOSSIERS) dossier(ctx, type, x + w * fx, y + h * fy, w * 0.19, h * 0.38);
-    if (hq.notes > 1) {
-      ctx.strokeStyle = '#c41e1e'; ctx.lineWidth = Math.max(0.5, w * 0.005); ctx.beginPath();
-      for (let i = 0; i < hq.notes; i++) ctx.lineTo(x + w * (0.08 + i * 0.07), y + h * (i % 2 ? 0.72 : 0.76));
-      ctx.lineTo(x + w * 0.655, y + h * 0.1);
-      ctx.stroke();
-    }
+    const posts = [];
+    for (const [type, fx, fy, tilt, dx, dy] of DOSSIERS) { const px = x + w * fx + dx, py = y + h * fy + dy, pw = w * 0.19; dossier(ctx, type, px, py, pw, h * 0.38, tilt); posts.push([px + pw / 2, py + 3]); }
+    // Yarn: note to note along the bottom, then up to the dossiers, with sag.
+    const draw = chain => { for (let i = 1; i < chain.length; i++) yarn(ctx, chain[i - 1], chain[i], Math.max(0.8, w * 0.006)); };
+    if (hq.notes > 1) draw([...notes, posts[2], posts[3]]);
+    draw([...pins.slice(0, 3), posts[0], posts[1]]);
+    for (const k of [...notes, ...pins]) pin(ctx, k[0], k[1], 2.4);
     if (!hq.alewife) return;
     const px = x + w * 0.56, py = y + h * 0.08, pw = w * 0.38, ph = h * 0.62;
-    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(px, py, pw, ph);
-    const ix = px + pw * 0.06, iy = py + ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
+    ctx.save(); ctx.translate(px + pw / 2, py + ph / 2); ctx.rotate(-1.5 * Math.PI / 180); ctx.translate(-pw / 2, -ph / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(4, 5, pw, ph);
+    ctx.fillStyle = '#f7f4ea'; ctx.fillRect(0, 0, pw, ph);
+    const ix = pw * 0.06, iy = ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
     ctx.fillStyle = '#2a2230'; ctx.fillRect(ix, iy, iw, ih);
     const photo = S.layer('hq/alewife-polaroid');
     if (photo) { ctx.imageSmoothingEnabled = false; ctx.drawImage(photo, ix, iy, iw, ih); }
     else S.draw(ctx, 'alewife', 'idle', 0, ix + iw / 2, iy + ih, ih * 0.92) || placeholderAlewife(ctx, ix + iw / 2, iy + ih, ih * 0.9);
+    pin(ctx, pw / 2, 4, 5);
+    tape(ctx, pw * 0.1, 3, pw * 0.2, 12, -35);
+    ctx.restore();
   }
 
   function placeholderAlewife(ctx, x, foot, h) {
@@ -192,19 +315,22 @@
   }
 
   function typed({ parts }, n) {
-    let html = '';
+    let html = '', rest = '';
     for (const { t, bold } of parts) {
       const part = escape(t.slice(0, Math.max(0, n)));
       html += bold ? `<b>${part}</b>` : part;
+      rest += escape(t.slice(Math.max(0, n)));
       n -= t.length;
     }
-    return html;
+    // The unwritten rest is laid out but invisible, so the box does not grow as the line types.
+    return rest ? `${html}<span class="rest">${rest}</span>` : html;
   }
 
   // A card across the shot, Ocean's Eleven style, when a recruit is introduced.
-  function nameCard(ctx, [name, title], age) {
+  // It takes the side of the stage the introduced recruit is not standing on.
+  function nameCard(ctx, [name, title], age, right) {
     const slide = 1 - Math.min(1, age / 260) ** 3;
-    ctx.save(); ctx.translate(-560 * slide, 0);
+    ctx.save(); ctx.translate(right ? W - 560 + 560 * slide : -560 * slide, 0);
     ctx.fillStyle = 'rgba(16,14,36,0.92)'; ctx.fillRect(0, 54, 560, 112);
     ctx.fillStyle = '#ffd76a'; ctx.fillRect(0, 54, 560, 5); ctx.fillRect(0, 161, 560, 5);
     ctx.textAlign = 'left';
@@ -214,18 +340,20 @@
   }
 
   // Plays shots of lines over the canvas. A tap finishes the line, the next tap moves on.
-  function play(canvas, dialog, shots, view, onDone) {
+  function play(canvas, dialog, shots, view, done) {
+    let onDone = done;
     const ctx = canvas.getContext('2d'), A = root.PR_SOUND;
     let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9;
-    let script = null, shown = 0, full = false;
+    let script = null, shown = 0, full = false, box = null;
     const text = dialog.querySelector('.line'), name = dialog.querySelector('.who');
     const nameOf = who => C.SPEAKERS[who] || view.customer || 'Customer';
     const show = () => {
       const line = shots[s].lines[l];
       name.textContent = nameOf(line.who);
       script = spans(line.text); shown = 0; full = false;
-      text.innerHTML = ''; text.dataset.full = line.text.replace(/\*\*/g, '');
+      text.innerHTML = typed(script, 0); text.dataset.full = line.text.replace(/\*\*/g, '');
       dialog.classList.remove('hidden', 'done');
+      box = speakerBox(shots[s], line.who, view); dock(canvas, dialog, box);
       if (line.thump) { thumpAt = performance.now(); A.play('smash'); }
     };
     const type = now => {
@@ -240,11 +368,9 @@
     const frame = now => {
       if (stopped) return;
       const shot = shots[s], cam = CAMERAS[shot.comp] || CAMERAS.wide, t = Math.min(1, (now - start) / (cam.ms || 6000));
-      const eased = t * t * (3 - 2 * t);
-      const [x, y, z0] = cam.from.map((v, i) => v + (cam.to[i] - v) * eased);
+      const { x, y, z } = camAt(shot, t);
       type(now);
-      // Each new line punches in a little, and each new shot whips into place.
-      const punch = Math.max(0, 1 - (now - lineAt) / 220), z = z0 * (1 + 0.035 * punch * punch);
+      // Each new shot whips into place.
       const whip = Math.max(0, 1 - (now - cutAt) / 240) ** 2 * 260;
       const thump = Math.max(0, 1 - (now - thumpAt) / THUMP_MS) ** 2 * 26;
       ctx.save();
@@ -256,14 +382,17 @@
       if (shot.comp === 'door') door(ctx, view, now);
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
-        ctx.translate(-Math.max(W / 2 / z, Math.min(W - W / 2 / z, x)) + whip / z, -Math.max(H / 2 / z, Math.min(H - H / 2 / z, y)));
+        ctx.translate(-x + Math.round(whip / z), -y);
         room(ctx, view.hq, now, view);
       }
       ctx.restore();
       const edge = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 800);
       edge.addColorStop(0, 'rgba(0,0,0,0)'); edge.addColorStop(1, 'rgba(0,0,0,0.6)');
       ctx.fillStyle = edge; ctx.fillRect(0, 0, W, H);
-      if (shot.card) nameCard(ctx, shot.card, now - cutAt);
+      if (shot.card) {
+        const who = standing(shot.comp, view), c = who && camAt(shot, t), onLeft = who && STAGE_CENTER[0] + (who.x - c.x) * c.z < W / 2;
+        nameCard(ctx, shot.card, now - cutAt, !!onLeft);
+      }
       raf = requestAnimationFrame(frame);
     };
     const advance = () => {
@@ -279,6 +408,10 @@
       show();
     };
     dialog.onclick = advance;
+    const relayout = () => { if (!stopped) dock(canvas, dialog, box); };
+    addEventListener('resize', relayout);
+    const finish = onDone;
+    onDone = () => { removeEventListener('resize', relayout); finish(); };
     show();
     raf = requestAnimationFrame(frame);
   }
