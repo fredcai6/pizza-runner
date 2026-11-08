@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.rc_A]
+refs = ["characters/recruit-ny/references/current.png", "paper/style_pm_sq.png"]
+prompt = "Full body character art for a 2D platformer, the whole figure visible head to sneakers, standing and facing slightly right. The character is the plain cheese version of the New York pizza slice mascot: a triangular slice with thin crust along the top, smooth golden melted cheese and NO pepperoni and no other toppings at all, a face on the cheese, thin arms and legs, white gloves, red sneakers. Paper Mario style papercraft standee: the whole character is a flat cut-out of printed card, a thick white paper border all around the silhouette like a sticker, a visible fold crease line across the body, a slightly curled corner, a visible paper fibre texture and soft matte printing, simple bold shapes, flat colours. The face is a Charlie the Unicorn style flat deadpan face: two small plain black dot eyes, no eyebrows, a small flat line for a mouth, almost no detail. Gentle soft shading with a little highlight and a soft shade under each fold, still clean and flat. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.rc_B]
+refs = ["characters/slice-ny/references/paper-master.png", "paper/style_pm_sq.png"]
+prompt = "Full body character art for a 2D platformer, the whole figure visible head to sneakers, standing and facing slightly right. The character is the plain cheese version of the New York pizza slice mascot: a triangular slice with thin crust along the top, smooth golden melted cheese and NO pepperoni and no other toppings at all, a face on the cheese, thin arms and legs, white gloves, red sneakers. Image 1 is the finished pepperoni version of the same family: same material, border, shading, face and proportions, but this one is a plain cheese slice with no pepperoni. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

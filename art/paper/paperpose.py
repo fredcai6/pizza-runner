@@ -22,6 +22,17 @@ from forge.generate import ROOT  # noqa: E402
 from forge.pixelize import despeckle, to_sprite  # noqa: E402
 from forge.posekit import Figure  # noqa: E402
 
+# forge.poseguide starts ComfyUI from ROOT/comfy, which is only right when the project is sprite-forge itself
+_popen = pg.subprocess.Popen
+
+
+def _start(cmd, *a, **k):
+    if str(cmd[0]).endswith("comfy/run.sh"):
+        cmd = [Path.home() / "projects/sprite-forge/comfy/run.sh", *cmd[1:]]
+    return _popen(cmd, *a, **k)
+
+
+pg.subprocess.Popen = _start
 TRACK = "qwen-pose-paper"
 pg.TRACKS[TRACK] = dict(pose="openpose", stages=[dict(model="qwen-edit", refs=["master", "pose"], prompt=(
     "Image 1 is the character, a flat paper standee. Image 2 is a pose skeleton for a side view. Redraw the exact same character from image 1, "
