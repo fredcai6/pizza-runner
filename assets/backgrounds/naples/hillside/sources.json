@@ -1,43 +1,153 @@
 {
  "rev": {
-  "sha": "2fd74aca829a651ac35920f4851fa2e2979ba498",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "hillside/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 1,
-   "seam_start_x": 204
+   "run": "paper/naples-1",
+   "job": 236,
+   "model": "qwen-edit",
+   "shot": "hillside_far",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.5,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 84,
+   "dark_lifted": true,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
-   "run": "hillside/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 4,
-   "shifted_by": -50,
-   "seam_start_x": 103
+   "run": "paper/naples-2",
+   "job": 241,
+   "model": "qwen-edit",
+   "shot": "hillside_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 22.9,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 110,
+   "shifted_by": -110,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "near": {
-   "run": "hillside/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 96
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "bush",
+     4,
+     {
+      "colors": [
+       "sage",
+       "green",
+       "mint"
+      ],
+      "w": [
+       110,
+       200
+      ],
+      "h": [
+       54,
+       84
+      ]
+     }
+    ],
+    [
+     "tuft",
+     5,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ],
+    [
+     "flower",
+     5,
+     {
+      "colors": [
+       "pink",
+       "butter",
+       "coral",
+       "lilac"
+      ],
+      "h": [
+       34,
+       58
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "hillside/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "running_bond in paper_build.py (bricks)",
+   "slab": [
+    32,
+    20
+   ],
+   "tones": [
+    [
+     228,
+     190,
+     170
+    ],
+    [
+     220,
+     182,
+     162
+    ],
+    [
+     234,
+     198,
+     178
+    ]
+   ],
+   "cut_line": [
+    190,
+    146,
+    130
+   ]
   },
   "door": {
-   "run": "hillside/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 3
+   "run": "paper/naples-1",
+   "job": 236,
+   "model": "qwen-edit",
+   "shot": "hillside_door",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 22.8,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

@@ -1,43 +1,168 @@
 {
  "rev": {
-  "sha": "4d761747244052940b92f529139362abf544fc39",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "georgetown/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 1,
-   "seam_start_x": 44
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "georgetown_far",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.3,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 34,
+   "dark_lifted": true,
+   "erased_text_boxes": []
   },
   "mid": {
-   "run": "georgetown/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 2,
-   "shifted_by": -60,
-   "seam_start_x": 58
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "georgetown_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 22.1,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 69,
+   "shifted_by": -98,
+   "erased_text_boxes": []
   },
   "near": {
-   "run": "georgetown/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 101
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "planter",
+     3,
+     {
+      "colors": [
+       "green",
+       "rose"
+      ],
+      "box": "terracotta",
+      "w": [
+       70,
+       100
+      ],
+      "h": [
+       72,
+       96
+      ]
+     }
+    ],
+    [
+     "bush",
+     3,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       110,
+       190
+      ],
+      "h": [
+       54,
+       84
+      ]
+     }
+    ],
+    [
+     "tuft",
+     4,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ],
+    [
+     "flower",
+     4,
+     {
+      "colors": [
+       "butter",
+       "rose",
+       "lilac"
+      ],
+      "h": [
+       34,
+       56
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "georgetown/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "running_bond in paper_build.py (bricks)",
+   "slab": [
+    32,
+    20
+   ],
+   "tones": [
+    [
+     212,
+     160,
+     140
+    ],
+    [
+     204,
+     152,
+     134
+    ],
+    [
+     220,
+     170,
+     150
+    ]
+   ],
+   "cut_line": [
+    166,
+    116,
+    102
+   ]
   },
   "door": {
-   "run": "georgetown/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "georgetown_door",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 24.1,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

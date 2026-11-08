@@ -1,43 +1,162 @@
 {
  "rev": {
-  "sha": "328b196a24dae5bbb3c4c3506781e61c75ecf5e4",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "downtown/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 1,
-   "seam_start_x": 117
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "downtown_far",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.8,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 27,
+   "dark_lifted": true,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
-   "run": "downtown/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 3,
-   "shifted_by": -55,
-   "seam_start_x": 116
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "downtown_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 22.1,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 187,
+   "shifted_by": -119,
+   "erased_text_boxes": [],
+   "cleared_boxes": [
+    [
+     290,
+     0,
+     400,
+     296
+    ]
+   ]
   },
   "near": {
-   "run": "downtown/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 2,
-   "seam_start_x": 134
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "planter",
+     3,
+     {
+      "colors": [
+       "green",
+       "coral"
+      ],
+      "box": "sand",
+      "w": [
+       70,
+       100
+      ],
+      "h": [
+       72,
+       96
+      ]
+     }
+    ],
+    [
+     "bush",
+     2,
+     {
+      "colors": [
+       "green",
+       "mint"
+      ],
+      "w": [
+       110,
+       180
+      ],
+      "h": [
+       54,
+       80
+      ]
+     }
+    ],
+    [
+     "tuft",
+     5,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "downtown/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 4
+   "procedural": "running_bond in paper_build.py (slabs)",
+   "slab": [
+    64,
+    40
+   ],
+   "tones": [
+    [
+     222,
+     210,
+     190
+    ],
+    [
+     214,
+     202,
+     182
+    ],
+    [
+     228,
+     216,
+     196
+    ]
+   ],
+   "cut_line": [
+    184,
+    170,
+    148
+   ]
   },
   "door": {
-   "run": "downtown/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "downtown_door",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 24.3,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

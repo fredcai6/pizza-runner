@@ -1,0 +1,7 @@
+run = "paper/naples-2"
+seeds = [1, 2, 3, 4]
+refs = ["paper/style_pm_sq.png"]
+
+[shots.hillside_mid]
+input = "/mnt/data/sprite-forge/paper-rest/in/hillside-mid-flat-ov-half.png"
+prompt = "Image 1 is a strip of street buildings on flat magenta. Rebuild it as cut paper art in the material of image 2: every building is one flat piece of coloured card, windows and doors are plain flat rectangles of a darker tone of the same card, shaded with just one soft tone. Soft pastel pink, mint, butter yellow, sky blue and coral colours. Keep the stepped hillside houses with terracotta tiled roofs, plain balconies with plain railings, and outdoor stone stairs climbing between them. There are no plants on balconies, no flower pots and no potted plants anywhere; the only greenery is a few flat pale-green round paper trees behind the houses. Faint paper grain, gently cut edges. No pen outlines, no line art, no brick or stone texture, no black, no white border, no cast shadows, no silhouettes. No bicycles, scooters, cars, barrels, crates, hydrants, flower pots or other small props. Keep the same layout, building positions and skyline shape. The flat magenta background stays perfectly flat magenta, including the strip along the bottom. No text, letters, numbers, logos, signs or lettering anywhere; signs and flags are blank. Make every shape bold, simple and chunky like scissor cuts from card, with few large plain windows and no fine detail."

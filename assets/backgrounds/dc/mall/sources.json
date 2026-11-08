@@ -1,43 +1,151 @@
 {
  "rev": {
-  "sha": "4d761747244052940b92f529139362abf544fc39",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "mall/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 3,
-   "seam_start_x": 196
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "mall_far",
+   "seed": 2,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.3,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 170,
+   "dark_lifted": true,
+   "erased_text_boxes": []
   },
   "mid": {
-   "run": "mall/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 5,
-   "shifted_by": -90,
-   "seam_start_x": 180
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "mall_mid",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.5,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 80,
+   "shifted_by": -103,
+   "erased_text_boxes": []
   },
   "near": {
-   "run": "mall/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 117
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "bush",
+     3,
+     {
+      "colors": [
+       "green",
+       "sage",
+       "mint"
+      ],
+      "w": [
+       120,
+       210
+      ],
+      "h": [
+       54,
+       84
+      ]
+     }
+    ],
+    [
+     "tuft",
+     8,
+     {
+      "colors": [
+       "sage",
+       "green",
+       "mint"
+      ],
+      "w": [
+       40,
+       72
+      ],
+      "h": [
+       26,
+       46
+      ]
+     }
+    ],
+    [
+     "flower",
+     4,
+     {
+      "colors": [
+       "butter",
+       "lilac",
+       "peach"
+      ],
+      "h": [
+       34,
+       56
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "mall/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "running_bond in paper_build.py (slabs)",
+   "slab": [
+    128,
+    60
+   ],
+   "tones": [
+    [
+     226,
+     222,
+     196
+    ],
+    [
+     220,
+     216,
+     190
+    ],
+    [
+     232,
+     228,
+     204
+    ]
+   ],
+   "cut_line": [
+    194,
+    188,
+    160
+   ]
   },
   "door": {
-   "run": "mall/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/dc-1",
+   "job": 235,
+   "model": "qwen-edit",
+   "shot": "mall_door",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.2,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }
