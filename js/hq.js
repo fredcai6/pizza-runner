@@ -21,15 +21,24 @@
     naples: { from: [900, 413, 1], to: [1060, 413, 3], at: 0.1, ms: 4000 },
   };
   const STAGE_CENTER = [W / 2, H / 2];
+  // The same shots on Tommy's painted board room (paintedBoard below), which has its own 1280x720 space.
+  const BOARD_CAMERAS = {
+    board: { from: [640, 360, 1], to: [700, 300, 1.25], ms: 9000 },
+    boardTeen: { from: [455, 215, 2.4], to: [460, 205, 2.6] },
+    boardTurtle: { from: [470, 380, 2.4], to: [475, 370, 2.6] },
+    polaroid: { from: [930, 280, 1.6], to: [930, 270, 1.75] },
+  };
+  const cameraOf = comp => (paintedReady() && BOARD_CAMERAS[comp]) || CAMERAS[comp] || CAMERAS.wide;
 
   // Painted cutscene pictures (assets/cutscenes/NAME.webp). A shot with `pic` shows one instead of the room and pans across it:
   // pan = [[x, y, zoom], [x, y, zoom]], x and y the frame's centre as fractions of the picture, zoom 1 = the picture just covers
   // the frame. `ms` is how long the pan takes; it eases, then holds. `card: 'right'` puts a name card on the right.
   const PICS = {};
-  function pic(name) {
-    if (!PICS[name]) { PICS[name] = new Image(); PICS[name].src = `assets/cutscenes/${name}.webp`; }
-    return PICS[name];
+  function still(src) {
+    if (!PICS[src]) { PICS[src] = new Image(); PICS[src].src = src; }
+    return PICS[src];
   }
+  const pic = name => still(`assets/cutscenes/${name}.webp`);
   function painting(ctx, shot, t) {
     const img = pic(shot.pic);
     if (!img.complete || !img.naturalWidth) return;
@@ -45,7 +54,7 @@
 
   // Where the camera is, in room units, a fraction t through a shot.
   function camAt(shot, t) {
-    const cam = CAMERAS[shot.comp] || CAMERAS.wide, e = t * t * (3 - 2 * t);
+    const cam = cameraOf(shot.comp), e = t * t * (3 - 2 * t);
     const z = t < (cam.at == null ? 0.5 : cam.at) ? cam.from[2] : cam.to[2];
     const lerp = i => cam.from[i] + (cam.to[i] - cam.from[i]) * e;
     return { z, x: Math.round(Math.max(W / 2 / z, Math.min(W - W / 2 / z, lerp(0)))), y: Math.round(Math.max(H / 2 / z, Math.min(H - H / 2 / z, lerp(1)))) };
@@ -67,6 +76,7 @@
       const at = who === 'customer' || who === 'alewife' ? { x: 760, foot: 520, h: final ? 340 : 300 } : { x: 380, foot: 520, h: C.STYLES[sty].height };
       return pad(at, 1, 640, 360, 1);
     }
+    if (OVER_TABLE.has(shot.comp) && paintedReady()) return null;
     const at = OVER_TABLE.has(shot.comp) && who !== 'old' ? null : standing(who, view);
     if (!at) return null;
     const a = camAt(shot, 0), b = camAt(shot, 1), r1 = pad(at, a.z, a.x, a.y, a.z), r2 = pad(at, b.z, b.x, b.y, b.z);
@@ -231,6 +241,80 @@
     ctx.restore();
   }
 
+  // Tommy's board room (art/cutscenes/board): the painted room, the live evidence pinned on its cork, Dayold at his chair, and the
+  // recruits from behind, cut from the same painting, drawn last so he sits behind them. Room space is 1280x720.
+  const BOARD_ART = ['room', 'room-front', 'dayold', 'polaroid-teen', 'polaroid-turtle', 'order-1', 'order-2'];
+  const paintedReady = () => BOARD_ART.every(n => { const i = pic(`board/${n}`); return i.complete && i.naturalWidth; });
+  // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; the rest go up once met.
+  const SUSPECTS = [['teen', 450, 205, 210, -4], ['turtle', 462, 378, 210, 3], ['ninja', 668, 196, 160, 3], ['mutant', 676, 346, 160, -3]];
+  // A cut-out pinned on the cork. Returns where its pin goes.
+  function stuck(ctx, img, cx, cy, w, tilt) {
+    const h = w * img.naturalHeight / img.naturalWidth, r = tilt * Math.PI / 180;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(r);
+    ctx.shadowColor = 'rgba(20,8,0,.45)'; ctx.shadowBlur = 6; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 4;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+    return [cx + Math.sin(r) * h * 0.42, cy - Math.cos(r) * h * 0.42];
+  }
+  // A suspect Tommy has not painted a Polaroid for yet: its photo in a paper frame.
+  function framed(ctx, type, cx, cy, w, tilt) {
+    const h = w * 0.86, photo = still(`assets/polaroids/${type}.png`);
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = 'rgba(20,8,0,.35)'; ctx.fillRect(3, 5, w, h);
+    ctx.fillStyle = '#efe6d2'; ctx.fillRect(0, 0, w, h);
+    const ix = w * 0.07, iy = w * 0.07, iw = w * 0.86, ih = h * 0.68;
+    ctx.fillStyle = '#4b3a30'; ctx.fillRect(ix, iy, iw, ih);
+    if (photo.complete && photo.naturalWidth) ctx.drawImage(photo, ix, iy, iw, ih);
+    else { ctx.save(); ctx.beginPath(); ctx.rect(ix, iy, iw, ih); ctx.clip(); S.draw(ctx, type, 'idle', 0, ix + iw / 2, iy + ih * 1.02, ih * 0.98); ctx.restore(); }
+    ctx.restore();
+    return [cx, cy - h * 0.42];
+  }
+  function paintedBoard(ctx, hq, ms, view) {
+    const art = n => pic(`board/${n}`);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(art('room'), 0, 0, W, H);
+    const rnd = seeded(97), pins = [], posts = {};
+    // Receipts drift across the right of the cork: three from his tapped line, then the player's.
+    const n = Math.min(hq.receipts + 3, 18);
+    for (let i = 0; i < n; i++) {
+      const col = i % 6, row = Math.floor(i / 6);
+      const at = stuck(ctx, art(`order-${1 + (i % 2)}`), 806 + col * 72 + (rnd() - 0.5) * 22, 168 + row * 92 + (rnd() - 0.5) * 18, 88, (rnd() - 0.5) * 16);
+      if (i % 3 === 0) pins.push(at);
+    }
+    for (const [type, cx, cy, w, tilt] of SUSPECTS) {
+      if (!(hq.known || ['teen', 'turtle']).includes(type)) continue;
+      posts[type] = type === 'teen' || type === 'turtle' ? stuck(ctx, art(`polaroid-${type}`), cx, cy, w, tilt) : framed(ctx, type, cx, cy, w, tilt);
+    }
+    // His notes along the foot of the cork. The first one (WHO IS THE ORDER?) is painted on.
+    const notes = [];
+    for (let i = 1; i < hq.notes; i++) {
+      const nx = 610 + (i - 1) * 74 + (rnd() - 0.5) * 10, ny = 418 + (rnd() - 0.5) * 12;
+      sticky(ctx, nx, ny, 52, 46, (rnd() - 0.5) * 14, i % 2);
+      notes.push([nx + 26, ny + 2]);
+    }
+    const string = chain => { for (let i = 1; i < chain.length; i++) yarn(ctx, chain[i - 1], chain[i], 2.2); };
+    string([...pins.slice(0, 3).reverse(), posts.turtle, posts.teen]);
+    if (notes.length > 1) string([...notes, posts.mutant || posts.turtle, posts.ninja || posts.teen]);
+    for (const k of [...notes, ...pins, ...Object.values(posts)]) pin(ctx, k[0], k[1], 4);
+    if (hq.alewife) {
+      const pw = 380, ph = 300, photo = S.layer('hq/alewife-polaroid'), ix = pw * 0.06, iy = ph * 0.05, iw = pw * 0.88, ih = ph * 0.74;
+      ctx.save(); ctx.translate(930, 280); ctx.rotate(-1.5 * Math.PI / 180); ctx.translate(-pw / 2, -ph / 2);
+      ctx.fillStyle = 'rgba(20,8,0,.4)'; ctx.fillRect(5, 7, pw, ph);
+      ctx.fillStyle = '#f7f4ea'; ctx.fillRect(0, 0, pw, ph);
+      ctx.fillStyle = '#2a2230'; ctx.fillRect(ix, iy, iw, ih);
+      if (photo) ctx.drawImage(photo, ix, iy, iw, ih);
+      pin(ctx, pw / 2, 6, 6); tape(ctx, pw * 0.1, 3, pw * 0.2, 14, -35);
+      ctx.restore();
+    }
+    // Dayold at his chair, rocking a little while he talks.
+    const d = art('dayold'), dw = 340, dh = dw * d.naturalHeight / d.naturalWidth;
+    const bob = view.mood === 'talk' ? Math.sin(ms / 110) * 3 : Math.sin(ms / 900) * 1.5;
+    ctx.drawImage(d, -6, 538 - dh + bob, dw, dh);
+    ctx.drawImage(art('room-front'), 0, 0, W, H);
+    ctx.restore();
+  }
+
   function placeholderAlewife(ctx, x, foot, h) {
     ctx.fillStyle = '#d9a37c'; dot(ctx, x, foot - h * 0.66, h * 0.2);
     ctx.fillStyle = '#3e2c55'; ctx.fillRect(x - h * 0.24, foot - h * 0.46, h * 0.48, h * 0.46);
@@ -371,6 +455,7 @@
     let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9;
     let script = null, shown = 0, full = false, box = null;
     shots.forEach(sh => sh.pic && pic(sh.pic));
+    BOARD_ART.forEach(n => pic(`board/${n}`));
     const text = dialog.querySelector('.line'), name = dialog.querySelector('.who');
     const nameOf = who => C.SPEAKERS[who] || view.customer || 'Customer';
     const show = () => {
@@ -393,7 +478,7 @@
     };
     const frame = now => {
       if (stopped) return;
-      const shot = shots[s], cam = CAMERAS[shot.comp] || CAMERAS.wide, t = Math.min(1, (now - start) / (shot.ms || cam.ms || 6000));
+      const shot = shots[s], cam = cameraOf(shot.comp), t = Math.min(1, (now - start) / (shot.ms || cam.ms || 6000));
       const { x, y, z } = camAt(shot, t);
       type(now);
       // Each new shot whips into place.
@@ -410,7 +495,8 @@
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
         ctx.translate(-x + Math.round(whip / z), -y);
-        room(ctx, view.hq, now, view);
+        if (OVER_TABLE.has(shot.comp) && paintedReady()) paintedBoard(ctx, view.hq, now, view);
+        else room(ctx, view.hq, now, view);
       }
       ctx.restore();
       const edge = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 800);

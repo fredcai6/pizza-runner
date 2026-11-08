@@ -118,3 +118,6 @@ on Contessa and Dayold; a bold brown outline and soft shading inside the white b
 - A rig whose body rides above the frame: lower `[gait] hip` (the body is placed so the hip sits a leg above the ground).
 - Cutscenes: Tommy paints them; `assets/cutscenes/NAME.webp`, shown by a `pic` shot with an eased `pan` (js/hq.js). The corkboard stays procedural.
 - Rig limbs are the sheets' dark brown (`[limb]` in each `rig/run.toml`); the rig runs without a bob because the master fills the frame height.
+- The corkboard shots (`board`, `boardTeen`, `boardTurtle`, `polaroid`) are Tommy's board room with live layers on it (`paintedBoard` in
+  js/hq.js; layers prepared by `art/cutscenes/board/build.py`): receipts, suspect Polaroids (teen and turtle are his; ninja and mutant use the
+  old photos in a paper frame until he paints them, and go up once met), notes, yarn, the final photo, Dayold, and the recruits in front.

@@ -395,6 +395,8 @@
       receipts: camp.receipts.length,
       notes: C.THEORY.filter(t => t.from <= camp.cityIndex).length,
       alewife: camp.phase === 'ending',
+      // Suspects on the board: teens and turtles from the start, the rest once met.
+      known: Object.keys(C.ENEMIES).filter(t => t === 'teen' || t === 'turtle' || Object.keys(camp.seen || {}).some(k => k.startsWith(`${t}.`))),
     };
   }
 
