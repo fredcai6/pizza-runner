@@ -1,0 +1,218 @@
+{
+ "slice_A/klein/1": {
+  "verdict": "keep",
+  "label": "A: grotesque 1 / shadow 1 / halftone 0",
+  "axes": "grotesque 1 / shadow 1 / halftone 0 (the safe one)",
+  "read": "The safe baseline. Reads as the current character with a hard black ground shadow; barely grotesque, barely noir. Works at 124 px, but it is not the direction Tommy asked for.",
+  "note": ""
+ },
+ "slice_B/klein/1": {
+  "verdict": "keep",
+  "label": "B: grotesque 2 / shadow 2 / halftone 0",
+  "axes": "grotesque 2 / shadow 2 / halftone 0",
+  "read": "Droopy limbs, crooked yellow teeth and a veiny eye survive at 124 px as a face that is clearly 'wrong'. The shadow went onto the backdrop and the floor, not onto the figure, so it is grotesque with almost no noir.",
+  "note": ""
+ },
+ "slice_C/klein/1": {
+  "verdict": "keep",
+  "label": "C: grotesque 2 / shadow 3 / halftone 1",
+  "axes": "grotesque 2 / shadow 3 / halftone 1",
+  "read": "Same as B, a little muddier. Klein ignores 'shadow blocks on the body' and only lights the figure flat. Noir comes out as a floor shadow.",
+  "note": ""
+ },
+ "slice_D/klein/1": {
+  "verdict": "keep",
+  "label": "D: grotesque 3 / shadow 2 / halftone 0",
+  "axes": "grotesque 3 / shadow 2 / halftone 0, style ref: Real Monsters",
+  "read": "Style ref Real Monsters pushes the cheese to a sickly pale yellow with a lumpy face, and this one holds together. Colour is a step off the game's cheese gold (#f5b82a): fixable in the palette stage. Good at 2x, a little flat at 1x.",
+  "note": ""
+ },
+ "slice_E/klein/1": {
+  "verdict": "keep",
+  "label": "E: grotesque 3 / shadow 3 / halftone 2",
+  "axes": "grotesque 3 / shadow 3 / halftone 2, style ref: Real Monsters (slice) or Sin City (customer)",
+  "read": "Similar to D, with a slightly heavier brow and hatching. Shadow is still on the floor. Safe but not bold.",
+  "note": ""
+ },
+ "slice_F/klein/1": {
+  "verdict": "keep",
+  "label": "F: grotesque 3 / shadow 3 / halftone 3",
+  "axes": "grotesque 3 / shadow 3 / halftone 3, style ref: Rocko concept (slice) or Sin City (customer)",
+  "read": "Most grotesque of the Klein set, the face is a mess in a good way. The lower arms lost their gloves (cream stumps): a pipeline reject unless fixed.",
+  "note": ""
+ },
+ "slice_A/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "A: grotesque 1 / shadow 1 / halftone 0",
+  "axes": "grotesque 1 / shadow 1 / halftone 0 (the safe one)",
+  "read": "Qwen already pushes the grin and the red eyes further than Klein on the safest settings. Keeps the pixel-painted look of the master, so it sits in the current game most easily.",
+  "note": ""
+ },
+ "slice_B/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "B: grotesque 2 / shadow 2 / halftone 0",
+  "axes": "grotesque 2 / shadow 2 / halftone 0",
+  "read": "Fanged grin, bulging red-veined eyes, soft cast shadow behind. Grotesque and still clearly Vinny. One of the best at 124 px because the face has big, high-contrast shapes.",
+  "note": ""
+ },
+ "slice_C/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "C: grotesque 2 / shadow 3 / halftone 1",
+  "axes": "grotesque 2 / shadow 3 / halftone 1",
+  "read": "The closest to what was asked: a solid violet-black block falls across the crust and brow, the lit face stays readable (one eye, fanged grin), and it holds at 124 px and in the street frame. Risk: the block took one eye on this seed, and it is luck rather than control, so it will not repeat on demand.",
+  "note": ""
+ },
+ "slice_D/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "D: grotesque 3 / shadow 2 / halftone 0",
+  "axes": "grotesque 3 / shadow 2 / halftone 0, style ref: Real Monsters",
+  "read": "The Real Monsters style ref gives a drooling tongue, ruffled crust, thin noodle limbs: the best grotesque. It reads at 1x because the tongue and teeth are large flat shapes. Shadow is still a floor shadow, no blocks on the body.",
+  "note": ""
+ },
+ "slice_E/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "E: grotesque 3 / shadow 3 / halftone 2",
+  "axes": "grotesque 3 / shadow 3 / halftone 2, style ref: Real Monsters (slice) or Sin City (customer)",
+  "read": "D with a purple backdrop and more hatching on the cheese; the face is the strongest of the set, with big veiny eyes, a spiralling tongue and a hard shadow on the ground. Halftone is invisible at 124 px.",
+  "note": ""
+ },
+ "slice_F/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "F: grotesque 3 / shadow 3 / halftone 3",
+  "axes": "grotesque 3 / shadow 3 / halftone 3, style ref: Rocko concept (slice) or Sin City (customer)",
+  "read": "Most extreme: gloves on the wrong side, wobbly arms. At game size the dots disappear and the cheese becomes noise. Overshoots on faces for a hero.",
+  "note": ""
+ },
+ "cust_A/klein/1": {
+  "verdict": "keep",
+  "label": "A: grotesque 1 / shadow 1 / halftone 0",
+  "axes": "grotesque 1 / shadow 1 / halftone 0 (the safe one)",
+  "read": "Close to the current art, with a harder jaw. Safe baseline. Reads at 130 px but is plain.",
+  "note": ""
+ },
+ "cust_B/klein/1": {
+  "verdict": "keep",
+  "label": "B: grotesque 2 / shadow 2 / halftone 0",
+  "axes": "grotesque 2 / shadow 2 / halftone 0",
+  "read": "Veiny red eyes, flying sweat, big yelling mouth. The expression survives down to 130 px. Shadow is a cast shape on the backdrop behind her, not on her.",
+  "note": ""
+ },
+ "cust_C/klein/1": {
+  "verdict": "keep",
+  "label": "C: grotesque 2 / shadow 3 / halftone 1",
+  "axes": "grotesque 2 / shadow 3 / halftone 1",
+  "read": "Wider eyes, more teeth. Reads as 'screaming' at 2x. The pinstripes fall to noise at 1x.",
+  "note": ""
+ },
+ "cust_D/klein/1": {
+  "verdict": "drop",
+  "label": "D: grotesque 3 / shadow 2 / halftone 0",
+  "axes": "grotesque 3 / shadow 2 / halftone 0, style ref: Real Monsters",
+  "read": "",
+  "note": "extra dangling arm at her right hip on both seeds"
+ },
+ "cust_E/klein/1": {
+  "verdict": "keep",
+  "label": "E: grotesque 3 / shadow 3 / halftone 2",
+  "axes": "grotesque 3 / shadow 3 / halftone 2, style ref: Real Monsters (slice) or Sin City (customer)",
+  "read": "Strongest face of the Klein set: the whites of the eyes and the teeth stay readable. The ink-black outline is already thick. Shadow on the figure is a soft darkening, not a hard block.",
+  "note": ""
+ },
+ "cust_F/klein/1": {
+  "verdict": "keep",
+  "label": "F: grotesque 3 / shadow 3 / halftone 3",
+  "axes": "grotesque 3 / shadow 3 / halftone 3, style ref: Rocko concept (slice) or Sin City (customer)",
+  "read": "E with yellow hair highlights and heavier lines. About the same, a little more noisy.",
+  "note": ""
+ },
+ "cust_A/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "A: grotesque 1 / shadow 1 / halftone 0",
+  "axes": "grotesque 1 / shadow 1 / halftone 0 (the safe one)",
+  "read": "Pixel-painted, close to the current customer. A black floor shadow reaches left, which has to be cropped before it ships.",
+  "note": ""
+ },
+ "cust_B/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "B: grotesque 2 / shadow 2 / halftone 0",
+  "axes": "grotesque 2 / shadow 2 / halftone 0",
+  "read": "Magenta gap between the legs leaks after keying (cleaned here). Face reads, but the pinstripe becomes dotted noise at 130 px.",
+  "note": ""
+ },
+ "cust_C/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "C: grotesque 2 / shadow 3 / halftone 1",
+  "axes": "grotesque 2 / shadow 3 / halftone 1",
+  "read": "Yellow face, bulging eyes, very grotesque; the face has the wrong skin tone for a pipeline that wants a stable palette.",
+  "note": ""
+ },
+ "cust_D/qwen-edit/1": {
+  "verdict": "drop",
+  "label": "D: grotesque 3 / shadow 2 / halftone 0",
+  "axes": "grotesque 3 / shadow 2 / halftone 0, style ref: Real Monsters",
+  "read": "",
+  "note": "spotlight cone in the backdrop merges with the figure when keyed, on both seeds"
+ },
+ "cust_E/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "E: grotesque 3 / shadow 3 / halftone 2",
+  "axes": "grotesque 3 / shadow 3 / halftone 2, style ref: Real Monsters (slice) or Sin City (customer)",
+  "read": "Bloodshot eyes with veins, spit, a huge scream. The most character of the set, but pinstripes plus eye detail are very busy at 130 px.",
+  "note": ""
+ },
+ "cust_F/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "F: grotesque 3 / shadow 3 / halftone 3",
+  "axes": "grotesque 3 / shadow 3 / halftone 3, style ref: Rocko concept (slice) or Sin City (customer)",
+  "read": "E with more spit; the same strengths and noise.",
+  "note": ""
+ },
+ "slice_N1/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "N1: code shadow, soft terminator",
+  "axes": "grotesque from base / shadow 1 added in code / halftone 0 (base slice_D qwen-edit seed 1)",
+  "base": "slice_D",
+  "noir": 1,
+  "read": "A shadow on the far side of the figure as one flat violet-black block with a hard edge. The face stays lit and readable at 124/130 px. This is the safest way to get Tommy's hard shadow: it is a post pass, so every character in the cast would get the same one."
+ },
+ "cust_N1/klein/1": {
+  "verdict": "keep",
+  "label": "N1: code shadow, soft terminator",
+  "axes": "grotesque from base / shadow 1 added in code / halftone 0 (base cust_E klein seed 1)",
+  "base": "cust_E",
+  "noir": 1,
+  "read": "A shadow on the far side of the figure as one flat violet-black block with a hard edge. The face stays lit and readable at 124/130 px. This is the safest way to get Tommy's hard shadow: it is a post pass, so every character in the cast would get the same one."
+ },
+ "slice_N2/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "N2: code shadow, hard terminator + dots",
+  "axes": "grotesque from base / shadow 2 added in code / halftone 1 (base slice_D qwen-edit seed 1)",
+  "base": "slice_D",
+  "noir": 2,
+  "read": "Harder and larger block with a 2 px dot dither along the edge. The dots survive only as a texture at 2x. The shadow now takes a bite of the face, so the light angle would need to be set per character."
+ },
+ "cust_N2/klein/1": {
+  "verdict": "keep",
+  "label": "N2: code shadow, hard terminator + dots",
+  "axes": "grotesque from base / shadow 2 added in code / halftone 1 (base cust_E klein seed 1)",
+  "base": "cust_E",
+  "noir": 2,
+  "read": "Harder and larger block with a 2 px dot dither along the edge. The dots survive only as a texture at 2x. The shadow now takes a bite of the face, so the light angle would need to be set per character."
+ },
+ "slice_N3/qwen-edit/1": {
+  "verdict": "keep",
+  "label": "N3: code shadow, half the figure + halftone band",
+  "axes": "grotesque from base / shadow 3 added in code / halftone 3 (base slice_D qwen-edit seed 1)",
+  "base": "slice_D",
+  "noir": 3,
+  "read": "The bold one: half the figure goes to violet-black and the terminator is a halftone band. It is striking in the street frame, but it eats the second eye and the sneaker on the shadow side. Too much for a hero, plausible for a customer in a doorway."
+ },
+ "cust_N3/klein/1": {
+  "verdict": "keep",
+  "label": "N3: code shadow, half the figure + halftone band",
+  "axes": "grotesque from base / shadow 3 added in code / halftone 3 (base cust_E klein seed 1)",
+  "base": "cust_E",
+  "noir": 3,
+  "read": "The bold one: half the figure goes to violet-black and the terminator is a halftone band. It is striking in the street frame, but it eats the second eye and the sneaker on the shadow side. Too much for a hero, plausible for a customer in a doorway."
+ }
+}

@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Pizza Runner: grotesque with a harder shadow (art-direction test)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font:15px/1.5 system-ui,sans-serif;background:#1d1624;color:#eee3d3;max-width:1100px;margin:0 auto;padding:20px 18px 80px}
+h1{font-size:26px;margin:.2em 0}h2{font-size:22px;margin-top:2.2em;border-top:2px solid #5a3a66;padding-top:.6em}h3{margin:.2em 0}
+.card{background:#2a1f33;border:1px solid #4a3556;border-radius:8px;padding:14px;margin:22px 0}
+.tag{font-size:12px;background:#4a2a48;border-radius:10px;padding:2px 8px;margin-left:8px;font-weight:400}
+.axes{margin:.1em 0 .7em;color:#c9b6d6;font-size:13px}
+.row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+figure{margin:0}figcaption{font-size:12px;color:#c9b6d6;margin:4px 0}figcaption.cur{margin-top:12px;color:#e8c070}
+.full{max-height:420px;width:auto;height:auto;max-width:100%;background:#ff00ff}
+.pair{display:flex;gap:16px;align-items:flex-end}.pair small{display:block;font-size:11px;color:#a898b4}
+img.px{image-rendering:pixelated;background:repeating-conic-gradient(#3b2d46 0 25%,#33263d 0 50%) 0 0/16px 16px}
+img.fr{image-rendering:pixelated;display:block}
+body.z2 img.fr{width:800px;height:480px}
+.frames{margin-top:12px}.read{margin:.8em 0 0;font-size:14px}
+button{background:#5a3a66;color:#fff;border:0;border-radius:5px;padding:6px 12px;cursor:pointer}
+.sticky{position:sticky;top:0;background:#1d1624;padding:6px 0;z-index:2}
+.rev{font-size:12px;color:#8e7e9c}code{color:#f0c27a}
+table{border-collapse:collapse;margin:10px 0}td,th{border:1px solid #4a3556;padding:4px 9px;text-align:left;font-size:13px;vertical-align:top}
+.drop{font-size:12px;color:#a898b4}
+</style></head><body>
+<div class="sticky"><button onclick="document.body.classList.toggle('z2')">toggle game-frame crops at 2x</button></div>
+<h1>Pizza Runner art direction test: grotesque with a harder shadow</h1>
+<p>Tommy's pick from the mood board is Nicktoon Grotesque with Case File Noir's shadow: 90s Nicktoon proportions and ugly-charming close-up detail, with hard flat shadow blocks in deep violet-black from one light, and a little print texture. This page tests two subjects, Vinny Two-Fold (the New York slice) and the Wall Street stockbroker, each in six variants that vary how grotesque (1 to 3), how hard the shadow (1 to 3) and how much halftone (0 to 3). D, E and F are deliberately bolder than is safe. N1 to N3 are a different route: the shadow is added in code to a clean generated image.</p>
+<p><b>Method.</b> FLUX.2 Klein 4B and Qwen-Image-Edit 2511 (Lightning 4 step) in ComfyUI through the sprite-forge pipeline, 48 images in the final round (12 shots x 2 seeds x 2 models); an earlier 24-image Klein round was discarded because the shadow and spotlight went onto the backdrop and the key failed. Image-edited from the current art (slice master, or the current customer sprite upscaled); D to F also take a mood-board image as a style reference. Each kept image is keyed, cut to the game height (124 slice, 130 customer), sampled onto the 1:1 stage grid with 48 colours and a 2 px outline, shown at 1x and 2x nearest, and composited over the New York Wall Street street. The toggle at the top switches the frame crops to 2x. Each card shows seed 1 only (seed 2 was checked for extra limbs and text); images with extra limbs or a bad key are listed under Dropped. No fake lettering was found in the kept images.</p>
+<p><b>Overall.</b> Qwen with a style reference is the boldest and most grotesque; Klein is cleaner and more consistent; neither will put a hard shadow on the figure reliably. The code shadow does, repeatably.</p>

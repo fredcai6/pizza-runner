@@ -3,3 +3,7 @@ __pycache__/
 .claude/
 docs/art-direction/index.html
 docs/writers-room/index.html
+art/tests/*/index.html
+art/tests/*/refs/
+art/tests/*/docs_refs/
+__pycache__/

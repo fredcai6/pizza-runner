@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Pizza Runner: Paper Theatre (art-direction test)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font:15px/1.5 system-ui,sans-serif;background:#1d1624;color:#eee3d3;max-width:1100px;margin:0 auto;padding:20px 18px 80px}
+h1{font-size:26px;margin:.2em 0}h2{font-size:22px;margin-top:2.2em;border-top:2px solid #5a3a66;padding-top:.6em}h3{margin:.2em 0}
+.card{background:#2a1f33;border:1px solid #4a3556;border-radius:8px;padding:14px;margin:22px 0}
+.tag{font-size:12px;background:#4a2a48;border-radius:10px;padding:2px 8px;margin-left:8px;font-weight:400}
+.axes{margin:.1em 0 .7em;color:#c9b6d6;font-size:13px}
+.row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+figure{margin:0}figcaption{font-size:12px;color:#c9b6d6;margin:4px 0}figcaption.cur{margin-top:12px;color:#e8c070}
+.full{max-height:420px;width:auto;height:auto;max-width:100%;background:#ff00ff}
+.pair{display:flex;gap:16px;align-items:flex-end}.pair small{display:block;font-size:11px;color:#a898b4}
+img.px{image-rendering:pixelated;background:repeating-conic-gradient(#3b2d46 0 25%,#33263d 0 50%) 0 0/16px 16px}
+img.fr{image-rendering:pixelated;display:block}
+body.z2 img.fr{width:800px;height:480px}
+.frames{margin-top:12px}.read{margin:.8em 0 0;font-size:14px}
+button{background:#5a3a66;color:#fff;border:0;border-radius:5px;padding:6px 12px;cursor:pointer}
+.sticky{position:sticky;top:0;background:#1d1624;padding:6px 0;z-index:2}
+.rev{font-size:12px;color:#8e7e9c}code{color:#f0c27a}
+table{border-collapse:collapse;margin:10px 0}td,th{border:1px solid #4a3556;padding:4px 9px;text-align:left;font-size:13px;vertical-align:top}
+.drop{font-size:12px;color:#a898b4}
+</style></head><body>
+<div class="sticky"><button onclick="document.body.classList.toggle('z2')">toggle game-frame crops at 2x</button></div>
+<h1>Pizza Runner art direction test: Paper Theatre</h1>
+<p>Paper Mario's material with Charlie the Unicorn's faces: every character a flat card standee with a white cut border and a little paper grain, and one deadpan face for everyone (two small blank dot eyes, a flat line mouth, almost no detail). Same two subjects as the last test, Vinny Two-Fold and the Wall Street stockbroker, in variants that vary how papery (border, grain, creases), how deadpan, and how much shading; F is deliberately cruder than is safe. P1 to P3 are the other route: a clean flat generation with the paper look added in code.</p>
+<p><b>Method.</b> FLUX.2 Klein 4B and Qwen-Image-Edit 2511 (Lightning 4 step) through the sprite-forge pipeline: 56 images (7 shots x 2 subjects x 2 seeds x 2 models), image-edited from the current art, some with a Paper Mario or Charlie the Unicorn still as a style reference. Each card shows the better-matching seed. Each image is keyed, cut to game height (124 px slice; the customer at the current customer's on-screen size), sampled onto the 1:1 stage grid with 48 colours, and composited over the Wall Street street next to the current art.</p>
+<p><b>Overall.</b> The slice took the direction well: Klein made real printed-card standees with deadpan dot faces, Qwen made clean flat sticker versions that hold up best at game size. The stockbroker took the paper but not the deadpan face, in both models: she still yells with angry brows. The code paper pass (P) is repeatable across the cast, so the material could come from code and only the face formula from the model.</p>
+__REFS__
