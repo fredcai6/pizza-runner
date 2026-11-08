@@ -1,6 +1,6 @@
 // One slice, out on the city's streets. Reads the world, changes it through the rules, reports how it ended.
 (function (root) {
-  const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND;
+  const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND, K = root.PR_PAPER;
   const W = 1280, H = 720, GROUND = R.GROUND;
   const TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
@@ -813,11 +813,17 @@
     // The next stretch comes in like a comic panel turning over.
     drawWipe() {
       const { ctx } = this, half = WIPE / 2, cover = 1 - Math.abs(this.wipe - half) / half;
-      ctx.fillStyle = '#17110e';
+      ctx.fillStyle = INK;
       ctx.fillRect(0, 0, W, H / 2 * cover); ctx.fillRect(0, H - H / 2 * cover, W, H / 2 * cover);
+      ctx.fillStyle = K.CORAL; ctx.fillRect(0, H / 2 * cover - 10, W, 10 * Math.min(1, cover * 4)); ctx.fillRect(0, H - H / 2 * cover, W, 10 * Math.min(1, cover * 4));
       if (cover > 0.8 && this.pending) {
-        ctx.fillStyle = '#ffd76a'; ctx.font = 'bold 34px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.fillText(this.world.streets[this.pending.id].name, W / 2, H / 2 + 12);
+        const name = this.world.streets[this.pending.id].name;
+        ctx.font = K.display(40, 700); ctx.textAlign = 'center';
+        const w = ctx.measureText(name).width + 70;
+        ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(-0.025); ctx.translate(-W / 2, -H / 2);
+        K.card(ctx, W / 2 - w / 2, H / 2 - 38, w, 76, { r: 14, shadow: 6 });
+        ctx.fillStyle = K.TEXT; ctx.fillText(name, W / 2, H / 2 + 14);
+        ctx.restore();
       }
     }
 
@@ -861,10 +867,10 @@
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
       const label = (text, y, color) => {
-        ctx.font = 'bold 21px system-ui, sans-serif'; ctx.textAlign = 'left';
-        const w = ctx.measureText(text).width + 22;
-        ctx.fillStyle = color; ctx.fillRect(x + 160, y, w, 32);
-        ctx.fillStyle = '#fff'; ctx.fillText(text, x + 171, y + 23);
+        ctx.font = K.display(22, 600); ctx.textAlign = 'left';
+        const w = ctx.measureText(text).width + 24;
+        K.card(ctx, x + 164, y, w, 32, { fill: color, r: 8, b: 3, shadow: 3 });
+        ctx.fillStyle = '#fff'; ctx.fillText(text, x + 176, y + 24);
       };
       label(`${j.keep.name} ▶`, GROUND - 232, '#2f6b3f');
       if (j.turn) label(`▲ ${j.turn.name}`, GROUND - 194, j.open ? '#2b5f8a' : '#6b5a4a');
@@ -1068,27 +1074,28 @@
       if (!speech) return;
       const shown = Math.min(speech.text.length, Math.floor(speech.age / 1.6));
       if (shown < speech.text.length && speech.age % 4 === 0) A.dit(this.slice.style);
-      ctx.font = '700 24px "Pixelify Sans", monospace'; ctx.textAlign = 'left';
-      const w = ctx.measureText(speech.text).width + 28, h = 38;
-      const cx = p.x + p.w / 2 - this.cam, x = Math.max(12, Math.min(W - w - 12, cx - w / 2)), y = Math.max(140, p.y + p.h - st.height - h - 30);
-      ctx.fillStyle = '#14122b'; ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
-      ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, h);
-      ctx.fillStyle = '#14122b'; ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
-      ctx.fillRect(Math.round(cx) - 6, y + h, 12, 10);
-      ctx.fillStyle = '#fff'; ctx.fillText(speech.text.slice(0, shown), x + 14, y + 27);
+      ctx.font = K.body(23, 800); ctx.textAlign = 'left';
+      const w = ctx.measureText(speech.text).width + 30, h = 40;
+      const cx = p.x + p.w / 2 - this.cam, x = Math.max(12, Math.min(W - w - 12, cx - w / 2)), y = Math.max(176, p.y + p.h - st.height - h - 30);
+      // The tail first, so the card's border covers where it joins.
+      const tx = Math.round(Math.max(x + 22, Math.min(x + w - 22, cx)));
+      const tail = (grow, fill) => { ctx.fillStyle = fill; ctx.beginPath(); ctx.moveTo(tx - 11 - grow, y + h - 4); ctx.lineTo(tx + 11 + grow, y + h - 4); ctx.lineTo(tx + 2, y + h + 15 + grow); ctx.closePath(); ctx.fill(); };
+      tail(4, INK); ctx.save(); ctx.translate(3, 4); tail(4, INK); ctx.restore(); tail(2, '#fff');
+      K.card(ctx, x, y, w, h, { r: 12, shadow: 3 });
+      tail(-1, K.PAPER);
+      ctx.fillStyle = K.TEXT; ctx.fillText(speech.text.slice(0, shown), x + 15, y + 28);
     }
 
     // The pie this slice came from. Each wedge goes as it is delivered or lost.
     drawPie(x, y, r) {
       const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, n = slices.length, turn = Math.PI * 2 / n;
-      ctx.fillStyle = INK; dot(ctx, x, y, r + 9);
-      ctx.fillStyle = '#4a2c3c'; dot(ctx, x, y, r + 4);
+      K.disc(ctx, x, y, r + 2, '#ffe9b8', { b: 5, shadow: 4 });
       slices.forEach((s, i) => {
         if (s.status !== 'ready') return;
         const a = -Math.PI / 2 + i * turn, mid = a + turn / 2, out = s === this.slice ? 4 + Math.sin(frame / 9) * 2 : 0;
         const ox = x + Math.cos(mid) * out, oy = y + Math.sin(mid) * out;
         const wedge = (radius, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.arc(ox, oy, radius, a + 0.03, a + turn - 0.03); ctx.fill(); };
-        wedge(r, '#b4702e'); wedge(r - 5, '#ffcc33');
+        wedge(r, '#e59a3a'); wedge(r - 5, '#ffc933');
         const topping = s === this.slice ? this.held() : s.topping;
         if (!topping) return;
         ctx.fillStyle = C.TOPPINGS[topping].color;
@@ -1107,11 +1114,10 @@
       else if (past) text = C.BARKS.missed;
       else if (h.kind === 'turn') text = `${feet(h.left)} to the turn onto ${h.street.name}`;
       else text = `${feet(h.left)}, then ${h.street.name}`;
-      ctx.font = 'bold 22px system-ui, sans-serif'; ctx.textAlign = 'center';
-      const w = ctx.measureText(text).width + 36, x = 740;
-      ctx.fillStyle = INK; ctx.fillRect(x - w / 2 - 4, 12, w + 8, 50);
-      ctx.fillStyle = '#4a2c3c'; ctx.fillRect(x - w / 2, 16, w, 42);
-      ctx.fillStyle = '#fff3d2'; ctx.fillText(text, x, 45);
+      ctx.font = K.body(22, 800); ctx.textAlign = 'center';
+      const w = ctx.measureText(text).width + 40, x = 740;
+      K.card(ctx, x - w / 2, 16, w, 42, { r: 21, shadow: 4 });
+      ctx.fillStyle = K.TEXT; ctx.fillText(text, x, 46);
     }
 
     // A soft contact shadow flat on the street under whatever stands on it.
@@ -1123,18 +1129,19 @@
       ctx.restore();
     }
 
-    // Heavy-outlined text, like the rest of the game's ink.
-    inkText(text, x, y, size = 20, fill = '#fff3d2', align = 'left') {
+    // A label on a paper sticker; (x, y) is the left end of the text's baseline.
+    inkText(text, x, y, size = 20) {
       const { ctx } = this;
-      ctx.font = `700 ${size}px "Pixelify Sans", system-ui, sans-serif`; ctx.textAlign = align; ctx.lineJoin = 'round';
-      ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.strokeText(text, x, y);
-      ctx.fillStyle = fill; ctx.fillText(text, x, y);
+      ctx.font = K.body(size, 800); ctx.textAlign = 'left';
+      const w = ctx.measureText(text).width + 24;
+      K.card(ctx, x - 12, y - size - 4, w, size + 14, { r: 10, b: 3, shadow: 3 });
+      ctx.fillStyle = K.TEXT; ctx.fillText(text, x, y + 1);
     }
 
     // Health is a slice on its side: crust at the left, cheese running out to the tip. Heat fills it from
     // the crust, a bite takes a scalloped chunk off the tip for good, and a lost chunk drains away slowly.
     drawHealth(x, y) {
-      const { ctx } = this, GW = 336, GH = 60, PAD = 8, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame;
+      const { ctx } = this, GW = 336, GH = 60, PAD = 10, w = GW + PAD * 2, h = GH + PAD * 2, f = this.frame;
       if (!this.gauge) { this.gauge = document.createElement('canvas'); this.gaugeInk = document.createElement('canvas'); for (const c of [this.gauge, this.gaugeInk]) { c.width = w; c.height = h; } }
       // Smooth: the bar eases to the true heat, and what a hit took trails behind in cream.
       const heat = Math.max(0, this.heat);
@@ -1154,21 +1161,21 @@
         if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4);
       };
       const crust = () => { g.beginPath(); if (g.roundRect) g.roundRect(0, -2, CR, GH + 4, 15); else g.rect(0, -2, CR, GH + 4); };
-      shape(); g.fillStyle = '#4a2c3c'; g.fill();
+      shape(); g.fillStyle = '#e8dcc0'; g.fill();
       g.save(); shape(); g.clip();
       // Cheese colour runs warm to cold with the heat.
       const mix = (a, b, k) => { const n = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = n(a), B = n(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`; };
       const hot = fill > 0.5, k = Math.max(0, Math.min(1, hot ? (fill - 0.5) * 2 : fill * 2));
       const c1 = hot ? mix('#e8bc55', '#ffd23a', k) : mix('#a9c6d8', '#e8bc55', k), c2 = hot ? mix('#c98a44', '#ff8a24', k) : mix('#6f97b3', '#c98a44', k);
       const edge = bx + bodyLen * ghostF, mid = bx + bodyLen * fill;
-      if (ghostF > fill) { g.fillStyle = '#fff3d2'; g.fillRect(mid, 0, edge - mid, GH); }
+      if (ghostF > fill) { g.fillStyle = '#fff'; g.fillRect(mid, 0, edge - mid, GH); }
       const grad = g.createLinearGradient(bx, 0, GW, 0); grad.addColorStop(0, c1); grad.addColorStop(1, c2);
-      g.fillStyle = grad; g.fillRect(bx, 0, Math.max(0, mid - bx), GH);
+      g.fillStyle = c1; g.fillRect(bx, 0, Math.max(0, mid - bx), GH);
       // Pepperoni along it, dimmed where the heat has gone, and a few cheese highlights.
       for (const [px, py, pr] of [[0.2, 0.3, 8], [0.38, 0.68, 7], [0.5, 0.3, 6], [0.66, 0.6, 5], [0.8, 0.45, 4]]) {
         const cx = bx + bodyLen * px, cy = GH * py, lit = cx < mid;
-        g.fillStyle = lit ? '#7a1a20' : '#35202c'; g.beginPath(); g.arc(cx, cy, pr + 2, 0, 7); g.fill();
-        g.fillStyle = lit ? '#c8321e' : '#4a2c3c'; g.beginPath(); g.arc(cx, cy, pr, 0, 7); g.fill();
+        g.fillStyle = lit ? '#fff' : '#d9ceb2'; g.beginPath(); g.arc(cx, cy, pr + 2, 0, 7); g.fill();
+        g.fillStyle = lit ? '#e8362b' : '#bfb394'; g.beginPath(); g.arc(cx, cy, pr, 0, 7); g.fill();
       }
       g.fillStyle = 'rgba(255,248,214,.5)';
       for (const [px, py] of [[0.1, 0.78], [0.3, 0.14], [0.58, 0.82], [0.72, 0.3]]) { const cx = bx + bodyLen * px; if (cx < mid) g.fillRect(Math.round(cx), Math.round(GH * py), 7, 3); }
@@ -1194,11 +1201,16 @@
       const k2 = this.gaugeInk.getContext('2d');
       k2.clearRect(0, 0, w, h); k2.globalCompositeOperation = 'source-over'; k2.drawImage(this.gauge, 0, 0);
       k2.globalCompositeOperation = 'source-in'; k2.fillStyle = INK; k2.fillRect(0, 0, w, h);
+      const k3 = this.gaugeCut || (this.gaugeCut = document.createElement('canvas')); k3.width = w; k3.height = h;
+      const kc = k3.getContext('2d'); kc.drawImage(this.gauge, 0, 0); kc.globalCompositeOperation = 'source-in'; kc.fillStyle = '#fff'; kc.fillRect(0, 0, w, h);
       ctx.save();
       // A hit shakes the gauge.
       const shake = this.invuln > 70 ? Math.sin(f * 2.4) * 3 : 0;
       ctx.translate(x + shake, y);
-      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, Math.round(Math.cos(a / 20 * 6.2832) * 4), Math.round(Math.sin(a / 20 * 6.2832) * 4));
+      // Violet drop shadow, violet rim, white cut border, then the slice itself.
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, 4 + Math.round(Math.cos(a / 20 * 6.2832) * 5), 5 + Math.round(Math.sin(a / 20 * 6.2832) * 5));
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeInk, Math.round(Math.cos(a / 20 * 6.2832) * 5), Math.round(Math.sin(a / 20 * 6.2832) * 5));
+      for (let a = 0; a < 20; a++) ctx.drawImage(this.gaugeCut, Math.round(Math.cos(a / 20 * 6.2832) * 3), Math.round(Math.sin(a / 20 * 6.2832) * 3));
       ctx.drawImage(this.gauge, 0, 0);
       ctx.restore();
     }
@@ -1211,11 +1223,10 @@
       if (this.specialCd > 0) {
         const k = 1 - this.specialCd / this.specialMax, r = 17, y = top - 24, deny = this.denied > 0 ? Math.sin(f * 1.6) * 4 : 0;
         ctx.save(); ctx.translate(Math.round(cx + deny), Math.round(y));
-        ctx.fillStyle = INK; dot(ctx, 0, 0, r + 6);
-        ctx.fillStyle = '#4a2c3c'; dot(ctx, 0, 0, r);
-        ctx.fillStyle = this.denied > 0 ? '#ff5a3c' : '#ffcc33';
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = INK; dot(ctx, 0, 0, 5);
+        K.disc(ctx, 0, 0, r, '#fff6df', { b: 3, shadow: 3 });
+        ctx.fillStyle = this.denied > 0 ? '#ff5a3c' : K.SUN;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 3, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = INK; dot(ctx, 0, 0, 4);
         ctx.restore();
       } else {
         // Ready: a golden glow at the feet and sparkles circling the pizza.
@@ -1246,20 +1257,19 @@
       this.drawPie(444, 62, 36);
       this.drawHealth(14, 12);
       const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
-      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 22, 100, 20);
+      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 26, 120, 19);
       // Addresses done, and the street we are on.
       city.areas.forEach((a, i) => {
-        const x = 34 + i * 28; ctx.fillStyle = INK; dot(ctx, x, 128, 13);
-        ctx.fillStyle = i < world.delivery ? '#7fd46a' : i === world.delivery ? '#ffd76a' : '#6b5560'; dot(ctx, x, 128, 8);
+        K.disc(ctx, 36 + i * 32, 152, 8, i < world.delivery ? '#4fcf6a' : i === world.delivery ? K.SUN : '#e6dcc0', { b: 3, shadow: 2 });
       });
-      this.inkText(this.street.name, 34 + city.areas.length * 28 + 6, 135, 19);
+      this.inkText(this.street.name, 36 + city.areas.length * 32 + 8, 158, 17);
       this.syncSpecialButton();
       this.guideBar();
       if (this.barkT > 0) {
-        ctx.font = 'italic 26px Georgia, serif'; ctx.textAlign = 'center';
-        const w = ctx.measureText(this.bark).width + 40;
-        ctx.fillStyle = 'rgba(255,248,225,0.93)'; ctx.fillRect(W / 2 - w / 2 + 110, 92, w, 46);
-        ctx.fillStyle = '#2a1a10'; ctx.fillText(this.bark, W / 2 + 110, 124);
+        ctx.font = K.body(26, 700); ctx.textAlign = 'center';
+        const w = ctx.measureText(this.bark).width + 44, bx = W / 2 + 110;
+        K.card(ctx, bx - w / 2, 96, w, 46, { r: 14, shadow: 4 });
+        ctx.fillStyle = K.TEXT; ctx.fillText(this.bark, bx, 129);
       }
     }
   }

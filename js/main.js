@@ -303,5 +303,5 @@
   }, 100);
 
   if (debug) window.__pr = { get camp() { return camp; }, set camp(c) { camp = c; }, run: null, route, input, save };
-  Promise.all([S.load(), S.loadLayers(), document.fonts.load('24px "Pixelify Sans"'), document.fonts.load('700 24px "Pixelify Sans"')]).then(title);
+  Promise.all([S.load(), S.loadLayers(), document.fonts.load('600 24px Fredoka'), document.fonts.load('700 24px Fredoka'), document.fonts.load('700 24px Nunito'), document.fonts.load('800 24px Nunito')]).then(title);
 })();
