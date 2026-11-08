@@ -176,8 +176,9 @@
       ctx.fillStyle = '#b98d5e'; ctx.fillRect(x, y, w, h);
     }
     const rnd = seeded(97), pins = [];
-    // Receipts overlap in a loose drift down the left of the cork.
-    const n = Math.min(hq.receipts, 18);
+    // Receipts overlap in a loose drift down the left of the cork. Three are his from the
+    // tapped dispatch line, there from the start; the player's add to them.
+    const n = Math.min(hq.receipts + 3, 18);
     for (let i = 0; i < n; i++) {
       const col = i % 6, row = Math.floor(i / 6), rw = w * 0.07, rh = h * 0.17;
       const rx = x + w * (0.03 + col * 0.072) + (rnd() - 0.5) * w * 0.03, ry = y + h * (0.05 + row * 0.2) + (rnd() - 0.5) * h * 0.05, rot = (rnd() - 0.5) * 16;
