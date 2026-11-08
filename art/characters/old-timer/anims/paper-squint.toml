@@ -1,12 +1,15 @@
+# Qwen on Tommy's sheet pose (art/paper/make_sheet_runs.py), picked 2026-11-08.
 master = "characters/old-timer/references/paper-master.png"
 canvas = [136, 130]
-job = 227
 frame_ms = 140
 loop = false
-run = "paper"
+run = "sheet_keys"
+presample = true
+
 [[frames]]
 pose = "master"
 hold = 2
+
 [[frames]]
 pose = "squint/2"
 hold = 12

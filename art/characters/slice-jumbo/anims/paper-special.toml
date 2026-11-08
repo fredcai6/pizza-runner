@@ -1,13 +1,15 @@
+# From Tommy's sheet (references/sheet.png, cut by art/paper/sheetcut.py).
 master = "characters/slice-jumbo/references/paper-master.png"
 canvas = [330, 240]
-job = 242
 frame_ms = 110
 loop = false
-run = "paper"
+run = "sheet"
+presample = true
+
 [[frames]]
-pose = "jump_rise/2"
+pose = "jump/1"
 hold = 3
 
 [[frames]]
-pose = "special_b/2"
+pose = "land/1"
 hold = 6

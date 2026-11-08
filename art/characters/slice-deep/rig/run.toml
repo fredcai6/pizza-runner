@@ -1,4 +1,4 @@
-# Big Stan's run on the code rig (see art/paper/pizzarig.py). Coordinates are on sprites/idle-core frame 0 (230x170 stage pixels).
+# Body from Tommy's sheet (2026-11-08). Big Stan's run on the code rig (see art/paper/pizzarig.py). Coordinates are on sprites/idle-core frame 0 (230x170 stage pixels).
 anim = "run"
 canvas = [230, 170]
 frame_ms = 70
@@ -16,44 +16,44 @@ src = "characters/slice-deep/sprites/idle-body/sheet.png"
 frame = 0
 frame_w = 230
 # the slice and its crust only: arms, legs, gloves and boots are drawn by the rig
-keep = [[54,28],[62,22],[95,8],[130,6],[165,8],[173,16],[171,30],[168,42],[160,60],[152,76],[145,88],[137,102],[130,114],[124,126],[119,127],[112,117],[104,106],[96,94],[88,80],[80,66],[73,52],[56,48]]
+keep = [[52,22],[60,12],[100,8],[140,8],[178,18],[178,32],[168,52],[162,72],[154,92],[140,104],[135,112],[134,128],[128,143],[112,146],[104,136],[99,118],[96,102],[84,94],[78,76],[66,62],[54,45]]
 erase = []
 
 [limb]
-leg = [[255,205,140],[255,176,94],[213,100,35]]
-arm = [[255,205,140],[255,176,94],[213,100,35]]
+leg = [[104,66,52],[80,48,38],[56,32,28]]
+arm = [[104,66,52],[80,48,38],[56,32,28]]
 
 [foot]
 src = "characters/slice-deep/sprites/idle-core/sheet.png"
 frame = 0
 frame_w = 230
-box = [127, 127, 178, 162]
-anchor = [140, 138]
+box = [84, 147, 119, 166]
+anchor = [104, 149]
 
 [hand]
 src = "characters/slice-deep/sprites/idle-core/sheet.png"
 frame = 0
 frame_w = 230
-box = [64, 98, 94, 128]
-anchor = [80, 100]
+box = [71, 104, 97, 132]
+anchor = [91, 107]
 
 [arm]
 behind = true
-shoulder_near = [146, 86]
-shoulder_far = [86, 80]
-len = 28
+shoulder_near = [136, 104]
+shoulder_far = [98, 104]
+len = 18
 w = 9
 swing = 0.8
 
 [gait]
 kind = "run"
-leg = 30
+leg = 24
 thigh = 0.5
 leg_w = 10
 lean = 4
 lean_down = 2
 stride = 0.85
 clear = 0.8
-bob = 1.5
-ground = 161
-hip = [121, 124]
+bob = 0
+ground = 165
+hip = [116, 138]

@@ -1,0 +1,14 @@
+# Poses on references/sheet.png (Tommy, 2026-11-08). See art/paper/sheetcut.py.
+master = "front"
+row = ["idle", "run", "jump", "land"]
+row_scale = 1.51
+scale = { hero = 0.85 }
+below = { land = 955 }
+[seeds]
+front = [600, 220]
+threequarter = [870, 220]
+hero = [250, 450]
+idle = [420, 860]
+run = [660, 860]
+jump = [890, 800]
+land = [1110, 880]

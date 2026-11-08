@@ -102,3 +102,15 @@ Same recipe, plus what the other twenty characters taught. Specs are scripts, no
 - Decals: a pose rotated or squashed past forge.decals' registration range keeps its toppings (see the jumbo flop); use an upright pose before it.
 - Candid Polaroids: `polaroids.py` (generation to `assets/polaroids/TYPE.png`, softened). DJ Alewife's ending photo is `alewife_polaroid.py`: the model drew pixel art
   and a laptop logo, so the room is drawn in code around her master.
+
+## Tommy's character sheets (2026-11-08)
+Tommy drew model sheets for Phil, Big Stan, La Contessa and Sergeant Dayold (`references/sheet.png` in each folder: turnaround, expressions,
+idle/run/jump/land poses). **They are the masters now**: where a sheet and the rules above disagree (faces: open smiling mouths, oval eyes, brows
+on Contessa and Dayold; a bold brown outline and soft shading inside the white border), the sheet wins. Vinny has no sheet yet.
+- `sheetcut.py` cuts the poses (seeds in `characters/NAME/sheet.toml`) onto magenta for paperkit, all on one drawing scale (the sheets draw the
+  pose row smaller than the turnaround: `row_scale`), with leaps capped to the master's height so nothing is cut off by the frame.
+- The front pose is the master (idle, and the body the code rig runs). Jump, fall and special come straight from the sheet's jump and land poses.
+- paperkit's `presample = true` box-averages onto the stage grid before the palette vote: the sheets' smooth shading otherwise turns into a dot grid.
+- What the sheets do not draw is Qwen with the sheet pose as image 1 and the sheet itself as image 2 (`make_sheet_runs.py`): cold poses, Dayold's
+  talk and squint, the plain recruits, and Phil without his printed pepperoni (toppings are the player's pick; painting them out in code tore his face).
+- Rig limbs are the sheets' dark brown (`[limb]` in each `rig/run.toml`); the rig runs without a bob because the master fills the frame height.

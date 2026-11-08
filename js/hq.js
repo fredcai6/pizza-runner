@@ -22,6 +22,27 @@
   };
   const STAGE_CENTER = [W / 2, H / 2];
 
+  // Painted cutscene pictures (assets/cutscenes/NAME.webp). A shot with `pic` shows one instead of the room and pans across it:
+  // pan = [[x, y, zoom], [x, y, zoom]], x and y the frame's centre as fractions of the picture, zoom 1 = the picture just covers
+  // the frame. `ms` is how long the pan takes; it eases, then holds. `card: 'right'` puts a name card on the right.
+  const PICS = {};
+  function pic(name) {
+    if (!PICS[name]) { PICS[name] = new Image(); PICS[name].src = `assets/cutscenes/${name}.webp`; }
+    return PICS[name];
+  }
+  function painting(ctx, shot, t) {
+    const img = pic(shot.pic);
+    if (!img.complete || !img.naturalWidth) return;
+    const [a, b] = shot.pan || [[0.5, 0.5, 1], [0.5, 0.5, 1]], e = t * t * (3 - 2 * t);
+    const at = i => a[i] + (b[i] - a[i]) * e, iw = img.naturalWidth, ih = img.naturalHeight;
+    const k = Math.max(W / iw, H / ih) * Math.max(1, at(2)), vw = W / k, vh = H / k;
+    const cx = Math.max(vw / 2, Math.min(iw - vw / 2, at(0) * iw)), cy = Math.max(vh / 2, Math.min(ih - vh / 2, at(1) * ih));
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, cx - vw / 2, cy - vh / 2, vw, vh, 0, 0, W, H);
+    ctx.restore();
+  }
+
   // Where the camera is, in room units, a fraction t through a shot.
   function camAt(shot, t) {
     const cam = CAMERAS[shot.comp] || CAMERAS.wide, e = t * t * (3 - 2 * t);
@@ -39,6 +60,7 @@
 
   // The speaker's box on the stage over the whole shot, or null when they are out of frame or in a painted scene.
   function speakerBox(shot, who, view) {
+    if (shot.pic) return null;
     if (shot.comp === 'door') {
       const final = view.city.final && view.area === view.city.areas[view.city.areas.length - 1];
       const sty = view.slice && view.slice.style ? view.slice.style : (view.city.style || 'ny');
@@ -348,6 +370,7 @@
     const ctx = canvas.getContext('2d'), A = root.PR_SOUND;
     let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9;
     let script = null, shown = 0, full = false, box = null;
+    shots.forEach(sh => sh.pic && pic(sh.pic));
     const text = dialog.querySelector('.line'), name = dialog.querySelector('.who');
     const nameOf = who => C.SPEAKERS[who] || view.customer || 'Customer';
     const show = () => {
@@ -370,7 +393,7 @@
     };
     const frame = now => {
       if (stopped) return;
-      const shot = shots[s], cam = CAMERAS[shot.comp] || CAMERAS.wide, t = Math.min(1, (now - start) / (cam.ms || 6000));
+      const shot = shots[s], cam = CAMERAS[shot.comp] || CAMERAS.wide, t = Math.min(1, (now - start) / (shot.ms || cam.ms || 6000));
       const { x, y, z } = camAt(shot, t);
       type(now);
       // Each new shot whips into place.
@@ -382,7 +405,8 @@
       view.mood = line.mood || (line.who === 'old' && !full ? 'talk' : 'idle');
       view.camX = x; view.comp = shot.comp;
       if (thump) ctx.translate(Math.sin(now / 21) * thump, Math.cos(now / 17) * thump);
-      if (shot.comp === 'door') door(ctx, view, now);
+      if (shot.pic) painting(ctx, shot, t);
+      else if (shot.comp === 'door') door(ctx, view, now);
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
         ctx.translate(-x + Math.round(whip / z), -y);
@@ -392,7 +416,8 @@
       const edge = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 800);
       edge.addColorStop(0, 'rgba(0,0,0,0)'); edge.addColorStop(1, 'rgba(0,0,0,0.6)');
       ctx.fillStyle = edge; ctx.fillRect(0, 0, W, H);
-      if (shot.card) {
+      if (shot.card && shot.pic) nameCard(ctx, shot.card, now - cutAt, shot.cardSide === 'right');
+      else if (shot.card) {
         const who = standing(shot.comp, view), c = who && camAt(shot, t), onLeft = who && STAGE_CENTER[0] + (who.x - c.x) * c.z < W / 2;
         nameCard(ctx, shot.card, now - cutAt, !!onLeft);
       }

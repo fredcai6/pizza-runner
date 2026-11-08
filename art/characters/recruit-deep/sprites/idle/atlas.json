@@ -7,20 +7,20 @@
  "frame_ms": 220,
  "loop": true,
  "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
   "dirty": false,
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "46fbf5f3581cddf74a3469612a87de8103e5001d",
+  "sha": "6999c29feccc6f2aed0cc2415335d5fa5f91cb67",
   "dirty": true
  },
  "source": {
-  "run": "paper",
+  "run": "sheet_keys",
   "model": "qwen-edit",
-  "job": 242,
+  "job": 251,
   "master": "characters/recruit-deep/references/paper-master.png",
-  "cell": 5.419,
+  "cell": 5.325,
   "border": 4,
   "palette": 48,
   "poses": [

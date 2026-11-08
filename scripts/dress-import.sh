@@ -6,9 +6,9 @@ FORGE=${SPRITE_FORGE:-$HOME/projects/sprite-forge}
 export FORGE_PROJECT=$ROOT/art
 declare -A EYES=(
   [ny]="76,40,9,11 89,39,6,10"
-  [deep]="120,78,7,6 136,77,6,5"
-  [jumbo]="173,88,16,19 192,87,11,16"
-  [naples]="70,38,6,9 79,38,5,9"
+  [deep]="107,73,4,8 123,73,4,8"
+  [jumbo]="165,90,5,11 189,90,5,11"
+  [naples]="57,45,6,5 75,45,6,5"
 )
 s=$1
 (cd "$FORGE" && .venv/bin/python -m forge.blink "characters/slice-$s/sprites/idle-plain" ${EYES[$s]})

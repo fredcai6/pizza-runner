@@ -7,20 +7,20 @@
  "frame_ms": 140,
  "loop": false,
  "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
   "dirty": false,
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "f21e0fe84285eed56992b9804d088a5ca1321ee5",
+  "sha": "6999c29feccc6f2aed0cc2415335d5fa5f91cb67",
   "dirty": true
  },
  "source": {
-  "run": "paper",
+  "run": "sheet_keys",
   "model": "qwen-edit",
-  "job": 227,
+  "job": null,
   "master": "characters/old-timer/references/paper-master.png",
-  "cell": 7.467,
+  "cell": 4.625,
   "border": 4,
   "palette": 48,
   "poses": [

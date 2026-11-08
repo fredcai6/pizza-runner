@@ -1,12 +1,14 @@
+# Qwen on Tommy's sheet pose (art/paper/make_sheet_runs.py), picked 2026-11-08.
 own_palette = true
 master = "characters/slice-deep/references/paper-master.png"
 canvas = [230, 170]
-job = 242
 frame_ms = 140
 loop = true
-run = "paper"
+run = "sheet_keys"
+presample = true
+
 [[frames]]
-pose = "cold_a/2"
+pose = "cold_a/1"
 dx = -1
 
 [[frames]]
