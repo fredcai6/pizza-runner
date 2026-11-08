@@ -1,43 +1,152 @@
 {
  "rev": {
-  "sha": "328b196a24dae5bbb3c4c3506781e61c75ecf5e4",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "bungalows/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 4,
-   "seam_start_x": 188
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "bungalows_far",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 21.0,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 211,
+   "dark_lifted": true,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
-   "run": "bungalows/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 2,
-   "shifted_by": -45,
-   "seam_start_x": 144
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "bungalows_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 21.9,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 14,
+   "shifted_by": -105,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "near": {
-   "run": "bungalows/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 156
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "bush",
+     5,
+     {
+      "colors": [
+       "green",
+       "sage",
+       "lilac"
+      ],
+      "w": [
+       120,
+       210
+      ],
+      "h": [
+       54,
+       88
+      ]
+     }
+    ],
+    [
+     "tuft",
+     5,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       40,
+       70
+      ],
+      "h": [
+       26,
+       44
+      ]
+     }
+    ],
+    [
+     "flower",
+     6,
+     {
+      "colors": [
+       "pink",
+       "butter",
+       "lilac"
+      ],
+      "h": [
+       34,
+       58
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "bungalows/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 3
+   "procedural": "running_bond in paper_build.py (slabs)",
+   "slab": [
+    64,
+    40
+   ],
+   "tones": [
+    [
+     196,
+     190,
+     196
+    ],
+    [
+     188,
+     182,
+     190
+    ],
+    [
+     202,
+     196,
+     202
+    ]
+   ],
+   "cut_line": [
+    150,
+    142,
+    154
+   ]
   },
   "door": {
-   "run": "bungalows/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 1
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "bungalows_door",
+   "seed": 2,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.3,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

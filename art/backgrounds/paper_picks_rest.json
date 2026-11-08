@@ -6,5 +6,14 @@
  "georgetown": {"far": {"run": "dc-1", "seed": 3}, "mid": {"run": "dc-1", "seed": 1}, "door": {"run": "dc-1", "seed": 1}},
  "mall": {"far": {"run": "dc-1", "seed": 2}, "mid": {"run": "dc-1", "seed": 3}, "door": {"run": "dc-1", "seed": 3}},
  "federal": {"far": {"run": "dc-1", "seed": 3}, "mid": {"run": "dc-1", "seed": 3}, "door": {"run": "dc-1", "seed": 1}},
- "dc": {"props": {"run": "dc-1", "seed": 2}}
+ "dc": {"props": {"run": "dc-1", "seed": 2}},
+ "harbor": {"far": {"run": "naples-1", "seed": 3}, "mid": {"run": "naples-1", "seed": 1}, "door": {"run": "naples-1", "seed": 1}},
+ "center": {"far": {"run": "naples-1", "seed": 3}, "mid": {"run": "naples-1", "seed": 1}, "door": {"run": "naples-1", "seed": 1}},
+ "hillside": {"far": {"run": "naples-1", "seed": 3}, "mid": {"run": "naples-1", "seed": 1}, "door": {"run": "naples-1", "seed": 1}},
+ "naples": {"props": {"run": "naples-1", "seed": 3}},
+ "downtown": {"far": {"run": "california-1", "seed": 3}, "mid": {"run": "california-1", "seed": 1}, "door": {"run": "california-1", "seed": 1}},
+ "beach": {"far": {"run": "california-1", "seed": 2}, "mid": {"run": "california-1", "seed": 1}, "door": {"run": "california-1", "seed": 3}},
+ "bungalows": {"far": {"run": "california-1", "seed": 1}, "mid": {"run": "california-1", "seed": 1}, "door": {"run": "california-1", "seed": 2}},
+ "california": {"props": {"run": "california-1", "seed": 1}},
+ "clear": {"downtown/mid": [[290, 0, 400, 296]]}
 }

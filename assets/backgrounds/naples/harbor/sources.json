@@ -1,43 +1,148 @@
 {
  "rev": {
-  "sha": "2fd74aca829a651ac35920f4851fa2e2979ba498",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "harbor/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 2,
-   "seam_start_x": 9
+   "run": "paper/naples-1",
+   "job": 236,
+   "model": "qwen-edit",
+   "shot": "harbor_far",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.2,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 191,
+   "dark_lifted": true,
+   "erased_text_boxes": []
   },
   "mid": {
-   "run": "harbor/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 2,
-   "shifted_by": -50,
-   "seam_start_x": 72
+   "run": "paper/naples-1",
+   "job": 236,
+   "model": "qwen-edit",
+   "shot": "harbor_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 18.6,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 87,
+   "shifted_by": -119,
+   "erased_text_boxes": []
   },
   "near": {
-   "run": "harbor/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 148
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "tuft",
+     6,
+     {
+      "colors": [
+       "sage",
+       "sand"
+      ],
+      "w": [
+       40,
+       72
+      ],
+      "h": [
+       26,
+       46
+      ]
+     }
+    ],
+    [
+     "bush",
+     2,
+     {
+      "colors": [
+       "sage",
+       "mint"
+      ],
+      "w": [
+       110,
+       180
+      ],
+      "h": [
+       54,
+       80
+      ]
+     }
+    ],
+    [
+     "flower",
+     4,
+     {
+      "colors": [
+       "coral",
+       "butter"
+      ],
+      "h": [
+       34,
+       56
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "harbor/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "running_bond in paper_build.py (bricks)",
+   "slab": [
+    16,
+    20
+   ],
+   "tones": [
+    [
+     176,
+     170,
+     190
+    ],
+    [
+     168,
+     162,
+     184
+    ],
+    [
+     184,
+     178,
+     198
+    ]
+   ],
+   "cut_line": [
+    136,
+    130,
+    156
+   ]
   },
   "door": {
-   "run": "harbor/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 2
+   "run": "paper/naples-1",
+   "job": 236,
+   "model": "qwen-edit",
+   "shot": "harbor_door",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 20.8,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

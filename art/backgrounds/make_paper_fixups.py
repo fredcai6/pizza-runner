@@ -8,6 +8,7 @@ from make_paper_spec_rest import CITIES, IN, door, far, mid
 # (city, area, layer) -> new description for that layer's prompt; seeds default to 1..4
 FIX = {
     ("chicago", "loop", "mid"): "Soft pastel lavender, dusty rose, cream and blue-grey colours. Tall narrow brick and stone office and loft buildings in a row with plain awnings. The strip above the buildings is flat magenta: no elevated railway, no girders, no pillars, no train.",
+    ("naples", "hillside", "mid"): "Soft pastel pink, mint, butter yellow, sky blue and coral colours. Keep the stepped hillside houses with terracotta tiled roofs, plain balconies with plain railings, and outdoor stone stairs climbing between them. There are no plants on balconies, no flower pots and no potted plants anywhere; the only greenery is a few flat pale-green round paper trees behind the houses.",
 }
 
 

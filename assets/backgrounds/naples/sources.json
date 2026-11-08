@@ -1,31 +1,33 @@
 {
  "rev": {
-  "sha": "bff2222efdec18e5684ea1c3f6e8ae502bf61be7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
-  "far": {
-   "run": "naples/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 2,
-   "seam_start_x": 147
+  "props": {
+   "run": "paper/naples-1",
+   "job": 236,
+   "model": "qwen-edit",
+   "shot": "props",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 14.5,
+   "size": [
+    1280,
+    720
+   ],
+   "upscaled_2x": false
   },
-  "mid": {
-   "run": "naples/mid2",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 2,
-   "shifted_by": -66,
-   "seam_start_x": 140
-  },
-  "near": {
-   "run": "naples/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 1,
-   "seam_start_x": 133
+  "platform": {
+   "procedural": "platform_tile in paper_ny_build.py",
+   "card": [
+    232,
+    178,
+    148
+   ]
   }
  }
 }

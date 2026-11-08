@@ -1,43 +1,148 @@
 {
  "rev": {
-  "sha": "328b196a24dae5bbb3c4c3506781e61c75ecf5e4",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
  "layers": {
   "far": {
-   "run": "beach/layers",
-   "model": "klein",
-   "shot": "far",
-   "seed": 1,
-   "seam_start_x": 1
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "beach_far",
+   "seed": 2,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 12.2,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 216,
+   "dark_lifted": true,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "mid": {
-   "run": "beach/layers",
-   "model": "klein",
-   "shot": "mid",
-   "seed": 4,
-   "shifted_by": -55,
-   "seam_start_x": 115
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "beach_mid",
+   "seed": 1,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 21.7,
+   "size": [
+    1408,
+    360
+   ],
+   "upscaled_2x": true,
+   "seam_start_x": 7,
+   "shifted_by": -103,
+   "erased_text_boxes": [],
+   "cleared_boxes": []
   },
   "near": {
-   "run": "beach/layers",
-   "model": "klein",
-   "shot": "near",
-   "seed": 4,
-   "seam_start_x": 79
+   "procedural": "paper_near.near_layer",
+   "spec": [
+    [
+     "tuft",
+     8,
+     {
+      "colors": [
+       "sage",
+       "sand",
+       "green"
+      ],
+      "w": [
+       40,
+       72
+      ],
+      "h": [
+       26,
+       46
+      ]
+     }
+    ],
+    [
+     "bush",
+     3,
+     {
+      "colors": [
+       "sage",
+       "green"
+      ],
+      "w": [
+       110,
+       190
+      ],
+      "h": [
+       54,
+       80
+      ]
+     }
+    ],
+    [
+     "flower",
+     5,
+     {
+      "colors": [
+       "coral",
+       "butter",
+       "pink"
+      ],
+      "h": [
+       34,
+       56
+      ]
+     }
+    ]
+   ],
+   "seed": 7
   },
   "ground": {
-   "run": "beach/props",
-   "model": "klein",
-   "shot": "ground",
-   "seed": 1
+   "procedural": "sand in paper_build.py",
+   "tones": [
+    [
+     244,
+     228,
+     186
+    ],
+    [
+     240,
+     222,
+     178
+    ],
+    [
+     248,
+     234,
+     194
+    ]
+   ],
+   "cut_line": [
+    222,
+    202,
+    150
+   ]
   },
   "door": {
-   "run": "beach/props",
-   "model": "klein",
-   "shot": "door",
-   "seed": 1
+   "run": "paper/california-1",
+   "job": 237,
+   "model": "qwen-edit",
+   "shot": "beach_door",
+   "seed": 3,
+   "refs": [
+    "paper/style_pm_sq.png"
+   ],
+   "secs": 15.2,
+   "size": [
+    896,
+    1152
+   ],
+   "upscaled_2x": false
   }
  }
 }

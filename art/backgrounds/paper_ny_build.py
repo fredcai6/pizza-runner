@@ -24,6 +24,7 @@ RUN = DATA / "runs/paper"
 JOBS = {"ny-1": 229, "ny-2": 232, "hq-1": 230}
 PICKS = json.loads((Path(__file__).parent / "newyork/paper_picks.json").read_text())
 # boxes (x0, y0, x1, y1) in final layer pixels
+CLEAR = {}   # same keys and boxes as ERASE
 ERASE = {"wallstreet/mid": [[1076, 524, 1102, 552]]}   # a door number "9"
 STYLE_REF = "art/paper/style_pm_sq.png"
 COLORS = {"far": 28, "mid": 44, "near": 28}
@@ -118,6 +119,10 @@ def build_layer(area, layer, run, seed):
         reg = rgba[y0:y1, x0:x1, :3]
         rgba[y0:y1, x0:x1, :3] = np.median(reg, axis=1, keepdims=True).astype(np.uint8)
     meta["erased_text_boxes"] = ERASE.get(f"{area}/{layer}", [])
+    # things that do not belong in the picture at all (a model-drawn tower, say): cut out, leaving the layer transparent there
+    for x0, y0, x1, y1 in CLEAR.get(f"{area}/{layer}", []):
+        rgba[y0:y1, x0:x1] = 0
+    meta["cleared_boxes"] = CLEAR.get(f"{area}/{layer}", [])
     return rgba, meta
 
 

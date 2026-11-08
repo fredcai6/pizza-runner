@@ -21,6 +21,7 @@ nb.JOBS.update({"chicago-1": 234, "dc-1": 235, "naples-1": 236, "california-1": 
 PICKS = json.loads((Path(__file__).parent / "paper_picks_rest.json").read_text())
 # boxes (x0, y0, x1, y1) in final layer pixels: model-drawn lettering found on inspection (see report)
 nb.ERASE.update(PICKS.get("erase", {}))
+nb.CLEAR.update(PICKS.get("clear", {}))
 
 AREAS = {
     "chicago": ["loop", "lincolnpark", "wickerpark"],
