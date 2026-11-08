@@ -56,4 +56,4 @@ stride = 0.85
 clear = 0.8
 bob = 0
 ground = 165
-hip = [116, 138]
+hip = [116, 127]

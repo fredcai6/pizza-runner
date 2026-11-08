@@ -55,4 +55,4 @@ lean_down = 2
 thigh = 0.5
 leg_w = 5
 ground = 99
-hip = [66, 84]
+hip = [66, 73]

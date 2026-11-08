@@ -9,8 +9,10 @@ presample = true
 
 [[frames]]
 pose = "cold_a/1"
+scale = 1.04
 dx = -1
 
 [[frames]]
 pose = "cold_a/1"
+scale = 1.04
 dx = 1

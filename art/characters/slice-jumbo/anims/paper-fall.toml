@@ -1,14 +1,16 @@
-# From Tommy's sheet (references/sheet.png, cut by art/paper/sheetcut.py).
+# Tommy's sheet poses (art/paper/sheetcut.py), pepperoni edited off by Qwen (make_sheet_runs.py); picked 2026-11-08.
 master = "characters/slice-jumbo/references/paper-master.png"
 canvas = [330, 240]
 frame_ms = 90
 loop = true
-run = "sheet"
+run = "sheet_plain"
 presample = true
 
 [[frames]]
-pose = "jump/1"
+pose = "edit_jump/2"
+scale = 1.3
 
 [[frames]]
-pose = "jump/1"
+pose = "edit_jump/2"
+scale = 1.3
 dy = 1

@@ -5,9 +5,9 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 FORGE=${SPRITE_FORGE:-$HOME/projects/sprite-forge}
 export FORGE_PROJECT=$ROOT/art
 declare -A EYES=(
-  [ny]="76,40,9,11 89,39,6,10"
+  [ny]="64,52,5,5 80,48,5,5"
   [deep]="107,73,4,8 123,73,4,8"
-  [jumbo]="165,90,5,11 189,90,5,11"
+  [jumbo]="167,90,4,10 186,90,4,10"
   [naples]="57,45,6,5 75,45,6,5"
 )
 s=$1

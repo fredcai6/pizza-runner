@@ -1,9 +1,12 @@
+# Tommy's sheet poses (art/paper/sheetcut.py), pepperoni edited off by Qwen (make_sheet_runs.py); picked 2026-11-08.
 master = "characters/slice-ny/references/paper-master.png"
 canvas = [140, 124]
-job = 225
 frame_ms = 90
 loop = false
-run = "paper"
+run = "sheet_plain"
+presample = true
+
 [[frames]]
-pose = "jump_rise/2"
+pose = "edit_jump/2"
+scale = 1.36
 hold = 2

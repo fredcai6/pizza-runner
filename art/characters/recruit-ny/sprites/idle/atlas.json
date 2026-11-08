@@ -7,27 +7,27 @@
  "frame_ms": 220,
  "loop": true,
  "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
   "dirty": false,
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "f21e0fe84285eed56992b9804d088a5ca1321ee5",
+  "sha": "0fae5bcd3d6c8ce12c5c34dc3a2fa8788a29a4b7",
   "dirty": true
  },
  "source": {
-  "run": "paper",
+  "run": "sheet_keys",
   "model": "qwen-edit",
-  "job": 227,
+  "job": 253,
   "master": "characters/recruit-ny/references/paper-master.png",
-  "cell": 7.579,
+  "cell": 7.5,
   "border": 4,
   "palette": 48,
   "poses": [
    "master",
    "master",
-   "idle_b/2",
-   "idle_b/2",
+   "master",
+   "master",
    "master",
    "master"
   ]

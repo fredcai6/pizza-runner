@@ -49,7 +49,7 @@
           { who: 'naples', text: 'Mamma mia! The whole world? And nobody tells Napoli?' },
           { who: 'old', text: "**Pipe down**, Contessa. I'm getting to the string." },
         ] },
-        { pic: 'order-board', pan: [[0.42, 0.34, 1.7], [0.66, 0.3, 1.7]], ms: 16000, lines: [
+        { comp: 'board', lines: [
           { who: 'old', text: 'Whole pies, gone in a night. Some nights all that turns up is the box.' },
           { who: 'old', text: 'Someone is pulling the strings.' },
           { who: 'old', text: 'I tapped the dispatch line. Every vanishing starts with a ticket that says **ORDER**. I call them **The Order**.' },

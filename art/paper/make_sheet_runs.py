@@ -41,6 +41,10 @@ NOPEP = ("Remove every pepperoni slice: where each one was, draw the same melted
          "Keep exactly the same pose, outline, face, expression, crust, gloves, sneakers and white border. Change nothing else.")
 CUT = "/mnt/data/sprite-forge/runs/{}/sheet/qwen-edit/{}/1.png"   # sheetcut.py's poses
 PEPPERONI = ["slice-jumbo", "slice-ny"]   # sheets that print pepperoni on the slice
+# A pose (jump, land) is an edit, not a redraw: told to redraw the character, the model stood him up again (job 252).
+EDIT = ("Edit image 1: remove every pepperoni slice, filling each spot with the same melted yellow cheese and soft shading around it. "
+        "Change nothing else: the pose, size, position, outline, face, crust, gloves, sneakers, white border and the flat magenta background "
+        "all stay exactly as they are. No text or lettering.")
 SOURCE = {"recruit-ny": "slice-ny", "recruit-jumbo": "slice-jumbo", "recruit-deep": "slice-deep", "recruit-naples": "slice-naples"}
 
 HEAD = 'models = ["qwen-edit"]\nseeds = [1, 2, 3]\nwidth = 1024\nheight = 1024\ncomfy_args = ["--reserve-vram", "1.5"]\ntemplate = "{action}"\n'
@@ -59,7 +63,8 @@ def main():
     # Phil's sheet prints pepperoni on him; toppings are the player's pick, and painting them out in code tore his face.
     for name in PEPPERONI:
         body = HEAD + "".join(f'\n[shots.plain_{p}]\nrefs = {json.dumps([CUT.format(name, p), f"characters/{name}/references/sheet.png"])}\n'
-                              f'prompt = {json.dumps(TEMPLATE.format(action=NOPEP))}\n' for p in ["front", "jump", "land"])
+                              f'prompt = {json.dumps(TEMPLATE.format(action=NOPEP))}\n' for p in ["front"])
+        body += "".join(f'\n[shots.edit_{p}]\nrefs = {json.dumps([CUT.format(name, p)])}\nprompt = {json.dumps(EDIT)}\n' for p in ["jump", "land"])
         (ART / f"characters/{name}/runs/sheet_plain.toml").write_text("# Written by art/paper/make_sheet_runs.py\n" + body)
         print(f"characters/{name}/runs/sheet_plain.toml")
 

@@ -1,21 +1,22 @@
 {
  "model": "qwen-edit",
- "shot": "rc_B",
- "seed": 2,
- "prompt": "Full body character art for a 2D platformer, the whole figure visible head to sneakers, standing and facing slightly right. The character is the plain cheese version of the New York pizza slice mascot: a triangular slice with thin crust along the top, smooth golden melted cheese and NO pepperoni and no other toppings at all, a face on the cheese, thin arms and legs, white gloves, red sneakers. Image 1 is the finished pepperoni version of the same family: same material, border, shading, face and proportions, but this one is a plain cheese slice with no pepperoni. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "shot": "master",
+ "seed": 1,
+ "prompt": "Image 1 is a cartoon pizza mascot cut out as a paper sticker. Redraw the same character: the same shapes, colours, bold dark outline, thick white sticker border all around the silhouette, the same face style, white cartoon gloves and red sneakers. Make it a plain cheese slice: plain melted yellow cheese with no toppings, no pepperoni, the same crust, the same simple dot-eyed smiling face, standing straight, arms relaxed at the sides. The whole figure is visible in frame with the white border complete. Image 2 is this character's model sheet: match its drawing style; do not copy its layout, labels or other poses. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
  "refs": [
-  "characters/slice-ny/references/paper-master.png",
-  "paper/style_pm_sq.png"
+  "/mnt/data/sprite-forge/runs/slice-ny/sheet/qwen-edit/front/1.png",
+  "characters/slice-ny/references/sheet.png"
  ],
  "size": [
   1024,
   1024
  ],
  "steps": null,
- "secs": 17.2,
+ "secs": 31.1,
  "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
   "dirty": false,
   "comfy": "v0.44.0"
- }
+ },
+ "job": 253
 }
