@@ -7,21 +7,29 @@
  "frame_ms": 200,
  "loop": true,
  "rev": {
-  "sha": "c285e8ad6dad6ad644e864198b4b7a21adca8aa7",
-  "dirty": true,
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
   "comfy": "v0.44.0"
  },
+ "game_rev": {
+  "sha": "b432b5f81e13a8e38a79cfc9ba0b84c54a9db18a",
+  "dirty": true
+ },
  "source": {
-  "run": "keys3",
+  "run": "paper",
   "model": "qwen-edit",
-  "cell": 9.010416666666666,
+  "job": 233,
+  "master": "characters/slice-naples/references/paper-master.png",
+  "cell": 9.01,
+  "border": 3,
+  "palette": 48,
   "poses": [
-   "idle_a/1",
-   "idle_a/1",
-   "idle_b/1",
-   "idle_b/1",
-   "idle_c/1",
-   "idle_b/1"
+   "master",
+   "master",
+   "master",
+   "master",
+   "master",
+   "master"
   ]
  }
 }

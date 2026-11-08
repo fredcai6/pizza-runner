@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 768
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/mutant/references/paper-master.png", "paper/style_pm_sq.png"]
+prompt = "A blurry candid snapshot photo taken secretly from inside a bush: the sewer mutant from image 1, hunched beside an open storm drain with its scrap sack, peering around, caught mid-step. The whole image is a papercraft diorama made of cut card, flat bold shapes, a faint paper grain texture: a flat pastel paper street with paper buildings far behind. The subject keeps its white paper cut border and flat colours but is a little soft and out of focus with gentle motion blur, small in the middle of the frame. In the foreground, big out-of-focus dark green paper-cut leaves and twigs cover the corners and edges of the frame, as if shot through a hedge. Warm faded snapshot colours, a soft vignette. Image 2 shows only the paper material to borrow; do not copy its characters. Absolutely no text, letters, numbers, logos, date stamps, borders or frames anywhere in the image."
+
+[shots.m_B]
+refs = ["characters/mutant/references/paper-master.png", "paper/style_pm_sq.png"]
+prompt = "A blurry candid snapshot photo taken secretly from inside a bush: the sewer mutant from image 1, hunched beside an open storm drain with its scrap sack, peering around, caught mid-step. The whole image is a papercraft diorama made of cut card, flat bold shapes, a faint paper grain texture: a flat pastel paper street with paper buildings far behind. The subject keeps its white paper cut border and flat colours but is soft and badly out of focus with gentle motion blur, small in the middle of the frame. In the foreground, big out-of-focus dark green paper-cut leaves and twigs cover the corners and edges of the frame, as if shot through a hedge. Warm faded snapshot colours, a soft vignette. Image 2 shows only the paper material to borrow; do not copy its characters. Absolutely no text, letters, numbers, logos, date stamps, borders or frames anywhere in the image."

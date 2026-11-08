@@ -1,0 +1,33 @@
+{
+ "frame": {
+  "w": 120,
+  "h": 150
+ },
+ "count": 4,
+ "frame_ms": 240,
+ "loop": true,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "b432b5f81e13a8e38a79cfc9ba0b84c54a9db18a",
+  "dirty": true
+ },
+ "source": {
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 233,
+  "master": "characters/customer-chicago-loop/paper-master.png",
+  "cell": 7.493,
+  "border": 4,
+  "palette": 48,
+  "poses": [
+   "master",
+   "master",
+   "master",
+   "master"
+  ]
+ }
+}

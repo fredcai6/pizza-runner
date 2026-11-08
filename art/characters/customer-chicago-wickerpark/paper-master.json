@@ -1,0 +1,22 @@
+{
+ "model": "qwen-edit",
+ "shot": "m_A",
+ "seed": 1,
+ "prompt": "Full body character art for a 2D platformer, the whole figure visible head to feet, standing facing the viewer in three-quarter view. The character is a Wicker Park hipster bartender woman in a black dress with a black apron, tattoo sleeves on one arm, a dark high ponytail, big hoop earrings, a bar towel over one shoulder, holding a pint glass of beer, redrawn from image 1 with the same clothes and props. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple and readable: two small black dot eyes and a small simple mouth that shows her mood, almost no detail. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "refs": [
+  "characters/customer-chicago-wickerpark/references/current.png",
+  "paper/style_pm_tall.png"
+ ],
+ "size": [
+  896,
+  1152
+ ],
+ "steps": null,
+ "secs": 26.3,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "job": 233
+}

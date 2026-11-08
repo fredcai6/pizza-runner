@@ -1,4 +1,4 @@
-master = "references/master2.png"
+master = "references/paper-master.png"
 canvas = [170, 120]
 ground = 116
 hip_x = 70

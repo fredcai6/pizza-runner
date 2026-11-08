@@ -1,0 +1,14 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 896
+height = 1152
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/customer-chicago-wickerpark/references/current.png", "paper/style_pm_tall.png"]
+prompt = "Full body character art for a 2D platformer, the whole figure visible head to feet, standing facing the viewer in three-quarter view. The character is a Wicker Park hipster bartender woman in a black dress with a black apron, tattoo sleeves on one arm, a dark high ponytail, big hoop earrings, a bar towel over one shoulder, holding a pint glass of beer, redrawn from image 1 with the same clothes and props. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple and readable: two small black dot eyes and a small simple mouth that shows her mood, almost no detail. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+
+[shots.m_B]
+refs = ["characters/customer-chicago-wickerpark/references/current.png", "paper/style_pm_tall.png"]
+prompt = "Full body character art for a 2D platformer, the whole figure visible head to feet, standing facing the viewer in three-quarter view. The character is a Wicker Park hipster bartender woman in a black dress with a black apron, tattoo sleeves on one arm, a dark high ponytail, big hoop earrings, a bar towel over one shoulder, holding a pint glass of beer, redrawn from image 1 with the same clothes and props. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. Her face is simple and readable: two small black dot eyes and a small simple mouth that shows her mood, almost no detail. Gentle soft shading with a little highlight and a soft shade under each fold, still clean and flat. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."

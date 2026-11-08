@@ -1,0 +1,22 @@
+{
+ "model": "qwen-edit",
+ "shot": "m_A",
+ "seed": 1,
+ "prompt": "Full body character art for a 2D platformer, standing hunched in a side view facing right, the whole figure visible head to boots. The character is a Futurama-style sewer mutant scavenger, a hunched, lumpy, long-armed creature with green-grey skin, a bulging bald head with two uneven eyes of different sizes and a drooping underbite, wearing a tattered patched brown vest, torn shorts and tall brown rubber boots, a rusty sewer-pipe wrench tucked in a belt and a scrap sack, as if it climbed out of a storm drain. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours with one soft shade, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face is simple and readable: two blank black dot eyes of slightly different size, a droopy flat line mouth with a bit of underbite, almost no detail. Completely flat fills with no shading at all. Images after the first show only the drawing style to borrow (material, border, face flatness); do not copy their characters or animals. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands.",
+ "refs": [
+  "characters/mutant/references/master2.png",
+  "paper/style_pm_sq.png"
+ ],
+ "size": [
+  1024,
+  1024
+ ],
+ "steps": null,
+ "secs": 27.4,
+ "rev": {
+  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "job": 233
+}
