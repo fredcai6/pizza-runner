@@ -247,7 +247,7 @@
   const paintedReady = () => BOARD_ART.every(n => { const i = pic(`board/${n}`); return i.complete && i.naturalWidth; });
   // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; ninjas and mutants go up after the
   // level that reveals them (once met: headquarters().known).
-  const SUSPECTS = [['teen', 450, 205, 210, -4], ['turtle', 462, 378, 210, 3], ['ninja', 668, 200, 180, 3], ['mutant', 672, 360, 180, -3]];
+  const SUSPECTS = [['teen', 445, 205, 196, -4], ['turtle', 455, 372, 196, 3], ['ninja', 668, 200, 214, 3], ['mutant', 672, 365, 214, -3]];
   // A cut-out pinned on the cork. Returns where its pin goes.
   function stuck(ctx, img, cx, cy, w, tilt) {
     const h = w * img.naturalHeight / img.naturalWidth, r = tilt * Math.PI / 180;
@@ -267,7 +267,7 @@
     const n = Math.min(hq.receipts + 3, 18);
     for (let i = 0; i < n; i++) {
       const col = i % 6, row = Math.floor(i / 6);
-      const at = stuck(ctx, art(`order-${1 + (i % 2)}`), 806 + col * 72 + (rnd() - 0.5) * 22, 168 + row * 92 + (rnd() - 0.5) * 18, 88, (rnd() - 0.5) * 16);
+      const at = stuck(ctx, art(`order-${1 + (i % 2)}`), 832 + col * 70 + (rnd() - 0.5) * 22, 168 + row * 92 + (rnd() - 0.5) * 18, 88, (rnd() - 0.5) * 16);
       if (i % 3 === 0) pins.push(at);
     }
     for (const [type, cx, cy, w, tilt] of SUSPECTS) {

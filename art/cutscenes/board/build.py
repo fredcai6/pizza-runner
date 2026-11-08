@@ -41,6 +41,28 @@ def cut(name, size):
     print(name, pic.size)
 
 
+# Teen and turtle were lit brighter and cooler than ninja and mutant: shift them onto the pair's colour statistics (per channel mean and
+# spread over the opaque pixels), most of the way, so all four read as one batch of photos.
+MATCH = {"polaroid-teen": ["polaroid-ninja", "polaroid-mutant"], "polaroid-turtle": ["polaroid-ninja", "polaroid-mutant"]}
+STRENGTH = 0.8
+
+
+def stats(names):
+    px = np.concatenate([(lambda a: a[a[..., 3] > 200][:, :3])(np.asarray(Image.open(OUT / f"{n}.webp").convert("RGBA")).astype(float))
+                         for n in names])
+    return px.mean(0), px.std(0)
+
+
+def tone(name, refs):
+    im = np.asarray(Image.open(OUT / f"{name}.webp").convert("RGBA")).astype(float)
+    m, sd = stats([name])
+    rm, rsd = stats(refs)
+    moved = (im[..., :3] - m) / sd * rsd + rm
+    im[..., :3] = np.clip(im[..., :3] + STRENGTH * (moved - im[..., :3]), 0, 255)
+    Image.fromarray(im.astype(np.uint8), "RGBA").save(OUT / f"{name}.webp", quality=92, method=6)
+    print(name, "toned to", ", ".join(refs))
+
+
 def room():
     im = Image.open(HERE / "room.png").convert("RGB")
     im = im.resize((ROOM_W, round(im.height * ROOM_W / im.width)), Image.LANCZOS)
@@ -65,3 +87,5 @@ if __name__ == "__main__":
     room()
     for k, v in CUTS.items():
         cut(k, v)
+    for k, refs in MATCH.items():
+        tone(k, refs)
