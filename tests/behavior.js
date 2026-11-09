@@ -11,10 +11,11 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
   const page = await (await b.newContext({ viewport: { width: 844, height: 390 } })).newPage();
   page.on('pageerror', e => { console.log('page error', e.message); process.exitCode = 1; });
   await page.goto(`http://localhost:${serve.address().port}/?debug=1`);
-  const results = await page.evaluate(() => {
+  const results = await page.evaluate(async () => {
     const C = PR_CONTENT, R = PR_RULES, P = PR_PLAY, GROUND = R.GROUND, out = [];
     const ok = (name, pass, detail = '') => out.push([name, !!pass, String(detail)]);
     const SAFE = C.TUNING.spawnSafe;
+    await Promise.all(C.CITIES.map(c => PR_SPRITES.loadCity(c)));
     const canvas = document.getElementById('stage');
     // One empty street with just the enemy under test on it.
     const scene = (cityIndex, style, topping, enemies = []) => {
@@ -68,10 +69,10 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       s.input.right = false; s.steps(40);
       ok('then it is gone for good', !s.street.enemies[0].alive && s.run.actors.length === 0);
       const s2 = scene(1, 'ny', 'pepperoni', [{ type: 'mutant', x: 300, drain: 300 }]);
-      s2.run.p.x = 460; s2.steps(78); s2.run.p.facing = -1; s2.input.q.power = true; s2.steps(60);
+      s2.run.p.x = 460; s2.steps(58); s2.run.p.facing = -1; s2.input.q.power = true; s2.steps(60);
       ok('it catches thrown food and goes down', !s2.street.enemies[0].alive && s2.run.heat > 95, s2.run.heat);
     }
-    { // Ninja: catches what you throw, bows, throws it back; the third time it runs. Hits last across slices.
+    { // Ninja: catches what you throw, bows, throws it back; the second hit sends it off. Hits last across slices.
       const s = scene(2, 'jumbo', 'pepperoni', [{ type: 'ninja', x: 720 }]);
       s.street.platforms.push({ x: 0, y: GROUND - 330, w: 3000, ledge: true }); s.run.enter(s.street.id, 300);
       s.input.q.power = true; s.steps(20);
@@ -87,10 +88,9 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       ok('it follows along up there', s.run.actors[0].y < GROUND - 200, s.run.actors[0].y);
       const again = new P.Run(canvas, s.input, { camp: s.camp, city: s.city, world: s.camp.world, slice: s.camp.pies.dc.slices[1], start: { street: s.street.id, x: 300 }, onEnd: () => {} });
       ok('a new slice finds its hit still counted', again.actors[0].e.hits === 1 && again.actors[0].state === 'perch');
-      R.strike(s.camp, e);
       ok('and it has not left yet', e.alive);
       again.hit(again.actors[0], 'shot', 'pepperoni');
-      ok('the third time it runs off for good', !e.alive && again.actors[0].state === 'flee' && !again.foes.length, again.actors[0].state);
+      ok('the second hit sends it off for good', !e.alive && again.actors[0].state === 'flee' && !again.foes.length, again.actors[0].state);
       const s2 = scene(2, 'ny', 'pepperoni', [{ type: 'ninja', x: 500 }]);
       s2.run.p.x = 470; s2.run.p.y = GROUND - 280; s2.run.p.vy = 6; s2.run.p.grounded = false; const heat = s2.run.heat; s2.steps(40);
       ok('jumping on a ninja hurts', s2.run.heat < heat - 5 && s2.street.enemies[0].alive, s2.run.heat);
@@ -172,6 +172,80 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       const reach = dx => { const t = scene(0, 'ny', 'garlic', [{ type: 'teen', x: 300 + dx, range: 0 }]); t.run.aura = true; t.run.p.x = 300 - t.run.p.w / 2; t.run.p.x = 300 - t.run.p.w / 2; t.steps(60); return !t.street.enemies[0].alive; };
       ok('the stank gets a teen at 300 px', reach(300));
       ok('but not one at 420 px', !reach(420));
+    }
+
+    { // Feet land on what is drawn: a solid is as tall as its painting, for every city's barricade and every pizza.
+      for (const [ci, style] of [[0, 'ny'], [1, 'deep'], [2, 'jumbo'], [3, 'naples']]) {
+        const city = C.CITIES[ci], s = scene(ci, style, 'pepperoni');
+        s.street.barricades.push({ x: 560, w: 80, h: 100 }); s.street.boxes.push({ x: 900, w: 84, h: 84, broken: false });
+        s.run.enter(s.street.id, 300);
+        const bar = s.street.barricades[0], want = PR_SPRITES.surface(`${city.id}/barricade`), box = s.street.boxes[0];
+        s.run.p.x = 520; s.run.p.y = GROUND - bar.h - s.run.p.h - 200; s.run.p.vy = 4; s.run.p.grounded = false; s.steps(120);
+        ok(`${style}: the ${city.id} barricade is as tall as it is painted`, want > 40 && bar.h === want, `${bar.h} vs ${want}`);
+        ok(`${style}: feet rest on the barricade's painted top`, s.run.p.grounded && Math.abs(s.run.p.y + s.run.p.h - (GROUND - want)) < 0.01, s.run.p.y + s.run.p.h);
+        ok(`${style}: a crate is as tall as its painting`, box.h === PR_SPRITES.surface('props/box'), box.h);
+      }
+    }
+    { // Garlic and onion work on every kind, and a ninja runs from it for good, even from a fire escape.
+      const stank = (type, extra = {}, ci = 2) => { const t = scene(ci, 'ny', 'garlic', [{ type, x: 560, range: 0, ...extra }]); t.run.aura = true; t.steps(45); return t; };
+      ok('the stank stuns a turtle', stank('turtle').run.actors[0].state === 'stun');
+      ok('and a teen runs off', !stank('teen').street.enemies[0].alive);
+      const m = stank('mutant', { drain: 560 }); m.run.actors[0].state = 'chase'; m.run.actors[0].rise = 1; m.steps(45);
+      ok('and a mutant is seen off', !m.street.enemies[0].alive);
+      const n = stank('ninja');
+      ok('a ninja runs away from it for good', !n.street.enemies[0].alive && n.camp.seen['ninja.gone']);
+      const high = scene(2, 'ny', 'garlic', [{ type: 'ninja', x: 560, range: 0, hits: 1 }]);
+      high.street.platforms.push({ x: 0, y: GROUND - 330, w: 3000, ledge: true }); high.run.enter(high.street.id, 300);
+      high.run.aura = true; high.steps(50);
+      ok('even one up on a fire escape', !high.street.enemies[0].alive, high.run.actors[0] && high.run.actors[0].y);
+    }
+    { // Two quick hits on a ninja are two hits.
+      const s = scene(2, 'ny', 'pepperoni', [{ type: 'ninja', x: 640, range: 0 }]);
+      s.run.charges = 3; s.input.q.power = true; s.steps(1);
+      const first = s.run.actors[0].e.hits;
+      s.steps(12); s.input.q.power = true; s.steps(30);
+      ok('the first shot counts', first === 0 || first === 1, first);
+      ok('a second shot a moment later counts too, and it is gone', s.street.enemies[0].hits === 2 && !s.street.enemies[0].alive, s.street.enemies[0].hits);
+      const sc = scene(2, 'ny', 'pineapple', [{ type: 'ninja', x: 640, range: 0 }]);
+      sc.input.q.power = true; sc.steps(40);
+      ok('three scattered shots landing together are one hit', sc.street.enemies[0].hits === 1 && sc.street.enemies[0].alive, sc.street.enemies[0].hits);
+      const f = scene(2, 'ny', 'pepperoni', [{ type: 'ninja', x: 640, range: 0 }]); f.run.hit(f.run.actors[0], 'shot', null);
+      ok('a hit shows a hurt flash', f.run.actors[0].hurt > 0);
+    }
+    { // A ninja on a fire escape cannot be bumped, so a tall pizza walks the platform beneath it.
+      const s = scene(2, 'jumbo', 'pepperoni', [{ type: 'ninja', x: 700, range: 0, hits: 1 }]);
+      s.street.platforms.push({ x: 0, y: GROUND - 330, w: 3000, ledge: true }, { x: 500, y: GROUND - 215, w: 400 }); s.run.enter(s.street.id, 300);
+      s.run.p.x = 560; s.run.p.y = GROUND - 215 - s.run.p.h; s.run.p.grounded = true; s.run.invuln = 0; s.run.actors[0].cd = 1e9; s.input.right = true; s.steps(60);
+      ok('Jumbo walks under it without a bite', s.run.bites === 0 && s.run.p.x > 700, `${s.run.bites} ${s.run.p.x}`);
+    }
+    { // A special does not stack hit-stops into a stutter, and costs no more to draw than a still frame.
+      const s = scene(1, 'deep', 'sausage', [{ type: 'turtle', x: 500, range: 0 }, { type: 'teen', x: 560, range: 0 }, { type: 'ninja', x: 620, range: 0 }, { type: 'turtle', x: 440, range: 0 }]);
+      s.run.p.x = 470; s.input.q.special = true;
+      let frozen = 0, peak = 0;
+      for (let i = 0; i < 160 && !s.run.done; i++) { s.run.step(); if (s.run.freeze > 0) frozen++; peak = Math.max(peak, s.run.freeze); }
+      ok('a slam into four enemies holds the picture a few frames in all', frozen <= 8 && peak <= 4, `${frozen} frames, peak ${peak}`);
+      const a = scene(1, 'ny', 'garlic', [{ type: 'teen', x: 520, range: 0 }, { type: 'turtle', x: 560, range: 0 }, { type: 'turtle', x: 600, range: 0 }]);
+      a.run.aura = true; let held = 0; for (let i = 0; i < 120; i++) { a.run.step(); if (a.run.freeze > 0) held++; }
+      ok('the stank never freezes the picture', held === 0, held);
+    }
+    { // Crates give and barricades do not, and bumping one says which.
+      const s = scene(0, 'ny', 'pepperoni');
+      s.street.barricades.push({ x: 540, w: 80, h: 100 }); s.run.enter(s.street.id, 300);
+      s.input.q.power = true; s.steps(30);
+      ok('a shot does not break a barricade', s.run.solids().includes(s.street.barricades[0]));
+      s.input.right = true; s.steps(60);
+      ok('walking into a barricade says it is solid', s.run.bark === C.TUNING.hints.barricade, s.run.bark);
+      const b = scene(0, 'ny', null);
+      b.street.boxes.push({ x: 540, w: 84, h: 84, broken: false }); b.run.enter(b.street.id, 300); b.input.right = true; b.steps(60);
+      ok('walking into a crate says it gives', b.run.bark === C.TUNING.hints.box, b.run.bark);
+    }
+    { // The corner of the screen carries a thermometer and the spare slices, and no counter text.
+      const s = scene(0, 'ny', 'pepperoni');
+      s.camp.pies.newyork.slices = [0, 1, 2, 3].map(id => ({ id, style: 'ny', topping: 'pepperoni', status: id === 3 ? 'lost' : 'ready' }));
+      s.run.slice = s.camp.pies.newyork.slices[0];
+      const texts = [], g = s.run.ctx, orig = g.fillText.bind(g); g.fillText = (t, ...r) => { texts.push(t); return orig(t, ...r); };
+      s.run.draw(); g.fillText = orig;
+      ok('no slice or topping counter is written', !texts.some(t => /Topping|×|plain cheese/.test(t)), texts.join(' | '));
     }
     return out;
   });
