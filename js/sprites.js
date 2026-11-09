@@ -74,10 +74,10 @@
 
   // Painted layers are optional, and each one simply appears once its file exists.
   const layers = {};
-  const CITY_LAYERS = ['platform', 'barricade', 'barrel', 'barrel-out'];
+  const CITY_LAYERS = ['platform', 'barricade'];
   const AREA_LAYERS = ['far', 'mid', 'near', 'ground', 'door'];
   const TOPPINGS = ['pepperoni', 'jalapeno', 'garlic', 'mushroom', 'basil', 'pineapple', 'sausage'];
-  const PROPS = ['box', 'box-pile', 'box-broken', 'drain', 'sign', 'ledge', 'star', ...TOPPINGS.flatMap(t => [`pickup-${t}`, `shot-${t}`, ...['ny', 'deep', 'jumbo', 'naples'].map(s => `piece-${t}-${s}`)])];
+  const PROPS = ['box', 'box-pile', 'box-broken', 'drain', 'sign', 'ledge', 'star', 'fire', 'fire-2', 'fire-out', ...TOPPINGS.flatMap(t => [`pickup-${t}`, `shot-${t}`, ...['ny', 'deep', 'jumbo', 'naples'].map(s => `piece-${t}-${s}`)])];
   const SHARED = ['hq/back', 'hq/mid', 'hq/table', 'hq/front', 'hq/alewife-polaroid', ...PROPS.map(p => `props/${p}`)];
 
   const fetchLayers = names => Promise.all(names.map(name => new Promise(done => {

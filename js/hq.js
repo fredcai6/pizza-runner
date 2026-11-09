@@ -251,7 +251,7 @@
 
   // Tommy's board room (art/cutscenes/board): the painted room, the live evidence pinned on its cork, Dayold at his chair, and the
   // recruits from behind, cut from the same painting, drawn last so he sits behind them. Room space is 1280x720.
-  const BOARD_ART = ['room', 'room-front', 'dayold', 'dayold-pointer', 'dayold-think', 'dayold-salute', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
+  const BOARD_ART = ['room', 'room-front', 'dayold', 'dayold-pointer', 'dayold-think', 'dayold-salute', 'dayold-slam', 'polaroid-teen', 'polaroid-turtle', 'polaroid-ninja', 'polaroid-mutant', 'order-1', 'order-2'];
   const paintedReady = () => BOARD_ART.every(n => { const i = pic(`board/${n}`); return i.complete && i.naturalWidth; });
   // Suspects: [type, centre x, centre y, width, tilt]. Teens and turtles are his from the start; ninjas and mutants go up after the
   // level that reveals them (once met: headquarters().known).
@@ -304,7 +304,7 @@
       ctx.restore();
     }
     // Dayold at his chair, rocking a little while he talks. `sticker` picks the pose: pointing (scene 1), pointer (the intel),
-    // think (stroking the mustache), salute.
+    // think (stroking the mustache), slam (fist on the desk), salute (a lost city).
     const d = art(shot.sticker ? `dayold-${shot.sticker}` : 'dayold'), dw = 340, dh = dw * d.naturalHeight / d.naturalWidth;
     const bob = view.mood === 'talk' ? Math.sin(ms / 110) * 3 : Math.sin(ms / 900) * 1.5;
     ctx.drawImage(d, -6, 538 - dh + bob, dw, dh);

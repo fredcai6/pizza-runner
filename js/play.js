@@ -990,7 +990,8 @@
     drawFires() {
       const { ctx } = this;
       for (const f of this.street.fires) {
-        if (S.prop(ctx, `${this.city.id}/${f.lit ? 'barrel' : 'barrel-out'}`, f.x, GROUND)) continue;
+        // A little pixel campfire with a plus on it, flickering between two frames; embers once used.
+        if (S.prop(ctx, `props/${f.lit ? (Math.floor(this.frame / 9) % 2 ? 'fire-2' : 'fire') : 'fire-out'}`, f.x, GROUND)) continue;
         ctx.fillStyle = '#39302b'; ctx.fillRect(f.x - 27, GROUND - 62, 54, 62);
         if (f.lit) { ctx.font = '46px serif'; ctx.textAlign = 'center'; ctx.fillText('🔥', f.x, GROUND - 62); }
       }

@@ -140,7 +140,7 @@
           { who: 'deep', text: "Vinny wasn't lying, boss. Something came up out of the storm drain. Some kind of mutant." },
           { who: 'deep', text: 'It chased me three blocks. I do not do three blocks. Is any of this worth it?' },
         ] },
-        { comp: 'boardDayold', lines: [
+        { comp: 'boardDayold', sticker: 'slam', lines: [
           { who: 'old', thump: true, text: '**THAT** is why we do this!' },
           { who: 'old', text: 'Why we keep the ovens hot! So tonight, somewhere, a family sleeps warm!' },
           { who: 'old', text: "A whole pie, shoulder to shoulder in the box. Lid down. Cozy. They'll never know your name." },
