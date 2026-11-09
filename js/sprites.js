@@ -131,6 +131,24 @@
     return true;
   }
 
+  // How high a painted prop's standing surface is above its foot: the first row from the top that is at least
+  // 60% as wide as the prop's widest, so a crate's puffy lid or a notch in a barrier does not set the height.
+  const surfaces = {};
+  function surface(name) {
+    if (name in surfaces) return surfaces[name];
+    const image = layers[name];
+    if (!image) return null;
+    const c = document.createElement('canvas');
+    c.width = image.width; c.height = image.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(image, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height).data, rows = [];
+    for (let y = 0; y < c.height; y++) { let n = 0; for (let x = 0; x < c.width; x++) if (data[(y * c.width + x) * 4 + 3] > 128) n++; rows.push(n); }
+    const wide = Math.max(...rows), top = rows.findIndex(n => n >= wide * 0.6);
+    let foot = rows.length; while (foot > top && !rows[foot - 1]) foot--;
+    return (surfaces[name] = foot - top);
+  }
+
   // Repeats a painted tile across a span, top-left at (x, y).
   function strip(ctx, name, x, y, w) {
     const image = layers[name];
@@ -266,5 +284,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, loadCity, needsCity, layer, tile, ground, prop, strip, has, draw, portrait, portraitUrl, stamp, size };
+  root.PR_SPRITES = { load, loadLayers, loadCity, needsCity, layer, tile, ground, prop, strip, surface, has, draw, portrait, portraitUrl, stamp, size };
 })(window);

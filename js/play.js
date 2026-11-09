@@ -8,6 +8,9 @@
   const INK = '#2a1830';
   // Characters stand this far into the street surface, as feet do in a picture seen from slightly above.
   const FOOT_SINK = 8;
+  // On a platform's painted top face the feet sink a little, as on the street; on a crate or barricade, barely.
+  const TOP_SINK = { platform: 5, solid: 2 };
+  const HIT_GAP = 8, MUTANT_GAP = 450;
   const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
 
   class Run {
@@ -21,8 +24,8 @@
       // Every hit takes a bite, and nothing grows it back: heat can only come back up to what is left.
       this.bites = 0; this.cap = this.heatMax;
       this.p = { x: 0, y: GROUND - st.h, vx: 0, vy: 0, w: st.w, h: st.h, grounded: true, facing: 1 };
-      this.invuln = 0; this.specialCd = 0; this.specialMax = Math.round(((C.TUNING.cooldown || {})[slice.style] || 0) * 60); this.ready = 0; this.shownHeat = this.heat; this.shownCap = this.cap; this.ghost = this.heat; this.fumes = []; this.smash = 0; this.pounding = false; this.splat = 0; this.pace = 0;
-      this.coyote = 0; this.buffer = 0; this.bounced = false;
+      this.invuln = 0; this.specialCd = 0; this.specialMax = Math.round(((C.TUNING.cooldown || {})[slice.style] || 0) * 60); this.shownHeat = this.heat; this.shownCap = this.cap; this.ghost = this.heat; this.fumes = []; this.smash = 0; this.pounding = false; this.splat = 0; this.pace = 0;
+      this.coyote = 0; this.buffer = 0; this.bounced = false; this.perch = 0;
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
       this.speech = null; this.quipGap = 0; this.quipCount = {};
@@ -45,11 +48,20 @@
       this.area = this.city.areas[street.area];
       this.junction = R.junction(this.world, street);
       R.clearSpawn(street, x);
+      this.fit(street);
       this.actors = street.enemies.filter(e => e.alive).map(e => this.actor(e));
       this.shots = []; this.foes = []; this.drops = []; this.temp = []; this.sauce = [];
       this.p.x = x; this.p.y = GROUND - this.p.h; this.p.vy = 0; this.p.vx *= 0.5; this.p.grounded = true;
       this.cam = this.camera(); this.warned = false;
     }
+
+    // What you can stand on is as tall as it is drawn, so feet land on the painted top.
+    fit(street) {
+      for (const c of street.barricades) c.h = S.surface(`${this.city.id}/barricade`) || c.h;
+      for (const b of street.boxes) b.h = S.surface('props/box') || b.h;
+    }
+
+    isBox(c) { return this.street.boxes.includes(c); }
 
     actor(e) {
       const a = { e, x: e.x, y: e.y, dir: -1, home: e.x, cd: 40 + e.id * 13 % 60, state: 'walk', t: 0, rise: 1, size: SIZE[e.type] * (1 + Math.min(e.power, 4) * 0.16) };
@@ -81,6 +93,8 @@
       this.quipGap = QUIP_GAP;
     }
     jolt(t) { this.trauma = Math.min(1, this.trauma + t); }
+    // A hit holds the picture for a few frames. Holds never add up: a second one inside the first just extends to its end.
+    hold(n) { this.freeze = Math.max(this.freeze, Math.min(n, 4)); }
 
     end(outcome, killer) {
       if (this.done) return;
@@ -114,11 +128,7 @@
       if (this.speech && ++this.speech.age > this.speech.text.length * 2 + QUIP_HOLD) this.speech = null;
       if (this.invuln > 0) this.invuln--;
       if (this.denied > 0) this.denied--;
-      if (this.ready > 0) this.ready--;
-      if (this.specialCd > 0 && --this.specialCd === 0) {
-        this.ready = 50; A.play('note');
-        this.bursts.push({ x: p.x + p.w / 2, y: p.y + p.h / 2, r: st.height * 0.6, t: 14, color: '#ffe27a' });
-      }
+      if (this.specialCd > 0 && --this.specialCd === 0) A.play('note');
       if (this.smash > 0) this.smash--;
       if (this.splat > 0) this.splat--;
       this.wobbleStep();
@@ -132,8 +142,9 @@
       p.x = Math.max(0, Math.min(this.street.length - p.w, p.x + p.vx));
       for (const c of this.solids()) {
         if (p.y + p.h > GROUND - c.h + 3 && p.x + p.w > c.x && p.x < c.x + c.w) {
-          if (dashing && c.h === 84) { this.breakBox(c); continue; }
+          if (dashing && this.isBox(c)) { this.breakBox(c); continue; }
           p.x = p.vx > 0 ? c.x - p.w : c.x + c.w; p.vx = 0;
+          this.bump(c);
         }
       }
 
@@ -160,11 +171,11 @@
         p.y = GROUND - p.h; p.vy = 0; p.grounded = true;
         if (this.pounding) { this.pounding = false; this.smash = 0; this.shockwave(); }
       }
-      const tops = this.solids().map(c => ({ x: c.x, w: c.w, y: GROUND - c.h, box: c.h === 84 ? c : null }));
+      const tops = this.solids().map(c => ({ x: c.x, w: c.w, y: GROUND - c.h, solid: true, box: this.isBox(c) ? c : null }));
       for (const pl of [...this.street.platforms, ...tops]) {
         if (p.vy >= 0 && lastBottom <= pl.y + 1 && p.y + p.h >= pl.y && p.x + p.w > pl.x && p.x < pl.x + pl.w) {
           if (pl.box && (this.pounding || (st.stomp && fall > 10))) { this.breakBox(pl.box); continue; }
-          p.y = pl.y - p.h; p.vy = 0; p.grounded = true;
+          p.y = pl.y - p.h; p.vy = 0; p.grounded = true; this.perch = pl.solid ? TOP_SINK.solid : TOP_SINK.platform;
           if (this.pounding) { this.pounding = false; this.smash = 0; this.shockwave(); }
         }
       }
@@ -196,6 +207,13 @@
     }
 
     solids() { return [...this.street.barricades, ...this.street.boxes.filter(b => !b.broken)]; }
+
+    // Walking into something solid says once what it is: a crate gives, a barricade does not.
+    bump(c) {
+      const kind = this.isBox(c) ? 'box' : 'barricade', seen = this.hinted || (this.hinted = new Set());
+      if (seen.has(kind)) return;
+      seen.add(kind); this.say(C.TUNING.hints[kind]);
+    }
 
     // Jelly on a spring: every pizza has one, and each has its own stiffness.
     wobbleStep() {
@@ -301,9 +319,9 @@
       const reach = st.flop ? 340 : 260, x = p.x + p.w / 2;
       A.play('smash');
       this.bursts.push({ x, y: GROUND, r: reach, t: 16, color: '#f3e2bd' });
-      this.jolt(st.flop ? 0.7 : 0.85); this.freeze = 4; this.wobV += st.flop ? 0.7 : 0.4;
+      this.jolt(st.flop ? 0.5 : 0.6); this.hold(3); this.wobV += st.flop ? 0.7 : 0.4;
       if (st.flop) this.splat = 26;
-      this.puff(x, GROUND, 16);
+      this.puff(x, GROUND, 8);
       for (const a of this.actors) if (Math.abs(a.x - x) < reach && a.y > GROUND - 110) this.hit(a, 'smash');
       for (const b of this.street.boxes) if (!b.broken && Math.abs(b.x - x) < reach) this.breakBox(b);
       this.gateHit(x, reach);
@@ -353,6 +371,7 @@
       const cx = p.x + p.w / 2;
       for (const a of this.actors) {
         const e = a.e, dist = Math.abs(a.x - cx), power = 1 + Math.min(e.power, 4) * 0.12;
+        if (a.hurt > 0) a.hurt--;
         if (a.leaving) { this.leave(a); continue; }
         if (dist > 1350 && a.state !== 'chase' && a.state !== 'perch') continue;
         if (e.type === 'teen') this.teen(a, dist, power);
@@ -441,20 +460,21 @@
       switch (a.state) {
         case 'lurk':
           if (cx > a.x + 60 && cx < a.x + 900) {
-            a.state = 'peek'; a.t = 0; this.say(C.BARKS.drain); this.note('mutant', 'peeks'); A.play('note'); this.quip('mutant');
+            a.state = 'peek'; a.t = 0; this.note('mutant', 'peeks'); this.say(C.BARKS.drain); A.play('note'); this.quip('mutant'); this.puff(a.x, GROUND, 6);
           }
           break;
         case 'peek':
           a.t++;
-          a.rise = a.t < 12 ? a.t / 12 * 0.35 : 0.35;
-          if (a.t > 72) { a.state = 'rise'; a.t = 0; }
+          a.rise = a.t < 12 ? a.t / 12 * 0.45 : 0.45;
+          if (a.t > 54) { a.state = 'rise'; a.t = 0; }
           break;
         case 'rise':
           a.rise = Math.min(1, a.rise + 0.05);
           if (a.rise >= 1) { a.state = 'chase'; this.note('mutant', 'chases'); }
           break;
         case 'chase': {
-          const speed = Math.max(this.style.speed * 1.35, 8);
+          // Far behind, it sprints to close the gap so it is seen on the screen before it arrives.
+          const speed = Math.max(this.style.speed * 1.35, 8) * (Math.abs(cx - a.x) > MUTANT_GAP ? 1.6 : 1);
           a.dir = Math.sign(cx - a.x) || 1;
           a.x += a.dir * Math.min(speed, Math.abs(cx - a.x));
           break;
@@ -489,7 +509,8 @@
 
     touching(a) {
       const { p } = this, half = a.size / 2;
-      if (a.rise < 0.5) return false;
+      // Up on a fire escape it throws from above and cannot be bumped, so a tall pizza walks under it.
+      if (a.rise < 0.5 || a.y < GROUND - 60) return false;
       return p.x + p.w - 6 > a.x - half && p.x + 6 < a.x + half && p.y + p.h > a.y - a.size && p.y < a.y;
     }
 
@@ -538,26 +559,30 @@
     }
 
     // What each hit does depends entirely on who it hits. how is 'shot', 'wave', 'aura' or 'smash',
-    // and topping is what was thrown, if anything was.
+    // and topping is what was thrown, if anything was. A hit that lands within a few frames of the last one
+    // on the same enemy is the same hit (a scatter's three shots, a dash dragging through); a second one after that counts.
     hit(a, how, topping = null) {
       const e = a.e;
-      if (a.leaving || a.state === 'bow') return;
-      A.play('smash');
-      this.jolt(0.2); this.freeze = 3;
+      if (a.leaving || this.frame - (a.hitAt ?? -99) < HIT_GAP) return;
+      if (e.type === 'turtle') {
+        const state = how === 'smash' || how === 'aura' ? 'stun' : 'munch';
+        if (a.state === state) { a.t = Math.max(a.t, 30); return; }
+      }
+      a.hitAt = this.frame;
+      if (how !== 'aura') { A.play('smash'); if (how !== 'smash') { this.jolt(0.14); this.hold(2); } }
       this.bursts.push({ x: a.x, y: a.y - 40, r: 48, t: 10, color: '#ffffff' });
       switch (e.type) {
         case 'teen': this.note('teen', 'flees'); this.flee(a); break;
         case 'turtle':
-          a.state = how === 'smash' ? 'stun' : 'munch'; a.t = how === 'smash' ? STUN : CHOMP;
+          a.state = how === 'smash' || how === 'aura' ? 'stun' : 'munch'; a.t = a.state === 'stun' ? STUN : CHOMP;
           this.note('turtle', how === 'smash' ? 'armored' : 'munch');
           break;
         case 'mutant': this.feedMutant(a); break;
         case 'ninja': {
-          if (this.frame - (a.struck ?? -99) < 40) return;
-          a.struck = this.frame;
-          const dropped = R.strike(this.camp, e);
+          // The stank is too much for a ninja: it is off at once and stays off. Otherwise each hit counts.
+          const dropped = how === 'aura' ? R.defeat(this.camp, e) : R.strike(this.camp, e);
+          a.hurt = 22;
           if (dropped) {
-            // Had enough: it runs off, and drops whatever it took from earlier slices.
             this.removed++; a.leaving = true; a.t = 0; a.state = 'flee'; a.dir = Math.sign(a.x - this.p.x) || 1;
             for (const t of dropped) this.drops.push({ x: a.x, y: Math.min(a.y, GROUND) - 50, topping: t });
             this.say(C.BARKS.ninjaGone); this.note('ninja', 'gone');
@@ -584,7 +609,7 @@
       this.quip('hurt');
       const chunk = this.heatMax / C.BITES;
       this.bites++; this.cap = this.heatMax - this.bites * chunk; this.heat = Math.min(this.cap, this.heat - chunk);
-      this.invuln = 90; this.jolt(0.55); this.freeze = 5; this.wobV += 0.2;
+      this.invuln = 90; this.jolt(0.45); this.hold(4); this.wobV += 0.2;
       A.play('hit');
       this.p.vy = -10; this.p.vx = this.p.x < fromX ? -9 : 9;
       if (this.heat <= 0.01) this.end('dead', owner);
@@ -688,7 +713,7 @@
     wispStep() {
       const { p } = this, f = Math.max(0, this.heat / this.heatMax);
       this.sweep += (p.vx - this.sweep) * 0.12;
-      if (Math.random() < f * f * 0.16 * (p.w / 72)) this.wisps.push({ at: 0.1 + Math.random() * 0.8, seed: Math.random() * 7, age: 0, t: 30 + Math.random() * 24, len: 16 + f * 30 * Math.sqrt(p.w / 72), size: f > 0.55 ? 4 : 3 });
+      if (Math.random() < f * f * 0.16 * (p.w / 72)) this.wisps.push({ at: 0.1 + Math.random() * 0.8, seed: Math.random() * 7, age: 0, t: 30 + Math.random() * 24, len: 16 + f * 30 * Math.sqrt(p.w / 72), size: f > 0.55 ? 6 : 5 });
       this.wisps = this.wisps.filter(w => ++w.age < w.t);
     }
 
@@ -701,8 +726,10 @@
       }
       if (++this.auraTick % AURA_USE === 0) this.spend(1);
       if (this.auraTick % 20) return;
+      // It rises, so it counts as half as far up: whoever is on a fire escape above is in it too. Every kind is.
+      const cx = this.p.x + this.p.w / 2, cy = this.p.y + this.p.h / 2;
       for (const a of this.actors) {
-        if (a.rise > 0.3 && Math.hypot(a.x - this.p.x - this.p.w / 2, a.y - 50 - this.p.y - this.p.h / 2) < C.TUNING.auraRadius && a.e.type !== 'turtle') this.hit(a, 'aura');
+        if (a.rise > 0.3 && Math.hypot(a.x - cx, (a.y - 50 - cy) * 0.5) < C.TUNING.auraRadius) this.hit(a, 'aura');
       }
     }
 
@@ -759,15 +786,31 @@
     art(name) { return `${this.city.id}/${this.area.id}/${name}`; }
 
     draw() {
-      const { ctx, cam, area } = this, pal = area.palette, t = this.trauma * this.trauma, f = this.frame;
+      const shake = this.trauma * this.trauma, real = this.ctx;
+      // A shaking frame is drawn flat into a spare canvas and moved as one picture. Drawing every painted layer
+      // through a rotated, zoomed transform made each shake frame several times dearer than a still one.
+      if (shake > 0.002) {
+        const buf = this.shakeBuf || (this.shakeBuf = Object.assign(document.createElement('canvas'), { width: W, height: H }));
+        this.ctx = buf.getContext('2d');
+        this.drawWorld();
+        this.ctx = real;
+        const f = this.frame, dx = shake * 14 * Math.sin(f * 1.7), dy = shake * 9 * Math.sin(f * 2.3 + 1), lean = shake * 0.006 * Math.sin(f * 1.1);
+        // Zoomed in a little, so no edge of the stage ever shows.
+        real.save();
+        real.translate(W / 2 + dx, H / 2 + dy); real.rotate(lean); real.scale(1 + shake * 0.05, 1 + shake * 0.05); real.translate(-W / 2, -H / 2);
+        real.drawImage(buf, 0, 0);
+        real.restore();
+      } else this.drawWorld();
+      this.hud();
+      this.drawSpeech();
+      if (this.wipe > 0) this.drawWipe();
+    }
+
+    drawWorld() {
+      const { ctx, cam, area } = this, pal = area.palette, f = this.frame;
       const sky = ctx.createLinearGradient(0, 0, 0, H);
       sky.addColorStop(0, pal.skyTop); sky.addColorStop(1, pal.skyBottom);
       ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-      const dx = t * 26 * Math.sin(f * 1.7), dy = t * 18 * Math.sin(f * 2.3 + 1), lean = t * 0.012 * Math.sin(f * 1.1);
-      ctx.save();
-      // Shake draws slightly zoomed in, so no edge of the stage ever shows.
-      const zoom = 1 + t * 0.06;
-      ctx.translate(W / 2 + dx, H / 2 + dy); ctx.rotate(lean); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
       S.tile(ctx, this.art('far'), cam, 0.2, W);
       S.tile(ctx, this.art('mid'), cam, 0.5, W);
       ctx.save(); ctx.translate(-Math.round(cam), 0);
@@ -802,14 +845,9 @@
       this.drawSauce();
       this.drawWisps();
       this.drawPlayer();
-      this.drawSpecialCue();
       for (const b of this.bursts) this.drawBurst(b);
       this.drawParty();
       ctx.restore();
-      ctx.restore();
-      this.hud();
-      this.drawSpeech();
-      if (this.wipe > 0) this.drawWipe();
     }
 
     // The next stretch comes in like a comic panel turning over.
@@ -852,10 +890,24 @@
     drawBox(b) {
       const { ctx } = this;
       if (b.broken) { if (!S.prop(ctx, 'props/box-broken', b.x + b.w / 2, GROUND)) { ctx.fillStyle = '#8a6030'; ctx.fillRect(b.x, GROUND - 12, b.w, 12); } return; }
-      if (S.prop(ctx, 'props/box', b.x + b.w / 2, GROUND)) return;
+      if (S.prop(ctx, 'props/box', b.x + b.w / 2, GROUND)) { this.drawCrack(b); return; }
       ctx.fillStyle = '#b8843f'; ctx.fillRect(b.x, GROUND - b.h, b.w, b.h);
       ctx.strokeStyle = '#2a1830'; ctx.lineWidth = 5; ctx.strokeRect(b.x + 3, GROUND - b.h + 3, b.w - 6, b.h - 6);
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
+    }
+
+    // A crate that gives way is cracked across its face. A barricade is whole.
+    drawCrack(b) {
+      const { ctx } = this, x = b.x, y = GROUND - b.h, w = b.w;
+      const line = [[0.7, 0.02], [0.56, 0.2], [0.66, 0.34], [0.48, 0.52], [0.56, 0.62], [0.4, 0.8]];
+      ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      for (const [lw, color] of [[7, INK], [3, '#fff3d6']]) {
+        ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.beginPath();
+        line.forEach(([u, v], i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, Math.round(x + u * w), Math.round(y + v * b.h)));
+        ctx.moveTo(Math.round(x + 0.66 * w), Math.round(y + 0.34 * b.h)); ctx.lineTo(Math.round(x + 0.84 * w), Math.round(y + 0.44 * b.h));
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     // The corner: a crosswalk and a sign with the real street names. Reading it is the player's job.
@@ -994,7 +1046,7 @@
 
     drawActor(a) {
       const { ctx } = this, e = a.e;
-      const bob = { walk: 'walk', film: 'film', flee: 'flee', munch: 'munch', stun: 'stun', leap: 'leap', perch: 'crouch', chase: 'run', rise: 'idle', peek: 'idle', lurk: 'idle', sink: 'idle', bow: 'crouch' }[a.state] || 'walk';
+      const bob = a.hurt > 0 && S.has(e.type, 'hurt') ? 'hurt' : { walk: 'walk', film: 'film', flee: 'flee', munch: 'munch', stun: 'stun', leap: 'leap', perch: 'crouch', chase: 'run', rise: 'idle', peek: 'idle', lurk: 'idle', sink: 'idle', bow: 'crouch' }[a.state] || 'walk';
       const anim0 = a.threw > this.frame && S.has(e.type, 'throw') ? 'throw' : bob;
       let anim = anim0;
       if (!S.has(e.type, anim)) anim = S.has(e.type, 'walk') ? 'walk' : 'run';
@@ -1005,7 +1057,7 @@
       const facing = a.dir, bow = a.state === 'bow' ? Math.sin(Math.min(1, a.t / (BOW * 0.6)) * Math.PI) : 0;
       // The bow: a dip and a lean toward the slice, holding up what it caught.
       if (bow) { ctx.translate(a.x, a.y); ctx.rotate(bow * 0.45 * facing); ctx.translate(-a.x, -a.y); }
-      const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : 0;
+      const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : a.state === 'perch' ? TOP_SINK.platform : 0;
       if (grounded) this.shadow(a.x, GROUND + FOOT_SINK * 0.6, a.size * 0.3, 0.3);
       if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12, { sink })) {
         ctx.font = `${a.size}px serif`; ctx.textAlign = 'center'; ctx.fillText(FACE[e.type], a.x, a.y - 4);
@@ -1033,8 +1085,9 @@
           }
         }
       };
-      paint('#ff7a2e', 3, 0.5);
-      paint('#fffbe8', 0, 0.95);
+      // Paper-cutout heat: an orange strip with a thick white edge round it.
+      paint('#fffbe8', 6, 0.95);
+      paint('#ff7a2e', 0, 1);
       ctx.globalAlpha = 1;
     }
 
@@ -1055,13 +1108,12 @@
       this.animMs += 16.7 * (anim === 'run' ? Math.max(0.5, pace) : 1);
       const flop = st.flop ? Math.sin(this.frame / 9) * (moving ? 7 : 2.5) - p.vx * 1.3 + p.vy * 0.6 + this.wob * 30 : 0;
       const tilt = (p.vx / st.speed) * (st.flop ? 0.05 : 0.07);
-      const air = Math.max(0, GROUND - (p.y + p.h)), sink = FOOT_SINK * Math.max(0, 1 - air / 14);
+      const air = Math.max(0, GROUND - (p.y + p.h)), sink = p.grounded && air > 1 ? this.perch : FOOT_SINK * Math.max(0, 1 - air / 14);
       this.shadow(cx, GROUND + FOOT_SINK * 0.6, st.height * 0.34 * (1 + Math.max(-0.1, this.wob) * 0.5), 0.34 * Math.max(0, 1 - air / 260));
       const dress = this.held() ? { piece: pieceArt(this.held(), this.slice.style), count: this.left() } : null;
       if (!S.draw(ctx, art, anim, this.animMs, cx, p.y + p.h, st.height, p.facing, squash, { wide, tilt, flop, dress, bites: this.bites, sink })) {
         drawSlice(ctx, cx, p.y + p.h * 0.5 + (1 - squash) * 36, this.slice.style, this.held(), cheese, 2.15 * st.height / 124, false, p.facing, squash);
       }
-      if (this.smash > 0) { ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, p.y + p.h / 2, st.height * 0.5, 0, 7); ctx.stroke(); }
       ctx.globalAlpha = 1;
     }
 
@@ -1083,15 +1135,14 @@
       ctx.fillStyle = K.TEXT; ctx.fillText(speech.text.slice(0, shown), x + 15, y + 28);
     }
 
-    // The slices this city started with, as small portraits of their characters wearing their toppings. The one
-    // out on the street bobs on a gold chip; delivered, eaten and lost slices are greyed on an empty chip.
-    drawSlices(x, top) {
-      const { ctx, frame } = this, slices = this.camp.pies[this.city.id].slices, CW = 40, CH = 46, STEP = 46;
-      slices.forEach((sl, i) => {
-        const cx = x + i * STEP + CW / 2, here = sl === this.slice, spent = !here && sl.status !== 'ready';
-        const lift = here ? Math.round(Math.sin(frame / 9) * 2) - 3 : 0, held = here ? this.held() : sl.topping;
-        K.card(ctx, cx - CW / 2, top + lift, CW, CH, { fill: here ? K.SUN : spent ? '#d9cfb8' : K.PAPER, r: 8, b: 2, shadow: 2 });
-        S.stamp(ctx, sl.style, held, cx, top + lift + CH - 3, CW - 4, CH - 6, { grey: spent, count: here ? this.left() : C.CHARGES });
+    // The slices still in the box, as small portraits of their characters wearing their toppings, in a row at the
+    // far end of the heat bar. The one out on the street is the bulb.
+    drawSlices(x, cy) {
+      const { ctx } = this, CW = 36, CH = 42, STEP = 40;
+      this.camp.pies[this.city.id].slices.filter(sl => sl !== this.slice && sl.status === 'ready').forEach((sl, i) => {
+        const cx = x + i * STEP + CW / 2;
+        K.card(ctx, cx - CW / 2, cy - CH / 2, CW, CH, { r: 8, b: 2, shadow: 2 });
+        S.stamp(ctx, sl.style, sl.topping, cx, cy + CH / 2 - 3, CW - 4, CH - 6, { count: C.CHARGES });
       });
     }
 
@@ -1107,7 +1158,7 @@
       else if (h.kind === 'turn') text = `${feet(h.left)} to the turn onto ${h.street.name}`;
       else text = `${feet(h.left)}, then ${h.street.name}`;
       ctx.font = K.body(22, 800); ctx.textAlign = 'center';
-      const w = ctx.measureText(text).width + 40, x = 740;
+      const w = ctx.measureText(text).width + 40, x = 880;
       K.card(ctx, x - w / 2, 16, w, 42, { r: 21, shadow: 4 });
       ctx.fillStyle = K.TEXT; ctx.fillText(text, x, 46);
     }
@@ -1191,36 +1242,7 @@
       ctx.restore();
     }
 
-    // The special's progress: a ring above the pizza that fills as it recharges, and a gold flash when it is back.
-    drawSpecialCue() {
-      const { ctx, p, style: st } = this;
-      if (!st.special || !this.specialMax) return;
-      const cx = p.x + p.w / 2, top = p.y + p.h - st.height, f = this.frame;
-      if (this.specialCd > 0) {
-        const k = 1 - this.specialCd / this.specialMax, r = 17, y = top - 24, deny = this.denied > 0 ? Math.sin(f * 1.6) * 4 : 0;
-        ctx.save(); ctx.translate(Math.round(cx + deny), Math.round(y));
-        K.disc(ctx, 0, 0, r, '#fff6df', { b: 3, shadow: 3 });
-        ctx.fillStyle = this.denied > 0 ? '#ff5a3c' : K.SUN;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 3, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = INK; dot(ctx, 0, 0, 4);
-        ctx.restore();
-      } else {
-        // Ready: a golden glow at the feet and sparkles circling the pizza.
-        const pulse = 0.5 + 0.5 * Math.sin(f / 7), flash = this.ready / 50;
-        ctx.save();
-        ctx.globalAlpha = 0.28 + pulse * 0.2 + flash * 0.3; ctx.fillStyle = '#ffd76a';
-        ctx.beginPath(); ctx.ellipse(cx, p.y + p.h - 2, st.height * 0.42 + flash * 40, 10 + pulse * 3, 0, 0, 7); ctx.fill();
-        ctx.globalAlpha = 1;
-        for (let i = 0; i < 4; i++) {
-          const a = f / 22 + i * 1.5708, sx = cx + Math.cos(a) * st.height * 0.42, sy = p.y + p.h - st.height * 0.5 + Math.sin(a * 1.3) * st.height * 0.42, n = (i + Math.floor(f / 6)) % 3 ? 6 : 10;
-          ctx.fillStyle = INK; ctx.fillRect(Math.round(sx) - n / 2 - 2, Math.round(sy) - 2, n + 4, 4); ctx.fillRect(Math.round(sx) - 2, Math.round(sy) - n / 2 - 2, 4, n + 4);
-          ctx.fillStyle = '#fff3a8'; ctx.fillRect(Math.round(sx) - n / 2, Math.round(sy) - 1, n, 2); ctx.fillRect(Math.round(sx) - 1, Math.round(sy) - n / 2, 2, n);
-        }
-        ctx.restore();
-      }
-    }
-
-    // The special button on the touch pad shows the same progress as a dial filling round it.
+    // The special button on the touch pad shows its progress as a dial filling round it.
     syncSpecialButton() {
       const btn = this.btn || (this.btn = document.getElementById('specialBtn'));
       if (!btn || !this.style.special) return;
@@ -1231,14 +1253,12 @@
     hud() {
       const { ctx, world, city } = this;
       this.drawHealth(14, 12);
-      this.drawSlices(24, 104);
-      const held = this.held(), t = held ? `${C.TOPPINGS[held].name} ×${this.left()}` : 'plain cheese';
-      this.inkText(`${this.style.name}  ·  Topping: ${t}`, 26, 186, 19);
+      this.drawSlices(392, 50);
       // Addresses done, and the street we are on.
       city.areas.forEach((a, i) => {
-        K.disc(ctx, 36 + i * 32, 218, 8, i < world.delivery ? '#4fcf6a' : i === world.delivery ? K.SUN : '#e6dcc0', { b: 3, shadow: 2 });
+        K.disc(ctx, 36 + i * 32, 124, 8, i < world.delivery ? '#4fcf6a' : i === world.delivery ? K.SUN : '#e6dcc0', { b: 3, shadow: 2 });
       });
-      this.inkText(this.street.name, 36 + city.areas.length * 32 + 8, 224, 17);
+      this.inkText(this.street.name, 36 + city.areas.length * 32 + 8, 130, 17);
       this.syncSpecialButton();
       this.guideBar();
       if (this.barkT > 0) {

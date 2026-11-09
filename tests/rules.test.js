@@ -220,12 +220,23 @@ test('the third Long Beach delivery goes to the ending', () => {
   assert.strictEqual(R.headquarters(c).alewife, true);
 });
 
-test('a ninja keeps its hits across slices and leaves on the third', () => {
+test('a ninja keeps its hits across slices and leaves on the second', () => {
   const c = fresh(), e = { hits: 0, alive: true, toppings: ['basil'] };
-  assert.strictEqual(R.strike(c, e), null);
   assert.strictEqual(R.strike(c, e), null);
   assert.deepStrictEqual(R.strike(c, e), ['basil']);
   assert.strictEqual(e.alive, false);
+});
+
+test('a city with mutants puts one on every delivery street, clear of the door, and nothing hangs over a door', () => {
+  const M = require('../js/maps.js').MAPS;
+  for (const city of C.CITIES) for (let attempt = 1; attempt <= 6; attempt++) {
+    const world = R.newWorld({ ...city, seed: city.seed + attempt * 7 }, attempt);
+    for (const id of M[city.id].addresses) {
+      const s = world.streets[id];
+      if (city.mix.includes('mutant')) assert.ok(s.enemies.some(e => e.type === 'mutant' && e.x >= 800 && e.x <= s.door - 700), `${city.id} ${id}`);
+      for (const l of s.platforms) assert.ok(l.x + l.w < s.door - 200 || l.x > s.door + 200, `${city.id} ${id} platform over the door`);
+    }
+  }
 });
 
 test('a photo brings local teenagers next attempt and changes no speeds', () => {

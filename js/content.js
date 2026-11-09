@@ -314,7 +314,7 @@
 
   // Where a photo's new teenagers turn up, relative to where it was taken.
   const PHOTO_ARRIVALS = [-260, 320];
-  const NINJA_HITS = 3;
+  const NINJA_HITS = 2;
   // A slice can lose this many bites. Each one takes the same share of its heat, and that share never comes back.
   const BITES = 5;
   const CHARGES = 3;
@@ -328,6 +328,8 @@
     auraRadius: 330,
     // A stomp: feet may be this far into the top share of an enemy, hands-off slack at its sides, and a few frames of apex grace.
     stomp: { window: 0.62, reachAbove: 16, slack: 18, apexVy: -3 },
+    // What walking into a crate or a barricade says, once a slice.
+    hints: { box: 'Cracked crate. Shoot it, slam it or dash through.', barricade: 'Solid. Jump it.' },
   };
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';

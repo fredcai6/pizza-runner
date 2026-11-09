@@ -29,13 +29,18 @@
   }
 
   const RAIL = 700;
+  // Nothing hangs over a doorway: platforms and fire escapes keep this far clear of a door on either side.
+  const DOOR_CLEAR = 220;
 
   function generateStreet(city, def, addressed) {
     const r = rng(city.seed * 977 + [...def.id].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) | 0, 7));
     const { length, role } = def, quiet = role === 'alley' || role === 'lead' || length < 1800;
-    const turnAt = length - 420, stop = length - 900;
+    const turnAt = length - 420, stop = length - 900, door = addressed === undefined ? null : Math.round(length * def.spot);
     const platforms = [];
-    for (let x = 700; x < stop; x += 460 + Math.floor(r() * 300)) platforms.push({ x, y: GROUND - (r() < 0.5 ? 135 : 215), w: 220 + Math.floor(r() * 160) });
+    for (let x = 700; x < stop; x += 460 + Math.floor(r() * 300)) {
+      const pl = { x, y: GROUND - (r() < 0.5 ? 135 : 215), w: 220 + Math.floor(r() * 160) };
+      if (door == null || pl.x + pl.w < door - DOOR_CLEAR || pl.x > door + DOOR_CLEAR) platforms.push(pl);
+    }
     const enemies = [], drains = [];
     let id = 0;
     if (!quiet) {
@@ -44,6 +49,17 @@
         const e = { id: id++, type, x, y: GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0 };
         if (type === 'mutant') { e.drain = x; drains.push(x); }
         enemies.push(e);
+      }
+      // A city with mutants meets one on every delivery street, with room after it to be caught up with.
+      if (door != null && city.mix.includes('mutant')) {
+        const lo = 800, hi = door - 700;
+        if (hi >= lo && !enemies.some(e => e.type === 'mutant' && e.x >= lo && e.x <= hi)) {
+          const swap = enemies.find(e => e.x >= lo && e.x <= hi && (e.type === 'teen' || e.type === 'turtle'));
+          const m = swap || { id: id++, type: 'mutant', x: Math.round((lo + hi) / 2), y: GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0 };
+          m.type = 'mutant'; m.drain = m.x; drains.push(m.x);
+          if (!swap) enemies.push(m);
+          enemies.sort((a, b) => a.x - b.x);
+        }
       }
     }
     // Fire escapes: a rail over each ninja, none longer than RAIL. A ninja without one of its own shares its neighbour's.
@@ -54,6 +70,16 @@
       if (x >= 300 && (!last || x > last.x + last.w + 160)) ledges.push({ x, y: GROUND - 330, w: RAIL, ledge: true });
     }
     if (!ninjas.length) for (const e of enemies) if (e.type === 'turtle' && r() < 0.6) ledges.push({ x: e.x - 170, y: GROUND - 300, w: 340, ledge: true });
+    // A fire escape that would cross a doorway is cut back to its longer side.
+    if (door != null) {
+      for (let i = ledges.length - 1; i >= 0; i--) {
+        const l = ledges[i], lo = door - DOOR_CLEAR, hi = door + DOOR_CLEAR;
+        if (l.x + l.w < lo || l.x > hi) continue;
+        const before = lo - l.x, after = l.x + l.w - hi;
+        if (Math.max(before, after) < 160) ledges.splice(i, 1);
+        else if (before >= after) l.w = before; else { l.w = after; l.x = hi; }
+      }
+    }
     const pickups = [];
     for (const l of ledges.slice(0, 2)) pickups.push({ x: l.x + l.w / 2, y: l.y - 40, topping: city.pickups[pickups.length % city.pickups.length] });
     if (!quiet) pickups.push({ x: 600 + Math.floor(r() * (length - 1400)), y: GROUND - 60, topping: city.pickups[Math.floor(r() * city.pickups.length)] });
