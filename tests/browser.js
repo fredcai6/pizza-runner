@@ -33,14 +33,14 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   await advance();
   await shot('03-order');
   ok('first order shows the customer alias', (await page.locator('.receipt').innerText()).includes('K8lyn'));
-  await click('Build the pie'); await shot('04-new-york-pie');
+  await shot('04-new-york-pie');
   ok('Build Your Pie shows the character, not a drawn pizza', await page.locator('.select canvas.fighterart').count() === 1 && await page.locator('.select svg').count() === 0 && await page.locator('.tile img').count() >= 1);
-  await click('Box it');
+  await click('Start delivery');
   await page.locator('#screen .citymap').waitFor();
   await shot('05-map');
   ok('map shows only the next address and one checkpoint', await page.locator('#screen .addr').count() === 1 && await page.locator('#screen .addr.active').count() === 1 && await page.locator('#screen .check').count() === 1);
   ok('no losses yet, no lost-slice marker', await page.locator('#screen .grave').count() === 0);
-  await click('Deploy');
+  await click('Deliver');
 
   await page.waitForTimeout(150);
   const jumpBox = await page.locator('#controls .jump').boundingBox();
@@ -130,7 +130,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
       const k = 'pie-' + await page.evaluate(() => __pr.camp.cityIndex);
       if (!seen.has(k)) { seen.add(k); await shot(`13-${k}`); }
     }
-    if (await page.getByRole('button', { name: 'Deploy' }).count()) {
+    if (await page.getByRole('button', { name: 'Deliver', exact: true }).count()) {
       const k = 'map-' + await page.evaluate(() => __pr.camp.cityIndex);
       if (!seen.has(k)) { seen.add(k); await shot(`13-${k}`); }
       if (!seen.has('taped') && await page.evaluate(() => __pr.camp.undercover.length && __pr.camp.cityIndex >= 2)) {
@@ -143,7 +143,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
         await page.locator('.tab.close').click();
         continue;
       }
-      await click('Deploy'); await page.waitForTimeout(30); continue;
+      await click('Deliver'); await page.waitForTimeout(30); continue;
     }
     await page.locator('#screen:not(.hidden) .actions button').first().click({ timeout: 600 }).catch(() => {});
     await page.waitForTimeout(15);
@@ -176,6 +176,46 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
     ok('sprite-forge sheet loads', await art.evaluate(() => PR_SPRITES.has('old-timer', 'idle') && PR_SPRITES.has('teen', 'walk')));
     if (out) await art.screenshot({ path: path.join(out, '15-derek-sprite.png') });
     await art.close();
+  }
+  // Every between-slice screen fits one phone screen, at the three sizes players meet.
+  const overflow = () => {
+    const bad = [];
+    for (const h of document.querySelectorAll('#screen:not(.hidden), #overlay:not(.hidden), #overlay:not(.hidden) .page, .detail:not(.hidden) .file')) if (h.scrollHeight > h.clientHeight + 1 || h.scrollWidth > h.clientWidth + 1) bad.push(`${h.id || h.className} ${h.scrollWidth}x${h.scrollHeight} in ${h.clientWidth}x${h.clientHeight}`);
+    return bad;
+  };
+  for (const [w, h] of [[915, 412], [844, 390], [780, 340]]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true });
+    const fit = await ctx.newPage();
+    fit.on('pageerror', e => errors.push(e.message));
+    await fit.goto(url);
+    await fit.getByRole('button', { name: 'Start', exact: true }).waitFor();
+    const go = async (city, phase, mod) => fit.evaluate(([c, p, m]) => { const camp = PR_RULES.jumpTo(c, 0); camp.phase = p; if (m) eval(m); __pr.camp = camp; __pr.route(); }, [city, phase, mod]);
+    const fits = async name => { await fit.waitForTimeout(150); const bad = await fit.evaluate(overflow); ok(`${name} fits ${w}x${h}`, !bad.length, bad.join(' | ')); };
+    const people = "for (let i = 0; i < 9; i++) camp.receipts.push({ n: i + 1, order: 1, placed: '12:00 AM', to: ['K8lyn', 'Kate-lyn', 'Caitlin'][i % 3], city: 'Chicago', attempt: 1, outcome: ['delivered', 'cold', 'dead'][i % 3], lines: ['Pepperoni'] }); camp.world.delivery = 1;";
+    await go(0, 'order'); await fit.locator('.select').waitFor(); await fits('order and toppings (New York)');
+    await go(2, 'order'); await fit.locator('.select').waitFor(); await fits('order and toppings (DC, three toppings)');
+    await go(3, 'order'); await fit.locator('.select').waitFor();
+    await fit.getByRole('button', { name: 'Start delivery', exact: true }).click(); await fit.getByRole('button', { name: 'Continue', exact: true }).waitFor(); await fits('predicted order');
+    await go(4, 'map', "camp.pies.california.slices.forEach((x, i) => { x.style = ['ny', 'deep', 'jumbo', 'naples'][i % 4]; x.topping = ['pepperoni', 'jalapeno', 'garlic', 'basil'][i >> 1]; })");
+    await fit.locator('.mapscreen').waitFor(); await fits('Long Beach map with eight different slices');
+    ok(`Long Beach picker shows all eight ${w}x${h}`, await fit.locator('.slice').count() === 8);
+    await go(0, 'map', people); await fit.locator('.mapscreen').waitFor(); await fits('New York map');
+    await fit.getByRole('button', { name: 'Corkboard', exact: true }).click();
+    for (const tab of ['history', 'enemies', 'theory', 'roster']) { await fit.locator(`[data-tab=${tab}]`).click(); await fits(`corkboard ${tab}`); }
+    await fit.locator('[data-tab=enemies]').click(); await fit.locator('[data-enemy]').nth(1).click(); await fits('corkboard enemy note');
+    const note = await fit.evaluate(() => { const r = document.querySelector('.detail .file').getBoundingClientRect(), e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return !!e.closest('.detail'); });
+    ok(`open note sits above the strings ${w}x${h}`, note);
+    await fit.locator('.detail').click(); await fit.locator('.tab.close').click();
+    await fit.reload(); await fit.getByRole('button', { name: 'Continue', exact: true }).waitFor();
+    await go(1, 'map', people); await fit.getByRole('button', { name: 'Deliver', exact: true }).click();
+    await fit.waitForTimeout(150); await fit.evaluate(() => __pr.run.end('cold')); await fit.locator('.stamp').waitFor(); await fits('gone cold receipt');
+    await fit.evaluate(() => { __pr.camp.phase = 'door'; __pr.route(); });
+    for (let i = 0; i < 80 && !(await fit.locator('.stamp.delivered').count()); i++) { if (await fit.locator('#dialog:not(.hidden)').count()) await fit.locator('#dialog').click(); else await fit.waitForTimeout(50); }
+    await fits('delivered receipt');
+    await fit.evaluate(() => { __pr.camp.phase = 'gameover'; __pr.route(); });
+    for (let i = 0; i < 80 && !(await fit.getByRole('button', { name: /^Back to/ }).count()); i++) { if (await fit.locator('#dialog:not(.hidden)').count()) await fit.locator('#dialog').click(); else await fit.waitForTimeout(50); }
+    await fits('city lost');
+    await ctx.close();
   }
   ok('no page errors', !errors.length, errors.slice(0, 3).join(' / '));
   await browser.close(); serve.close();
