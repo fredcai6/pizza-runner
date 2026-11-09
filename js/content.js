@@ -41,21 +41,11 @@
 
         // Scene 1 is Tommy's paintings (assets/cutscenes), panned (`pic` in js/hq.js), and his painted board room.
         { comp: 'board', lines: [
-          { who: 'old', text: 'New recruits. Look at you. Warm, plain, and full of hope.' },
-          { who: 'old', text: 'Welcome to Pizza HQ.' },
-          { who: 'old', text: 'Slices are vanishing all over the world.' },
-        ] },
-        { pic: 'recruits-table', pan: [[0.2, 0.46, 1.8], [0.19, 0.44, 1.95]], ms: 5000, lines: [
-          { who: 'naples', text: 'Mamma mia! The whole world? And nobody tells Napoli?' },
-          { who: 'old', text: "**Pipe down**, Contessa. I'm getting to the string." },
-        ] },
-        { comp: 'board', lines: [
-          { who: 'old', text: 'Whole pies, gone in a night. Some nights all that turns up is the box.' },
-          { who: 'old', text: 'Someone is pulling the strings.' },
+          { who: 'old', text: 'New recruits. Look at you. Warm, plain, and full of hope. Welcome to Pizza HQ.' },
+          { who: 'old', text: 'Slices are vanishing all over the world. Whole pies, gone in a night. Someone is pulling the strings.' },
           { who: 'old', text: 'I tapped the dispatch line. Every vanishing starts with a ticket that says **ORDER**. I call them **The Order**.' },
           { who: 'old', text: "You go **undercover**. Under a cover. Lid down. Nobody asks a box what's inside." },
-          { who: 'old', text: "Most come back with a report. The best don't come back at all. That is **deep undercover**." },
-          { who: 'old', text: 'So you go out there, get in close, and find out who.' },
+          { who: 'old', text: "Most come back with a report. The best don't come back at all. That is **deep undercover**. So get in close and find out who." },
         ] },
         { pic: 'recruits-table', pan: [[0.17, 0.46, 1.6], [0.21, 0.43, 1.75]], ms: 6000, card: ['La Contessa', 'Margherita of Naples'], cardSide: 'right', lines: [
           { who: 'old', text: 'La Contessa. Fastest thing in the oven. Cools just as fast. Certified a pizza by a government.' },
@@ -68,17 +58,15 @@
           { who: 'deep', text: 'Somebody will.' },
         ] },
         { pic: 'recruits-table', pan: [[0.37, 0.42, 1.5], [0.42, 0.39, 1.65]], ms: 6000, card: ['Phil A. Buster', 'Jumbo Slice of Washington'], cardSide: 'right', lines: [
-          { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Three names, because one would not hold him.' },
-          { who: 'old', text: 'Reads every lid. Twice. Structural integrity, none.' },
+          { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Three names, because one would not hold him. Reads every lid. Twice.' },
           { who: 'jumbo', text: 'Thank you. I wish to yield my time to myself, for brief remarks on the subject of...' },
           { who: 'old', text: 'You may not.' },
         ] },
         { pic: 'recruits-table', pan: [[0.6, 0.46, 1.6], [0.64, 0.43, 1.75]], ms: 6000, card: ['Vinny Two-Fold', 'Slice of New York'], lines: [
           { who: 'old', text: 'And last, Vinny Two-Fold. Off the streets. Nobody would take him indoors.' },
-          { who: 'ny', text: "Disappearances? Boss, that's a **Tuesday** where I'm from. I ain't scared a nothin'." },
-          { who: 'ny', text: 'I fold for nobody.' },
+          { who: 'ny', text: "Disappearances? Boss, that's a **Tuesday** where I'm from. I ain't scared a nothin'. I fold for nobody." },
         ] },
-        { pic: 'vinny-new-york', pan: [[0.4, 0.5, 1.1], [0.62, 0.5, 1]], ms: 10000, lines: [
+        { pic: 'vinny-new-york', lift: 0.1, pan: [[0.4, 0.5, 1.1], [0.62, 0.5, 1]], ms: 10000, lines: [
           { who: 'old', text: 'I like a brave slice. New York first. Nobody looks twice at a loud one.' },
           { who: 'ny', text: 'Wait, what?' },
           { who: 'old', text: "Lid's open. Get in the box." },
@@ -98,11 +86,11 @@
           door: [{ who: 'customer', text: "I'm on mile nine and I'm not stopping. Is it organic? Tyler, thank the pizza." }] },
         { id: 'wickerpark', name: "Wicker Park", palette: { skyTop: '#b39aa0', skyBottom: '#ecd5c0', ground: '#5d4e4c', top: '#83706c' },
           customer: "Kay T'Lynn", who: 'Bartender', instructions: 'Back door. Mind the porch stairs. Knock like a regular.',
-          door: [{ who: 'customer', text: "Tavern's closed till four. Ooh, a casserole! ...No? Fine. You're the most honest thing all week." }] },
+          door: [{ who: 'customer', text: "Tavern's closed till four. Ooh, a casserole! ...No? Fine. I'm telling everyone it's a casserole." }] },
       ],
       briefing: [
 
-        { pic: 'vinny-beat-up', pan: [[0.4, 0.5, 1.15], [0.46, 0.48, 1.04]], ms: 12000, lines: [
+        { pic: 'vinny-beat-up', lift: 0.12, pan: [[0.4, 0.5, 1.15], [0.46, 0.48, 1.04]], ms: 12000, lines: [
           { who: 'ny', text: "Boss. It's hell out there." },
           { who: 'ny', text: 'Teenagers. Turtles. Teenagers with cameras. I got my picture took four times.' },
           { who: 'ny', text: "And I ain't sayin' I'm rattled. I'm sayin' some a me didn't come back." },
@@ -123,11 +111,11 @@
           { who: 'old', text: "**Turtles.** Slow. But I've seen them take a bite out of many a tough slice." },
           { who: 'old', text: 'Slow is what they want you to think.' },
         ] },
-        { pic: 'assign-chicago', pan: [[0.3, 0.5, 1.25], [0.64, 0.48, 1.1]], ms: 9000, lines: [
-          { who: 'old', text: 'Big Stan. Deep undercover needs a deep dish.' },
-          { who: 'deep', text: "I'm a dish. I don't dig." },
-          { who: 'old', text: 'Dig anyway.' },
-          { who: 'deep', text: '...Fine.' },
+        { pic: 'assign-chicago', lift: 0.1, pan: [[0.3, 0.5, 1.25], [0.64, 0.48, 1.1]], ms: 9000, lines: [
+          { who: 'old', text: 'Big Stan. Chicago. Deep undercover needs a deep dish.' },
+          { who: 'deep', text: "That's a pun, boss. You're sending me on a pun." },
+          { who: 'old', text: "I'm sending you on a **plan**. The pun is a bonus." },
+          { who: 'deep', text: "...Fine. I'm bringing the sauce." },
         ] },
       ],
     },
@@ -148,11 +136,11 @@
       ],
       briefing: [
 
-        { pic: 'stan-beat-up', pan: [[0.42, 0.5, 1.15], [0.48, 0.48, 1.04]], ms: 10000, lines: [
+        { pic: 'stan-beat-up', lift: 0.12, pan: [[0.42, 0.5, 1.15], [0.48, 0.48, 1.04]], ms: 10000, lines: [
           { who: 'deep', text: "Vinny wasn't lying, boss. Something came up out of the storm drain. Some kind of mutant." },
           { who: 'deep', text: 'It chased me three blocks. I do not do three blocks. Is any of this worth it?' },
         ] },
-        { comp: 'boardDayold', sticker: 'salute', lines: [
+        { comp: 'boardDayold', lines: [
           { who: 'old', thump: true, text: '**THAT** is why we do this!' },
           { who: 'old', text: 'Why we keep the ovens hot! So tonight, somewhere, a family sleeps warm!' },
           { who: 'old', text: "A whole pie, shoulder to shoulder in the box. Lid down. Cozy. They'll never know your name." },
@@ -164,7 +152,7 @@
           { who: 'old', text: "Nobody spells their own name six ways. That's not a name. That's a cover with a typo." },
           { who: 'old', text: 'This goes **all the way to the top**.' },
         ] },
-        { pic: 'assign-dc', pan: [[0.3, 0.5, 1.25], [0.66, 0.48, 1.1]], ms: 9000, lines: [
+        { pic: 'assign-dc', lift: 0.1, pan: [[0.3, 0.5, 1.25], [0.66, 0.48, 1.1]], ms: 9000, lines: [
           { who: 'old', text: "The top of the government is Washington. Phil, nobody turns you away. You're the size of a door." },
           { who: 'jumbo', text: 'I accept with humility, and shall begin with a statement of no more than four hours.' },
           { who: 'old', text: 'Go.' },
@@ -181,22 +169,22 @@
           door: [{ who: 'customer', text: 'From the sea this morning. You, from the oven? Same hour. We understand each other.' }] },
         { id: 'center', name: "Centro Storico", palette: { skyTop: '#d9a97c', skyBottom: '#f7dcae', ground: '#6b5140', top: '#94765f' },
           customer: 'Kate? Lin?', who: 'Nonna', instructions: 'Fourth floor. Lower the basket. Do not make conversation.',
-          door: [{ who: 'customer', text: 'Who sent you? Your mother? Tell her she is late. ...Tell her nothing, is perfect.' }] },
+          door: [{ who: 'customer', text: 'Who sent you? Your mother? Tell her she is late. ...Tell her I kept her seat warm.' }] },
         { id: 'hillside', name: "Vomero Hill", palette: { skyTop: '#a6c2dc', skyBottom: '#fbe2c8', ground: '#8a6d5a', top: '#b3957f' },
           customer: 'Qatelyn', who: 'Signora', instructions: 'Up the steps. All of them. Do not ask how many.',
           door: [{ who: 'customer', text: "Ma che bello! A pizza, in THIS house! With THIS view! Is mine. Don't tell the neighbors." }] },
       ],
       briefing: [
 
-        { pic: 'phil-beat-up', pan: [[0.4, 0.5, 1.15], [0.46, 0.48, 1.04]], ms: 12000, lines: [
+        { pic: 'phil-beat-up', lift: 0.12, pan: [[0.4, 0.5, 1.15], [0.46, 0.48, 1.04]], ms: 12000, lines: [
           { who: 'jumbo', text: 'Mr. Chairman, I rise today a mere fraction of my former self.' },
           { who: 'jumbo', text: 'I entered that city whole. The record shows nothing. It is classified.' },
           { who: 'jumbo', text: 'But I read every lid in the capital. Every one says **Original Italian.**' },
           { who: 'deep', text: "Mine says it too. I'm from Chicago." },
         ] },
-        { pic: 'assign-naples', pan: [[0.66, 0.48, 1.2], [0.36, 0.5, 1.1]], ms: 14000, lines: [
+        { pic: 'assign-naples', lift: 0.1, pan: [[0.66, 0.48, 1.2], [0.36, 0.5, 1.1]], ms: 14000, lines: [
           { who: 'naples', text: "Then somebody copies me. Is flattery, not a clue. Everybody knows where I'm from." },
-          { who: 'old', text: 'Nothing honest announces itself.' },
+          { who: 'old', text: 'A box that has to say it is hiding something.' },
           { who: 'naples', text: 'Honest things announce themselves **constantly**. This is Italy.' },
           { who: 'old', text: "Then you won't mind us checking the source. **Naples.**" },
           { who: 'naples', text: '...Finalmente. Somebody takes me home.' },
@@ -219,7 +207,7 @@
       ],
       briefing: [
 
-        { pic: 'contessa-beat-up', pan: [[0.42, 0.5, 1.06], [0.47, 0.5, 1]], ms: 8000, lines: [
+        { pic: 'contessa-beat-up', lift: 0.12, pan: [[0.42, 0.5, 1.06], [0.47, 0.5, 1]], ms: 8000, lines: [
           { who: 'old', text: "Look at what's left of you. Good. Nobody swings that hard at a bluff. We're close." },
         ] },
         { comp: 'board', sticker: 'think', lines: [
@@ -229,13 +217,13 @@
           { who: 'old', text: "That's exactly what she'd want you to think." },
           { who: 'old', text: 'Twelve disguises, then one real name. You only drop the disguise at **home**.' },
         ] },
-        { pic: 'group-long-beach', pan: [[0.5, 0.5, 1], [0.48, 0.5, 1.08]], ms: 12000, lines: [
+        { pic: 'group-long-beach', lift: 0.1, pan: [[0.5, 0.5, 1], [0.48, 0.5, 1.08]], ms: 12000, lines: [
           { who: 'old', text: "One slice won't do it. This takes all four of you." },
           { who: 'jumbo', text: 'A point of order. Will you be joining us in the field, sir?' },
           { who: 'naples', text: 'Sì. You send us out. You come too, yes?' },
         ] },
         { comp: 'boardDayold', sticker: 'think', lines: [
-          { who: 'deep', text: 'You never leave the building.' },
+          { who: 'deep', text: 'So when did you last go out there, boss?' },
           { who: 'old', text: 'Not since 1987.' },
           { who: 'deep', text: 'What happened in 1987?' },
           { who: 'old', text: "...Nothing. That's what bothers me." },
@@ -290,7 +278,7 @@
   const THEORY = [
     { from: 0, text: 'WHO IS THE ORDER?' },
     { from: 0, text: 'Every ticket says ORDER. Printed right on it. HIDING IN PLAIN SIGHT.' },
-    { from: 0, text: 'Slices go out. Less of them come back. WHERE IS THE REST?' },
+    { from: 0, text: 'Slices go out. Fewer come back. WHERE IS THE REST?' },
     { from: 1, text: "Vinny's missing slice. No call = DEEP UNDERCOVER. Proud." },
     { from: 1, text: 'Teenagers and turtles: AGENTS? (yes)' },
     { from: 2, text: 'The names are ALIASES. Has to be.' },
@@ -301,19 +289,19 @@
 
   // Polaroids start as a name and question marks. Notes appear once the behavior has been seen.
   const ENEMIES = {
-    teen: { name: 'Teenager', claim: 'Agent of The Order. Reports back with photographs.', notes: { flees: 'One good pepperoni and it runs home for good.', stomp: 'Soft on top. Cries.', films: 'Takes your picture, and its friends show up next time.', } },
+    teen: { name: 'Teenager', claim: 'Agent of The Order. Reports back with photographs.', notes: { flees: 'One good pepperoni and it runs home for good.', stomp: 'Soft on top. Folds like a lawn chair.', films: 'Takes your picture, and its friends show up next time.', } },
     turtle: { name: 'Turtle', claim: 'Agent of The Order. In place for ninety years, minimum.', notes: { bites: 'Bites, then stops to chew.', munch: 'Throw it something. It will stop to chew.', stun: 'Jump on it and it tucks in. It makes an excellent springboard.', armored: 'Nothing removes a turtle. It was here before us.' } },
-    ninja: { name: 'Ninja', claim: 'Senior agent of The Order. I do not like the reports.', notes: { throws: 'Throws things. Keeps its distance.', bounce: 'Do not jump on its head.', climbs: 'Hit it and it takes to the fire escapes. It remembers every hit.', bows: 'Catches whatever you throw. Bows. Throws it straight back.', debt: 'Fights with whatever it took off a fallen slice.', gone: 'The third time, it runs off and does not come back.' } },
+    ninja: { name: 'Ninja', claim: 'Senior agent of The Order. I do not like the reports.', notes: { throws: 'Throws things. Keeps its distance.', bounce: 'Do not jump on its head.', climbs: 'Hit it and it takes to the fire escapes. It remembers every hit.', bows: 'Catches whatever you throw. Bows. Throws it straight back.', debt: 'Fights with whatever it took off a fallen slice.', gone: 'Hit it enough and it bows out for good.' } },
     mutant: { name: 'Mutant', claim: 'What is The Order feeding them?', notes: { peeks: 'Watch the storm drains. It looks before it comes.', chases: 'It comes up behind you, fast.', feed: 'Catches food and goes back down, for good.', bite: 'One bite and it goes home. One.' } },
   };
 
   const BARKS = {
     hot: 'Heat holding. You are magnificent.', warm: 'Lukewarm. Stay focused.', cold: 'Cold now. The cheese has given up on you.',
     bow: 'The ninja catches it. Bows. Here it comes back.', feed: 'It catches it and goes back down the drain.',
-    filmed: 'A teenager took your picture.', fire: 'Warm again, for now.',
+    filmed: 'A teenager took your picture.', fire: 'Back in the glow. Toasty.',
     recovered: 'Topping back in hand.', note: 'New note on the board.', paper: 'Something was in the box.',
-    pickup: 'Three uses. The old topping is gone.', unlocked: 'New topping! Three uses now, and it is on the menu for every pie after this.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
-    flees: 'It ran off crying. It will not be back.', ninjaGone: 'It has had enough. It runs off and will not be back.', ninjaHit: 'It remembers that.',
+    pickup: 'Swapped in. Three uses.', unlocked: 'New on the menu! Three uses now, and every pie after this can wear it.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
+    flees: 'The teenager bolts for home, phone first.', ninjaGone: 'The ninja bows once more and vanishes. Respect.', ninjaHit: 'It remembers that.',
     drain: 'Something in the storm drain.', almost: 'just ahead', missed: 'Rerouting...', bite: 'One bite and it goes home.', nope: 'Not this address yet.',
   };
 
@@ -324,8 +312,6 @@
     'NAPKIN, IN SERGEANT DAYOLD\'S HAND: The Kates, Katies, Kaitlins and Caitlyns do not meet. They do not need to.',
   ];
 
-  // Zanier as the run goes on. Each city's customer is listed on its own order.
-  const SPELLINGS = ['Kaetlinne', 'Ketlin', "Kay T'Lynn", 'Cateliñ', 'K-Lyn', 'Katelyn²', 'Kaitlyn (ask for Dave)'];
   // Where a photo's new teenagers turn up, relative to where it was taken.
   const PHOTO_ARRIVALS = [-260, 320];
   const NINJA_HITS = 3;
@@ -354,13 +340,13 @@
   ];
 
   const ENDING = {
-    finale: [{ comp: 'polaroid', lines: [{ who: 'old', mood: 'squint', text: 'Know thy enemy...' }] }],
+    finale: [{ pic: 'dayold-desk', lift: 0.12, pan: [[0.5, 0.5, 1], [0.5, 0.5, 1]], ms: 8000, lines: [{ who: 'old', text: 'Know thy enemy...' }] }],
     card: { line: 'To be continued...?', listen: 'Listen to DJ Alewife here', youtube: 'https://www.youtube.com/@djalewife', birthday: '(Happy birthday Katelyn!)' },
   };
 
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
   const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
-  const api = { CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, SPELLINGS, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
+  const api = { CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

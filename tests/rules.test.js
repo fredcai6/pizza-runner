@@ -255,10 +255,10 @@ test('broken shortcut boxes stay broken and open the turn', () => {
   assert.strictEqual(R.junction(c.world, before).open, true);
 });
 
-test('each receipt spells the name differently', () => {
-  const c = fresh();
-  lose(c); lose(c); lose(c);
-  assert.strictEqual(new Set(c.receipts.map(r => r.to)).size, 3);
+test('a receipt names the customer at the address that run was for', () => {
+  const c = fresh(), city = C.CITIES[c.cityIndex];
+  lose(c); lose(c);
+  assert.deepStrictEqual(c.receipts.map(r => r.to), [city.areas[0].customer, city.areas[0].customer]);
 });
 
 test('a pie is one topping, all six slices', () => {

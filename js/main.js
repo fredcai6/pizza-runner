@@ -241,7 +241,11 @@
   function endCard() {
     const card = C.ENDING.card;
     const link = card.youtube ? `<a class="listen" href="${card.youtube}" target="_blank" rel="noopener">${card.listen}</a>` : '';
-    show(`<div class="card"><h2>${card.line}</h2>${link}<p class="bday">${card.birthday}</p></div>`, [['Back to title', title, 'quiet']]);
+    // Katelyn's Polaroid sits beside the words once its file exists. Until then the card is just the words.
+    show(`<div class="card"><img class="kpol" src="assets/cutscenes/katelyn-polaroid.webp" alt="Katelyn in front of the house" hidden><div class="cardtext"><h2>${card.line}</h2>${link}<p class="bday">${card.birthday}</p></div></div>`, [['Back to title', title, 'quiet']]);
+    const pol = screen.querySelector('.kpol');
+    pol.onload = () => { pol.hidden = false; pol.parentNode.classList.add('withpol'); };
+    pol.onerror = () => pol.remove();
   }
 
   function pause(on) {
