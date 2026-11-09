@@ -75,13 +75,14 @@
       let last = performance.now(), spare = 0;
       const tick = now => {
         if (this.done) return;
+        this.raf = requestAnimationFrame(tick); // first, so a throw in step/draw cannot end the loop for good
         spare = Math.min(spare + (now - last), 100); last = now;
         while (spare >= 1000 / 60 && !this.done) { if (!this.paused) this.step(); spare -= 1000 / 60; }
-        if (!this.done) { this.draw(); this.raf = requestAnimationFrame(tick); }
+        if (!this.done) this.draw();
       };
       this.raf = requestAnimationFrame(tick);
     }
-    stop() { this.done = true; cancelAnimationFrame(this.raf); }
+    stop() { this.done = true; cancelAnimationFrame(this.raf); this.paused = false; }
     say(text) { this.bark = text; this.barkT = 170; }
 
     // The pizza talks to itself now and then. `urgent` lines ignore the gap, not each other.

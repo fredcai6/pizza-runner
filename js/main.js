@@ -5,7 +5,7 @@
   const $ = id => document.getElementById(id);
   const screen = $('screen'), canvas = $('stage'), controls = $('controls'), dialog = $('dialog'), overlay = $('overlay');
   const debug = new URLSearchParams(location.search).has('debug');
-  let camp = load(), run = null;
+  let camp = load(), run = null, epoch = 0, unkeys = null;
 
   function load() { try { return JSON.parse(localStorage.getItem(SAVE)); } catch { return null; } }
   function save() { localStorage.setItem(SAVE, JSON.stringify(camp)); }
@@ -25,10 +25,24 @@
     if (slot) slot.appendChild(row);
   }
 
-  function scene(shots, done, extra = {}) {
+  // Exactly one thing is alive at a time. Every way of leaving a scene, a run or a screen goes through here.
+  function halt() {
+    epoch++;
+    H.stopScene();
+    if (run) { run.stop(); run = null; if (debug) window.__pr.run = null; }
+    if (unkeys) { unkeys(); unkeys = null; }
+    for (const k of ['left', 'right', 'jumpHeld']) input[k] = false;
+    input.queued = {};
+    $('pause').classList.add('hidden');
+    overlay.classList.add('hidden');
     controls.classList.add('hidden');
+  }
+
+  function scene(shots, done, extra = {}) {
+    halt();
+    const mine = epoch;
     screen.classList.add('hidden');
-    H.play(canvas, dialog, shots, { hq: R.headquarters(camp), city: R.currentCity(camp), ...extra }, done);
+    H.play(canvas, dialog, shots, { hq: R.headquarters(camp), city: R.currentCity(camp), ...extra }, () => { if (mine === epoch) done(); });
   }
 
   const boardButton = back => ['Corkboard', () => B.open(overlay, camp, () => { overlay.classList.add('hidden'); if (back) back(); }), 'quiet'];
@@ -36,13 +50,15 @@
   // Android and desktop can take the whole screen. iPhones cannot, so they get no button.
   const stageRoot = document.documentElement;
   const canFull = !!(stageRoot.requestFullscreen || stageRoot.webkitRequestFullscreen);
+  // Entering is idempotent: asking while already fullscreen does nothing. The pause sheet's button is the one way out.
+  const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
   async function goFull() {
-    try {
-      if (document.fullscreenElement || document.webkitFullscreenElement) return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-      await (stageRoot.requestFullscreen || stageRoot.webkitRequestFullscreen).call(stageRoot, { navigationUI: 'hide' });
-      await window.screen.orientation?.lock?.('landscape');
-    } catch { /* The browser said no. The game plays fine in a window. */ }
+    if (isFull()) return;
+    try { await (stageRoot.requestFullscreen || stageRoot.webkitRequestFullscreen).call(stageRoot, { navigationUI: 'hide' }); } catch { return; /* The browser said no. The game plays fine in a window. */ }
+    try { await window.screen.orientation?.lock?.('landscape'); } catch { /* Lock is optional. */ }
   }
+  const leaveFull = () => { if (isFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); };
+  const syncFull = () => { $('fullBtn').textContent = isFull() ? 'Exit full screen' : 'Full screen'; };
   // Playtest menu: add ?playtest=1 to the address once and it stays on. ?playtest=0 turns it off.
   const asked = new URLSearchParams(location.search).get('playtest');
   if (asked !== null) localStorage.setItem('pizzaRunnerPlaytest', asked);
@@ -50,8 +66,7 @@
   let god = false;
 
   function playtestMenu() {
-    if (run) { run.stop(); run = null; }
-    $('pause').classList.add('hidden');
+    halt();
     const rows = C.CITIES.map((city, i) => `<div class="jumprow"><b>${city.name}</b>${city.areas.map((a, n) => `<button class="warp" data-city="${i}" data-at="${n}">${n + 1}. ${a.name}</button>`).join('')}</div>`).join('');
     show(`<h2>Playtest</h2>${rows}<p class="tally">Jumping starts that city fresh with the whole map open. It replaces the saved game.</p>`,
       [[god ? 'Never go cold: on' : 'Never go cold: off', () => { god = !god; playtestMenu(); }, 'quiet'],
@@ -60,18 +75,22 @@
     screen.querySelectorAll(".warp").forEach(b => { b.onclick = () => { camp = R.jumpTo(+b.dataset.city, +b.dataset.at); save(); route(); }; });
   }
 
-  const fullButton = () => (canFull ? [['Full screen', goFull, 'quiet']] : []);
-
   function title() {
+    halt();
     const acts = [];
-    if (camp) acts.push(['Continue', route]);
-    acts.push([camp ? 'New game' : 'Start', () => {
-      if (canFull && matchMedia('(pointer: coarse)').matches) goFull();
-      camp = R.newCampaign(); save(); route();
-    }]);
-    if (playtest) acts.push(['Playtest', playtestMenu, 'quiet']);
-    show('<h1>PIZZA RUNNER</h1><p class="sub">You have been deployed.</p>', [...acts, ...fullButton()]);
+    if (camp) acts.push(['Continue', () => { if (touch) goFull(); route(); }]);
+    acts.push(['Start delivery', () => { if (touch) goFull(); camp = R.newCampaign(); save(); route(); }, camp ? 'quiet' : '']);
+    show('<img class="logo" src="assets/logo.webp" alt="Pizza Runner">', acts);
+    const side = [];
+    if (playtest) side.push(['Playtest', playtestMenu]);
+    if (canFull) side.push(['Full screen', goFull]);
+    if (side.length) {
+      const row = document.createElement('div'); row.className = 'minor';
+      for (const [label, fn] of side) { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; row.appendChild(b); }
+      screen.querySelector('.sheet').appendChild(row);
+    }
   }
+  const touch = canFull && matchMedia('(pointer: coarse)').matches;
 
   // A city's street art loads behind whatever is on screen, never behind a screen of its own.
   // The briefing is back-room art that is already loaded, so it plays while the city arrives.
@@ -79,12 +98,20 @@
   const preload = city => (loading[city.id] = loading[city.id] || S.loadCity(city));
 
   async function route() {
+    halt();
     save();
-    const city = R.currentCity(camp), ready = preload(city);
-    if (camp.phase !== 'briefing') await ready;
+    const mine = epoch, city = R.currentCity(camp), ready = preload(city);
+    if (camp.phase === 'briefing') {
+      // Arriving in a city: let go of the paintings of every city that is not this one or the next.
+      const keep = new Set([city.id, C.CITIES[camp.cityIndex + 1]?.id]);
+      for (const c of C.CITIES) if (!keep.has(c.id) && !S.needsCity(c)) { S.unloadCity(c); delete loading[c.id]; }
+    } else await ready;
+    if (mine !== epoch) return; // something else took over while the art loaded
     switch (camp.phase) {
       case 'briefing': return scene(city.briefing, async () => {
+        const here = epoch;
         await ready;
+        if (here !== epoch) return;
         if (city.final) { R.startFinale(camp); route(); } else orderScreen();
       });
       case 'order': return orderScreen();
@@ -142,7 +169,7 @@
   function pieBuilder(city, held) {
     const options = R.menu(camp, city);
     let pick = held || city.signature;
-    const done = () => { removeEventListener('keydown', keys); box(city, pick); };
+    const done = () => { if (unkeys) { unkeys(); unkeys = null; } box(city, pick); };
     const slot = TOPPING_ORDER.indexOf.bind(TOPPING_ORDER);
     // Cursor moves over the tiles on the order's menu, nearest in the direction pressed, wrapping around.
     const step = (dx, dy) => {
@@ -175,6 +202,7 @@
       screen.querySelectorAll('.tile[data-t]').forEach(b => { b.onclick = () => { if (pick === b.dataset.t) done(); else { pick = b.dataset.t; render(); } }; });
     };
     addEventListener('keydown', keys);
+    unkeys = () => removeEventListener('keydown', keys);
     render();
   }
 
@@ -214,13 +242,15 @@
 
   function startRun(slice, node) {
     const city = R.currentCity(camp), world = camp.world;
+    halt();
     world.checkpoint = node;
     screen.classList.add('hidden');
     controls.classList.remove('hidden');
     const special = C.STYLES[slice.style].specialName;
     $('specialBtn').textContent = special || '';
     $('specialBtn').classList.toggle('off', !special);
-    run = new P.Run(canvas, input, { camp, city, world, slice, start: R.deployment(world, node), onEnd: result => debrief(slice, result) });
+    const mine = epoch;
+    run = new P.Run(canvas, input, { camp, city, world, slice, start: R.deployment(world, node), onEnd: result => { if (mine === epoch) debrief(slice, result); } });
     run.god = god;
     if (debug) window.__pr.run = run;
     run.start();
@@ -251,6 +281,7 @@
   function pause(on) {
     if (!run || run.done) return;
     run.paused = on;
+    if (on) { for (const k of ['left', 'right', 'jumpHeld']) input[k] = false; input.queued = {}; }
     $('pause').classList.toggle('hidden', !on);
     $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on';
   }
@@ -286,8 +317,12 @@
     overlay.querySelector('.mapback').onclick = () => overlay.classList.add('hidden');
   };
   $('pausePlaytestBtn').onclick = playtestMenu;
+  $('sceneFull').hidden = !canFull;
+  $('sceneFull').onclick = goFull;
   $('pausePlaytestBtn').classList.toggle('hidden', !playtest);
-  $('fullBtn').onclick = goFull;
+  $('fullBtn').onclick = () => { isFull() ? leaveFull() : goFull(); };
+  document.addEventListener('fullscreenchange', syncFull);
+  document.addEventListener('webkitfullscreenchange', syncFull);
   $('fullBtn').classList.toggle('hidden', !canFull);
   $('muteBtn').onclick = () => { A.toggle(); $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on'; };
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });

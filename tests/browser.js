@@ -26,7 +26,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
   const advance = async () => { for (let i = 0; i < 120 && await page.locator('#dialog:not(.hidden)').count(); i++) await page.locator('#dialog').click(); };
 
   await page.goto(url);
-  await click('Start');
+  await click('Start delivery');
   await page.locator('#dialog:not(.hidden)').waitFor(); await page.waitForTimeout(250); await shot('01-hq-opening');
   const firstLine = await page.locator('#dialog .line').getAttribute('data-full');
   ok('opening scene plays', /New recruits. Look at you. Warm, plain/.test(firstLine), firstLine);
@@ -173,7 +173,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
     await art.goto(url);
     await art.evaluate(() => localStorage.clear());
     await art.reload();
-    await art.getByRole('button', { name: 'Start', exact: true }).click();
+    await art.getByRole('button', { name: 'Start delivery', exact: true }).click();
     await art.waitForTimeout(300);
     ok('sprite-forge sheet loads', await art.evaluate(() => PR_SPRITES.has('old-timer', 'idle') && PR_SPRITES.has('teen', 'walk')));
     if (out) await art.screenshot({ path: path.join(out, '15-derek-sprite.png') });
@@ -190,7 +190,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
     const fit = await ctx.newPage();
     fit.on('pageerror', e => errors.push(e.message));
     await fit.goto(url);
-    await fit.getByRole('button', { name: 'Start', exact: true }).waitFor();
+    await fit.getByRole('button', { name: 'Start delivery', exact: true }).waitFor();
     const go = async (city, phase, mod) => fit.evaluate(([c, p, m]) => { const camp = PR_RULES.jumpTo(c, 0); camp.phase = p; if (m) eval(m); __pr.camp = camp; __pr.route(); }, [city, phase, mod]);
     const fits = async name => { await fit.waitForTimeout(150); const bad = await fit.evaluate(overflow); ok(`${name} fits ${w}x${h}`, !bad.length, bad.join(' | ')); };
     const people = "for (let i = 0; i < 9; i++) camp.receipts.push({ n: i + 1, order: 1, placed: '12:00 AM', to: ['K8lyn', 'Kate-lyn', 'Caitlin'][i % 3], city: 'Chicago', attempt: 1, outcome: ['delivered', 'cold', 'dead'][i % 3], lines: ['Pepperoni'] }); camp.world.delivery = 1;";

@@ -11,7 +11,7 @@
     await image.decode();
     const mask = atlas.seats ? new Image() : null;
     if (mask) { mask.src = `${base}/mask.png`; await mask.decode(); }
-    loaded[`${character}/${anim}`] = { atlas, image, mask, pad: footPad(image, atlas), rims: character.startsWith('slice-') ? rims(image, atlas) : null };
+    loaded[`${character}/${anim}`] = { atlas, image, mask, pad: footPad(image, atlas), rims: character.startsWith('slice-') ? rims(image, { ...atlas, count: atlas.count + (atlas.blink != null ? 1 : 0) }) : null };
   }
 
   // Transparent rows under the lowest foot in a strip, taken over every frame. Art is painted with a margin
@@ -98,6 +98,12 @@
   async function loadCity(city) {
     await fetchLayers(cityLayers(city));
     loadedCities.add(city.id);
+  }
+
+  // Drops a city's paintings (about 75 MB decoded each) once the player has moved on from it.
+  function unloadCity(city) {
+    for (const name of cityLayers(city)) delete layers[name];
+    loadedCities.delete(city.id);
   }
 
   const layer = name => layers[name];
@@ -229,7 +235,7 @@
   // Takes the bites out of one frame: a round chunk with tooth marks, the drawing's outline around it.
   const biteCanvas = document.createElement('canvas');
   function bitten(s, i, source, sx, n) {
-    const { w, h } = s.atlas.frame, spots = s.rims[i];
+    const { w, h } = s.atlas.frame, spots = s.rims[i] || []; // the blink frame sits one past count, so it needs a rim too
     if (biteCanvas.width !== w || biteCanvas.height !== h) { biteCanvas.width = w; biteCanvas.height = h; }
     const g = biteCanvas.getContext('2d');
     g.clearRect(0, 0, w, h);
@@ -284,5 +290,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, loadCity, needsCity, layer, tile, ground, prop, strip, surface, has, draw, portrait, portraitUrl, stamp, size };
+  root.PR_SPRITES = { load, loadLayers, loadCity, unloadCity, needsCity, layer, tile, ground, prop, strip, surface, has, draw, portrait, portraitUrl, stamp, size };
 })(window);

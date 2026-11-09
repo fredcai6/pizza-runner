@@ -453,8 +453,11 @@
   }
 
   // Plays shots of lines over the canvas. A tap finishes the line, the next tap moves on.
+  // One scene at a time: starting a scene (or a jump elsewhere) stops the one still running.
+  let live = null;
   function play(canvas, dialog, shots, view, done) {
-    let onDone = done;
+    if (live) live.stop();
+    const bar = document.getElementById('sceneBar'), skipBtn = document.getElementById('skipBtn');
     const ctx = canvas.getContext('2d'), A = root.PR_SOUND;
     let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9;
     let script = null, shown = 0, full = false, box = null;
@@ -482,6 +485,7 @@
     };
     const frame = now => {
       if (stopped) return;
+      raf = requestAnimationFrame(frame); // first, so one bad frame cannot end the loop for good
       const shot = shots[s], cam = cameraOf(shot.comp), t = Math.min(1, (now - start) / (shot.ms || cam.ms || 6000));
       const { x, y, z } = camAt(shot, t);
       type(now);
@@ -511,28 +515,39 @@
         const who = standing(shot.comp, view), c = who && camAt(shot, t), onLeft = who && STAGE_CENTER[0] + (who.x - c.x) * c.z < W / 2;
         nameCard(ctx, shot.card, now - cutAt, !!onLeft);
       }
-      raf = requestAnimationFrame(frame);
     };
     const advance = () => {
       if (!full) { shown = script.total; full = true; text.innerHTML = typed(script, shown); dialog.classList.add('done'); return; }
       l++;
       lineAt = performance.now();
       if (l >= shots[s].lines.length) { l = 0; s++; start = cutAt = lineAt; }
-      if (s >= shots.length) {
-        stopped = true; cancelAnimationFrame(raf);
-        dialog.classList.add('hidden'); dialog.onclick = null;
-        return onDone();
-      }
+      if (s >= shots.length) return finish();
       show();
     };
-    dialog.onclick = advance;
     const relayout = () => { if (!stopped) dock(canvas, dialog, box); };
+    // Every exit (last line, Skip, being replaced) tears the scene down; only the first two call done.
+    const stop = () => {
+      if (stopped) return;
+      stopped = true; cancelAnimationFrame(raf);
+      removeEventListener('resize', relayout);
+      dialog.classList.add('hidden'); dialog.onclick = null;
+      if (bar) bar.classList.add('hidden');
+      if (skipBtn) skipBtn.onclick = null;
+      if (live === handle) live = null;
+    };
+    const finish = () => { if (stopped) return; stop(); done(); };
+    const handle = { stop, skip: finish };
+    live = handle;
+    dialog.onclick = advance;
     addEventListener('resize', relayout);
-    const finish = onDone;
-    onDone = () => { removeEventListener('resize', relayout); finish(); };
+    if (skipBtn) skipBtn.onclick = finish;
+    if (bar) bar.classList.remove('hidden');
     show();
     raf = requestAnimationFrame(frame);
+    return handle;
   }
 
-  root.PR_HQ = { play };
+  const stopScene = () => { if (live) live.stop(); };
+
+  root.PR_HQ = { play, stopScene };
 })(window);

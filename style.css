@@ -302,3 +302,18 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .spot:has(> .pin) { filter: drop-shadow(3px 4px 0 rgba(42,24,48,.85)); }
 .spot .alias.lbl { background: none; box-shadow: none; font: 600 14px var(--display); color: var(--ink); }
 @media (max-height: 420px) { .spot .sticky { width: 128px; min-height: 78px; padding: 8px; font-size: 13px; } }
+
+/* ---- title: the logo, two choices, and a quiet row for the rest; no scrolling on a landscape phone ---- */
+#screen:has(.logo) { display: flex; overflow: hidden; padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+.sheet:has(.logo) { max-width: 560px; width: 100%; margin: auto; align-items: center; gap: 8px; }
+.logo { max-width: 100%; height: min(48vh, 320px); width: auto; object-fit: contain; filter: drop-shadow(0 4px 0 rgba(42,24,48,.25)); }
+.sheet:has(.logo) .actions { flex-direction: row; align-self: stretch; margin: 0; gap: 12px; }
+.sheet:has(.logo) .actions button { flex: 1; padding: 11px 8px; }
+.minor { display: flex; gap: 10px; }
+.minor button { font: 700 13px var(--body); color: var(--text); background: rgba(255,255,255,.55); border: 2px solid #fff; border-radius: 999px; padding: 4px 14px; cursor: pointer; }
+
+/* ---- cutscene corner: skip and full screen, small and out of the dialogue's way ---- */
+#sceneBar { position: fixed; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; display: flex; gap: 6px; }
+#sceneBar button { font: 700 13px var(--body); color: #fff; background: rgba(42,24,48,.55); border: 2px solid rgba(255,255,255,.8); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+#sceneBar button:active { background: rgba(42,24,48,.85); }
+#sceneBar button[hidden] { display: none; }

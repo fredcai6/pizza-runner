@@ -35,7 +35,7 @@ const pilot = () => {
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(`http://localhost:${serve.address().port}/?debug=1`);
   await page.evaluate(pilot);
-  await page.getByRole('button', { name: 'Start', exact: true }).click();
+  await page.getByRole('button', { name: 'Start delivery', exact: true }).click();
   const started = Date.now();
   const log = [];
   for (let guard = 0; Date.now() - started < 50 * 60000; guard++) {
