@@ -327,8 +327,6 @@
     if (city.final) startFinale(camp); else camp.phase = 'order';
   }
 
-  const spelling = camp => C.SPELLINGS[camp.receipts.length % C.SPELLINGS.length];
-
   // Each order is printed once, with its own wrong name.
   function printOrder(camp) {
     const city = currentCity(camp), area = city.areas[camp.world ? camp.world.delivery : 0];
@@ -352,7 +350,7 @@
     if (moved) lines.push(`Cleared this trip: ${moved}`);
     lines.push(`Stays cleared: ${persistentGone(world)}`);
     lines.push(`Addresses done: ${world.delivery + (result.outcome === 'delivered' ? 1 : 0)} of ${city.areas.length}`);
-    return { n: camp.receipts.length + 1, order: C.ORDER_NUMBER, placed: C.PRINTER_CLOCK, to: spelling(camp), city: city.name, attempt: world.attempt, outcome: result.outcome, lines };
+    return { n: camp.receipts.length + 1, order: C.ORDER_NUMBER, placed: C.PRINTER_CLOCK, to: city.areas[world.delivery].customer, city: city.name, attempt: world.attempt, outcome: result.outcome, lines };
   }
 
   function describe(e) {

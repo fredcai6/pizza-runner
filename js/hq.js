@@ -49,6 +49,13 @@
     const cx = Math.max(vw / 2, Math.min(iw - vw / 2, at(0) * iw)), cy = Math.max(vh / 2, Math.min(ih - vh / 2, at(1) * ih));
     ctx.save();
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    // `lift` raises the painting by that share of the screen, so faces stay above the dialogue box. The strip it
+    // uncovers along the bottom is the painting's own last rows, stretched, and sits under the box.
+    const lift = (shot.lift || 0) * H;
+    if (lift) {
+      ctx.translate(0, -lift);
+      ctx.drawImage(img, cx - vw / 2, cy + vh / 2 - 2 / k, vw, 2 / k, 0, H - 1, W, lift + 2);
+    }
     ctx.drawImage(img, cx - vw / 2, cy - vh / 2, vw, vh, 0, 0, W, H);
     ctx.restore();
   }
@@ -365,6 +372,13 @@
     }
   }
 
+  // Each door painting carries a blank signboard on top. This is how many rows of the art to leave off so it is not drawn.
+  const DOOR_SIGN = {
+    'newyork/centralpark': 74, 'newyork/brooklyn': 70, 'chicago/loop': 66, 'chicago/lincolnpark': 60, 'chicago/wickerpark': 68,
+    'dc/georgetown': 62, 'naples/harbor': 60, 'naples/center': 48, 'naples/hillside': 62,
+    'california/downtown': 74, 'california/beach': 68, 'california/bungalows': 66,
+  };
+
   // The delivery: the neighborhood behind, the door, whoever ordered, and the pizza that made it.
   function door(ctx, view, ms) {
     const { city, area, slice } = view, pal = area.palette, drift = ms * 0.012;
@@ -381,9 +395,9 @@
     S.ground(ctx, `${city.id}/${area.id}/ground`, drift, 720, W);
     const name = art('door');
     if (S.layer(name)) {
-      const image = S.layer(name), scale = image.height > 240 ? 1 : 2;
+      const image = S.layer(name), scale = image.height > 240 ? 1 : 2, cut = DOOR_SIGN[`${city.id}/${area.id}`] || 0, rows = image.height - cut;
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(image, 760 - image.width * scale / 2, 600 - image.height * scale, image.width * scale, image.height * scale);
+      ctx.drawImage(image, 0, cut, image.width, rows, 760 - image.width * scale / 2, 600 - rows * scale, image.width * scale, rows * scale);
     } else {
       ctx.fillStyle = '#6b5344'; ctx.fillRect(620, 200, 300, 400);
       ctx.fillStyle = '#20150f'; ctx.fillRect(660, 250, 220, 350);
@@ -391,7 +405,7 @@
     const final = city.final && area === city.areas[city.areas.length - 1];
     if (final) {
       const tint = ['#ff3fa4', '#4fd8ff', '#ffe14f', '#b45cff'][Math.floor(ms / 240) % 4];
-      ctx.save(); ctx.globalAlpha = 0.3; ctx.fillStyle = tint; ctx.beginPath(); ctx.moveTo(760, 260); ctx.lineTo(240, 720); ctx.lineTo(1240, 720); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.globalAlpha = 0.3; ctx.fillStyle = tint; ctx.beginPath(); ctx.moveTo(735, 90); ctx.lineTo(785, 90); ctx.lineTo(1240, 720); ctx.lineTo(240, 720); ctx.fill(); ctx.restore();
     }
     const who = final ? 'alewife' : `customer-${city.id}-${area.id}`, height = final ? 220 : 200;
     if (!S.draw(ctx, who, 'idle', ms, 760, 610, height, -1)) placeholderAlewife(ctx, 760, 610, 300);
