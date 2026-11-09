@@ -2,63 +2,64 @@
 (function (root) {
   const MAPS = {
     newyork: {
+      // Drawn on Manhattan's own grid: avenues run 29 degrees east of north. a counts streets eastward, b avenues northward.
+      grid: { rot: 29, ox: 165, oy: 372, ga: 62, gb: 34 },
       start: 'bat',
       nodes: {
-        'bat': { name: 'Battery Park', x: 265, y: 625, area: 0 },
-        'bowl': { name: 'Bowling Green', x: 300, y: 590, area: 0 },
-        'wall': { name: 'Broadway & Wall St', x: 330, y: 555, area: 0 },
-        'sea': { name: 'South Street Seaport', x: 425, y: 565, area: 0 },
-        'hall': { name: 'City Hall', x: 445, y: 490, area: 0 },
-        'canal': { name: 'Canal St & Bowery', x: 470, y: 440, area: 0 },
-        'times': { name: 'Times Square', x: 480, y: 345, area: 1 },
-        'colcir': { name: 'Columbus Circle', x: 452, y: 292, area: 1 },
-        'parkse': { name: 'Fifth Ave & 59th St', x: 540, y: 292, area: 1 },
-        'cpn': { name: 'Harlem Meer, 110th St', x: 590, y: 170, area: 1 },
-        'dumbo': { name: 'Brooklyn Bridge, DUMBO', x: 565, y: 520, area: 2 },
-        'boroh': { name: 'Borough Hall', x: 600, y: 590, area: 2 },
-        'prom': { name: 'Brooklyn Heights Promenade', x: 535, y: 605, area: 2 },
-        'atl': { name: 'Atlantic Ave & Flatbush Ave', x: 720, y: 610, area: 2 },
-        'dekalb': { name: 'Flatbush Ave & DeKalb Ave', x: 655, y: 525, area: 2 },
+        'bat': { name: 'Battery Park', a: 3, b: 0, area: 0 },
+        'bowl': { name: 'Bowling Green', a: 3, b: 2, area: 0 },
+        'wall': { name: 'Broadway & Wall St', a: 3, b: 4, area: 0 },
+        'sea': { name: 'South Street Seaport', a: 6, b: 4, area: 0 },
+        'hall': { name: 'City Hall', a: 4, b: 7, area: 0 },
+        'canal': { name: 'Canal St & Bowery', a: 6, b: 9, area: 0 },
+        'times': { name: 'Times Square', a: 3, b: 9, area: 1 },
+        'colcir': { name: 'Columbus Circle', a: 2, b: 11, area: 1 },
+        'parkse': { name: 'Fifth Ave & 59th St', a: 5, b: 11, area: 1 },
+        'cpn': { name: 'Harlem Meer, 110th St', a: 5, b: 14, area: 1 },
+        'dumbo': { name: 'Brooklyn Bridge, DUMBO', a: 10, b: 6, area: 2 },
+        'boroh': { name: 'Borough Hall', a: 10, b: 3, area: 2 },
+        'prom': { name: 'Brooklyn Heights Promenade', a: 9, b: 1, area: 2 },
+        'atl': { name: 'Atlantic Ave & Flatbush Ave', a: 13, b: 5, area: 2 },
+        'dekalb': { name: 'Flatbush Ave & DeKalb Ave', a: 11, b: 9, area: 2 },
       },
       streets: [
         { id: 'battery-pl', name: 'Battery Place', from: 'bat', to: 'bowl', area: 0, length: 0.5 },
-        { id: 'whitehall', name: 'Whitehall Street', from: 'bowl', to: 'bat', area: 0, length: 0.5, via: [[290,610]] },
+        { id: 'whitehall', name: 'Whitehall Street', from: 'bowl', to: 'bat', area: 0, length: 0.5 },
         { id: 'broadway-1', name: 'Broadway', from: 'bowl', to: 'wall', area: 0, length: 0.7, turn: true },
-        { id: 'broadway-2', name: 'Broadway', from: 'wall', to: 'hall', area: 0, length: 0.8, via: [[390,520]] },
-        { id: 'wall-st', name: 'Wall Street', from: 'wall', to: 'sea', area: 0, length: 1, via: [[375,548]], turn: true, door: 0.7 },
-        { id: 'south-st', name: 'South Street', from: 'sea', to: 'bat', area: 0, length: 1, via: [[400,625],[330,645]] },
-        { id: 'fulton', name: 'Fulton Street', from: 'sea', to: 'hall', area: 0, length: 0.6, turn: true },
-        { id: 'broadway-3', name: 'Broadway', from: 'hall', to: 'times', area: 1, length: 1, via: [[465,420]] },
-        { id: 'brooklyn-bridge', name: 'Brooklyn Bridge', from: 'hall', to: 'dumbo', area: 2, length: 0.8, via: [[500,495],[535,505]], turn: true },
-        { id: 'bowery', name: 'The Bowery', from: 'canal', to: 'hall', area: 0, length: 0.5 },
-        { id: 'seventh-ave', name: 'Seventh Ave South', from: 'times', to: 'bowl', area: 1, length: 1.5, via: [[420,450],[345,540]], turn: true },
-        { id: 'broadway-4', name: 'Broadway', from: 'times', to: 'colcir', area: 1, length: 0.7 },
+        { id: 'broadway-2', name: 'Broadway', from: 'wall', to: 'hall', area: 0, length: 0.8, via: [[3,7]] },
+        { id: 'wall-st', name: 'Wall Street', from: 'wall', to: 'sea', area: 0, length: 1, turn: true, door: 0.7 },
+        { id: 'south-st', name: 'South Street', from: 'sea', to: 'bat', area: 0, length: 1, via: [[6,0]] },
+        { id: 'fulton', name: 'Fulton Street', from: 'sea', to: 'hall', area: 0, length: 0.6, via: [[6,7]], turn: true },
+        { id: 'broadway-3', name: 'Broadway', from: 'hall', to: 'times', area: 1, length: 1, via: [[3,7]] },
+        { id: 'brooklyn-bridge', name: 'Brooklyn Bridge', from: 'hall', to: 'dumbo', area: 2, length: 0.8, via: [[4,6]], turn: true },
+        { id: 'bowery', name: 'The Bowery', from: 'canal', to: 'hall', area: 0, length: 0.5, via: [[4,9]] },
+        { id: 'seventh-ave', name: 'Seventh Ave South', from: 'times', to: 'bowl', area: 1, length: 1.5, via: [[2,9],[2,2]], turn: true },
+        { id: 'broadway-4', name: 'Broadway', from: 'times', to: 'colcir', area: 1, length: 0.7, via: [[3,11]] },
         { id: 'cps', name: 'Central Park South', from: 'colcir', to: 'parkse', area: 1, length: 0.6 },
-        { id: 'fifth-1', name: 'Fifth Avenue', from: 'parkse', to: 'hall', area: 1, length: 1.2, via: [[500,360]] },
-        { id: 'east-drive', name: 'East Drive', from: 'parkse', to: 'cpn', area: 1, length: 0.9, via: [[562,235]], turn: true, door: 0.7 },
-        { id: 'fifth-2', name: 'Fifth Avenue', from: 'cpn', to: 'hall', area: 1, length: 1.6, via: [[540,292],[500,360]] },
-        { id: 'park-ave', name: 'Park Avenue', from: 'cpn', to: 'hall', area: 1, length: 1, via: [[570,290],[490,400]], turn: true, gated: true },
+        { id: 'fifth-1', name: 'Fifth Avenue', from: 'parkse', to: 'hall', area: 1, length: 1.2, via: [[5,7]] },
+        { id: 'east-drive', name: 'East Drive', from: 'parkse', to: 'cpn', area: 1, length: 0.9, turn: true, door: 0.7 },
+        { id: 'fifth-2', name: 'Fifth Avenue', from: 'cpn', to: 'hall', area: 1, length: 1.6, via: [[5,7]] },
+        { id: 'park-ave', name: 'Park Avenue', from: 'cpn', to: 'hall', area: 1, length: 1, via: [[4,14]], turn: true, gated: true },
         { id: 'cadman', name: 'Cadman Plaza West', from: 'dumbo', to: 'boroh', area: 2, length: 0.5 },
-        { id: 'montague', name: 'Montague Street', from: 'boroh', to: 'prom', area: 2, length: 0.8, turn: true, door: 0.7 },
-        { id: 'columbia-hts', name: 'Columbia Heights', from: 'prom', to: 'dumbo', area: 2, length: 0.6 },
-        { id: 'atlantic', name: 'Atlantic Avenue', from: 'boroh', to: 'atl', area: 2, length: 0.8 },
-        { id: 'flatbush', name: 'Flatbush Avenue', from: 'atl', to: 'dekalb', area: 2, length: 0.7 },
-        { id: 'tillary', name: 'Tillary Street', from: 'dekalb', to: 'dumbo', area: 2, length: 0.6, turn: true },
-        { id: 'manhattan-bridge', name: 'Manhattan Bridge', from: 'dekalb', to: 'canal', area: 2, length: 1, via: [[570,470]] },
+        { id: 'montague', name: 'Montague Street', from: 'boroh', to: 'prom', area: 2, length: 0.8, via: [[10,1]], turn: true, door: 0.7 },
+        { id: 'columbia-hts', name: 'Columbia Heights', from: 'prom', to: 'dumbo', area: 2, length: 0.6, via: [[9,6]] },
+        { id: 'atlantic', name: 'Atlantic Avenue', from: 'boroh', to: 'atl', area: 2, length: 0.8, via: [[13,3]] },
+        { id: 'flatbush', name: 'Flatbush Avenue', from: 'atl', to: 'dekalb', area: 2, length: 0.7, via: [[13,9]] },
+        { id: 'tillary', name: 'Tillary Street', from: 'dekalb', to: 'dumbo', area: 2, length: 0.6, via: [[11,6]], turn: true },
+        { id: 'manhattan-bridge', name: 'Manhattan Bridge', from: 'dekalb', to: 'canal', area: 2, length: 1 },
       ],
       addresses: ['wall-st', 'east-drive', 'montague'],
+      areaLabels: [[1.0,7.2],[3,13],[11.5,4.3]],
       features: [
-        { kind: 'water', points: [[0,80],[525,80],[477,170],[414,290],[346,420],[304,500],[272,560],[240,620],[270,650],[0,650]], name: 'Hudson River' },
-        { kind: 'water', points: [[685,80],[760,80],[730,200],[690,300],[640,400],[590,470],[520,530],[500,590],[480,650],[400,650],[432,560],[464,500],[506,420],[548,340],[574,290],[637,170]], name: 'East River' },
-        { kind: 'park', points: [[449,290],[539,290],[602,172],[512,172]], name: 'Central Park' },
-        { kind: 'park', points: [[830,560],[930,550],[950,620],[850,640]], name: 'Prospect Park' },
+        { kind: 'water', points: [[-14,22],[-0.5,22],[-0.5,5],[0.5,2],[0.5,0],[1.5,-1],[5.5,-1],[6.5,0],[6.5,22],[8.5,22],[8.5,-2],[30,-2],[30,-14],[-14,-14]], name: 'Hudson River, harbor and East River' },
+        { kind: 'park', points: [[2,11],[5,11],[5,14.5],[2,14.5]], name: 'Central Park' },
+        { kind: 'park', points: [[16,-1.5],[19,-1.5],[19,2],[16,2]], name: 'Prospect Park' },
       ],
+      backdrop: [['Houston St', 4.5, 5, 0], ['Lafayette St', 4.5, 5, 1], ['Varick St', 2, 5, 1], ['Court St', 11, 8, 1], ['Henry St', 9.5, 4.5, 1], ['Lexington Ave', 5.5, 12.5, 1]],
       landmarks: [
-        { name: 'Statue of Liberty', x: 150, y: 610 },
-        { name: 'One World Trade Center', x: 345, y: 520 },
-        { name: 'Empire State Building', x: 505, y: 405 },
-        { name: 'Barclays Center', x: 745, y: 590 },
-        { name: 'Chrysler Building', x: 540, y: 370 },
+        { name: 'Statue of Liberty', a: 0, b: -2 },
+        { name: 'Governors Island', a: 5.5, b: -3.5 },
+        { name: 'Barclays Center', a: 15.2, b: 3 },
       ],
     },
     chicago: {
@@ -235,7 +236,7 @@
         'cherry': { name: 'Cherry Ave & Ocean Blvd', x: 650, y: 545, area: 1 },
         'junip': { name: 'Junipero Ave & Ocean Blvd', x: 770, y: 550, area: 2 },
         'term': { name: 'Termino Ave & Ocean Blvd, Belmont Pier', x: 960, y: 588, area: 1 },
-        'pend': { name: 'End of Belmont Pier', x: 1000, y: 648, area: 1 },
+        'pend': { name: 'End of Belmont Pier', x: 1000, y: 648, area: 1, pier: true },
         'bh': { name: 'Termino Ave & 4th St, Belmont Heights', x: 940, y: 450, area: 1 },
         'bpark': { name: 'Junipero Ave & 4th St, Bluff Park', x: 770, y: 470, area: 2 },
       },
@@ -277,5 +278,53 @@
       ],
     },
   };
-  if (typeof module !== 'undefined') module.exports = { MAPS }; else root.PR_MAPS = MAPS;
+
+  // A city with a grid is authored in street/avenue steps (a, b) and turned onto the sheet here, so every
+  // road sits on its own tilted lattice. Everything downstream just sees sheet coordinates.
+  for (const m of Object.values(MAPS)) {
+    const g = m.grid;
+    if (!g) continue;
+    const c = Math.cos(g.rot * Math.PI / 180), s = Math.sin(g.rot * Math.PI / 180);
+    const at = (a, b) => [g.ox + a * g.ga * c + b * g.gb * s, g.oy + a * g.ga * s - b * g.gb * c].map(v => Math.round(v * 10) / 10);
+    for (const n of Object.values(m.nodes)) [n.x, n.y] = at(n.a, n.b);
+    for (const st of m.streets) if (st.via) st.via = st.via.map(p => at(...p));
+    for (const f of m.features) f.points = f.points.map(p => at(...p));
+    for (const l of m.landmarks) [l.x, l.y] = at(l.a, l.b);
+    m.areaLabels = (m.areaLabels || []).map(p => at(...p));
+    m.backdrop = (m.backdrop || []).map(([name, a, b, up]) => [name, ...at(a, b), up]);
+  }
+
+  // Each city's picture: roads stretched to fill the sheet and pinned to a street grid (a gridded city is
+  // already on the sheet). Crossroads never share a grid point; the later one takes the nearest free corner.
+  const G = 40, fits = {};
+  function fit(id) {
+    if (fits[id]) return fits[id];
+    const m = MAPS[id];
+    if (m.grid) {
+      const f = p => p.map(Math.round);
+      f.node = n => [m.nodes[n].x, m.nodes[n].y];
+      return (fits[id] = f);
+    }
+    const pts = [...Object.values(m.nodes).map(n => [n.x, n.y]), ...m.streets.flatMap(s => s.via || [])];
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
+    const sx = 1130 / (Math.max(...xs) - x0), sy = 540 / (Math.max(...ys) - y0);
+    const stretch = ([x, y]) => [75 + (x - x0) * sx, 100 + (y - y0) * sy];
+    const snap = ([x, y]) => [Math.round(x / G) * G, Math.round(y / G) * G];
+    const taken = new Set(), nodes = {};
+    for (const [nid, n] of Object.entries(m.nodes)) {
+      const [x, y] = snap(stretch([n.x, n.y]));
+      let best = null;
+      for (let r = 0; r < 4 && !best; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
+        const k = `${x + dx * G},${y + dy * G}`;
+        if (!taken.has(k) && (!best || Math.hypot(dx, dy) < best[2])) best = [x + dx * G, y + dy * G, Math.hypot(dx, dy), k];
+      }
+      taken.add(best[3]); nodes[nid] = [best[0], best[1]];
+    }
+    // Landscape keeps its own shape; only the roads are gridded.
+    const f = p => stretch(p).map(Math.round);
+    f.node = nid => nodes[nid];
+    return (fits[id] = f);
+  }
+
+  if (typeof module !== 'undefined') module.exports = { MAPS, fit, G }; else { root.PR_MAPS = MAPS; root.PR_MAPFIT = { fit, G }; }
 })(typeof window !== 'undefined' ? window : globalThis);

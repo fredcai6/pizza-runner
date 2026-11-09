@@ -1,7 +1,7 @@
 // Checks every authored city network in js/maps.js against the design rules. Usage: node --test tests/maps.test.js
 const test = require('node:test');
 const assert = require('node:assert');
-const { MAPS } = require('../js/maps.js');
+const { MAPS, fit } = require('../js/maps.js');
 const CITIES = ['newyork', 'chicago', 'dc', 'naples', 'california'];
 
 const out = (m, node) => m.streets.filter(s => s.from === node);
@@ -93,6 +93,29 @@ for (const id of CITIES) {
     assert.ok(!(steady && steadyY) , 'addresses march steadily across the map');
   });
 }
+
+// Distance from a point to a polygon's outline, and whether it lies inside, both as drawn on the sheet.
+const inside = ([x, y], poly) => poly.reduce((c, [xi, yi], i) => {
+  const [xj, yj] = poly[(i + poly.length - 1) % poly.length];
+  return (yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi ? !c : c;
+}, false);
+const edge = ([x, y], poly) => Math.min(...poly.map(([ax, ay], i) => {
+  const [bx, by] = poly[(i + 1) % poly.length], t = Math.max(0, Math.min(1, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2 || 1)));
+  return Math.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay));
+}));
+
+test('no crossroad sits in the water, a pier end excepted', () => {
+  for (const id of CITIES) {
+    const m = MAPS[id], f = fit(id);
+    const seas = m.features.filter(k => k.kind === 'water').map(w => ({ name: w.name, poly: w.points.map(q => f(q)) }));
+    for (const [n, node] of Object.entries(m.nodes)) {
+      const p = f.node(n), wet = seas.filter(w => inside(p, w.poly));
+      if (node.pier) { assert.ok(wet.length, `${id} ${n} is flagged a pier end but is on land`); continue; }
+      assert.ok(!wet.length, `${id}: ${n} is in the ${wet.map(w => w.name)}`);
+      for (const w of seas) assert.ok(edge(p, w.poly) >= 14, `${id}: ${n} touches the ${w.name}`);
+    }
+  }
+});
 
 test('every map has water or parks and named landmarks for character', () => {
   for (const id of CITIES) {

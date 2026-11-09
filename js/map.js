@@ -3,42 +3,19 @@
   const C = root.PR_CONTENT, R = root.PR_RULES;
   const MAPS = root.PR_MAPS;
 
-  // Every city's roads are stretched to fill the sheet, then pinned to a street grid so every road
-  // runs along a grid line and turns at a corner, like a street map.
-  const G = 40;
-  const fits = {};
-  function fit(city) {
-    if (fits[city.id]) return fits[city.id];
-    const m = MAPS[city.id], pts = [...Object.values(m.nodes).map(n => [n.x, n.y]), ...m.streets.flatMap(s => s.via || [])];
-    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
-    const sx = 1130 / (Math.max(...xs) - x0), sy = 540 / (Math.max(...ys) - y0);
-    const stretch = ([x, y]) => [75 + (x - x0) * sx, 100 + (y - y0) * sy];
-    const snap = ([x, y]) => [Math.round(x / G) * G, Math.round(y / G) * G];
-    // Two crossroads never share a grid point: the later one takes the nearest free corner.
-    const taken = new Set(), nodes = {};
-    for (const [id, n] of Object.entries(m.nodes)) {
-      const [x, y] = snap(stretch([n.x, n.y]));
-      let best = null;
-      for (let r = 0; r < 4 && !best; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
-        const k = `${x + dx * G},${y + dy * G}`;
-        if (!taken.has(k) && (!best || Math.hypot(dx, dy) < best[2])) best = [x + dx * G, y + dy * G, Math.hypot(dx, dy), k];
-      }
-      taken.add(best[3]); nodes[id] = [best[0], best[1]];
-    }
-    // Landscape keeps its own shape; only the roads are gridded.
-    const f = p => stretch(p).map(Math.round);
-    f.node = id => nodes[id];
-    return (fits[city.id] = f);
-  }
+  const { fit: fitMap, G } = root.PR_MAPFIT;
+  const fit = city => fitMap(city.id);
 
   // Each stretch as the line of road it follows on the map: along the grid, with corners.
   // A road and the road back the other way take opposite corners, so a pair rings a block.
   const hash = id => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
   function line(city, street, world) {
     const m = MAPS[city.id], def = m.streets.find(s => s.id === street.id), f = fit(city);
-    if (!def) return [[f.node(m.start)[0] - 34, f.node(m.start)[1]], f.node(m.start)];
+    const tilt = m.grid ? m.grid.rot * Math.PI / 180 : 0;
+    if (!def) return [[f.node(m.start)[0] - 34 * Math.cos(tilt), f.node(m.start)[1] - 34 * Math.sin(tilt)], f.node(m.start)];
     if (def.back) return line(city, world.streets[def.back], world).slice().reverse();
     const a = f.node(def.from), b = f.node(def.to);
+    if (m.grid) return [a, ...(def.via || []), b];
     if (a[0] === b[0] || a[1] === b[1]) return [a, b];
     const twin = m.streets.find(t => t !== def && !t.back && t.from === def.to && t.to === def.from);
     const horizontalFirst = twin ? hash(def.id) < hash(twin.id) : hash(def.id) % 2 === 0;
@@ -60,16 +37,24 @@
 
   // Streets for the faded backdrop, real for each area. [name, x, y, vertical] on the raw map sheet.
   const BACKDROP = {
-    newyork: [['Houston St', 400, 465, 0], ['14th St', 440, 395, 0], ['34th St', 520, 335, 0], ['Lafayette St', 478, 470, 1], ['Varick St', 380, 500, 1], ['Court St', 640, 570, 1], ['Court St', 650, 440, 1], ['Henry St', 580, 590, 1], ['Lexington Ave', 520, 220, 1]],
     chicago: [['Madison St', 790, 530, 0], ['Adams St', 790, 560, 0], ['Division St', 850, 360, 0], ['Armitage Ave', 840, 200, 0], ['Halsted St', 640, 300, 1], ['Ashland Ave', 520, 250, 1], ['Dearborn St', 840, 520, 1], ['Webster Ave', 880, 170, 0]],
     dc: [['K Street', 700, 270, 0], ['H Street', 800, 250, 0], ['Constitution Ave', 600, 360, 0], ['Independence Ave', 700, 470, 0], ['14th Street', 640, 330, 1], ['7th Street', 800, 380, 1], ['Wisconsin Ave', 330, 300, 1], ['Rhode Island Ave', 520, 190, 0]],
     naples: [['Via Chiaia', 360, 520, 0], ['Via Caracciolo', 270, 620, 0], ['Via Foria', 800, 300, 0], ['Via Duomo', 780, 380, 1], ['Via Medina', 560, 560, 0], ['Via Cilea', 280, 270, 0], ['Corso Garibaldi', 850, 480, 0]],
     california: [['Ocean Blvd', 520, 560, 0], ['Anaheim St', 560, 380, 0], ['Atlantic Ave', 860, 420, 1], ['Redondo Ave', 840, 520, 1], ['Elm Ave', 330, 520, 1], ['3rd St', 460, 480, 0], ['Locust Ave', 520, 430, 1]],
   };
 
-  // The stage, drawn as city blocks with the streets as the gaps between them.
+  // The stage, drawn as city blocks with the streets as the gaps between them. A tilted city turns its blocks with its streets.
   function blocks(city) {
-    const out = [];
+    const out = [], g = MAPS[city.id].grid;
+    if (g) {
+      const c = Math.cos(g.rot * Math.PI / 180), sn = Math.sin(g.rot * Math.PI / 180);
+      for (let b = -30; b < 30; b++) for (let a = -30; a < 50; a++) {
+        const x = g.ox + (a + .5) * g.ga * c + (b + .5) * g.gb * sn, y = g.oy + (a + .5) * g.ga * sn - (b + .5) * g.gb * c;
+        if (x < 40 || x > 1240 || y < 80 || y > 660) continue;
+        out.push(`<rect class="blk t${hash(`${a},${b},${city.id}`) % 5}" x="${a * g.ga + 4}" y="${-(b + 1) * g.gb + 4}" width="${g.ga - 8}" height="${g.gb - 8}" rx="3"/>`);
+      }
+      return `<g transform="translate(${g.ox} ${g.oy}) rotate(${g.rot})">${out.join('')}</g>`;
+    }
     for (let y = 80; y < 660; y += G) for (let x = 40; x < 1240; x += G) {
       const tone = (hash(`${x},${y},${city.id}`) % 5);
       out.push(`<rect class="blk t${tone}" x="${x + 4}" y="${y + 4}" width="${G - 8}" height="${G - 8}" rx="3"/>`);
@@ -90,6 +75,18 @@
       left -= lens[i];
     }
     return { x: pts[0][0], y: pts[0][1], angle: 0 };
+  }
+
+  // The first part of a line, up to a fraction of its length.
+  function head(pts, t) {
+    const lens = spans(pts);
+    let left = t * lens.reduce((a, b) => a + b, 0);
+    const out = [pts[0]];
+    for (let i = 0; i < lens.length; i++) {
+      if (left <= lens[i]) { const f = lens[i] ? left / lens[i] : 0; out.push([pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f]); return out; }
+      out.push(pts[i + 1]); left -= lens[i];
+    }
+    return out;
   }
 
   const path = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${p[0]} ${p[1]}`).join(' ');
@@ -131,12 +128,14 @@
     out.push(blocks(city));
     for (const k of m.features) out.push(`<polygon class="${k.kind}" points="${k.points.map(p => f(p).join(',')).join(' ')}"/>`);
     city.areas.forEach((a, i) => {
-      const ns = Object.values(m.nodes).filter(n => n.area === i).map(n => f([n.x, n.y])), x = ns.reduce((t, n) => t + n[0], 0) / ns.length, y = ns.reduce((t, n) => t + n[1], 0) / ns.length;
+      const ns = Object.values(m.nodes).filter(n => n.area === i).map(n => f([n.x, n.y])), at = m.areaLabels && m.areaLabels[i];
+      const x = at ? at[0] : ns.reduce((t, n) => t + n[0], 0) / ns.length, y = at ? at[1] : ns.reduce((t, n) => t + n[1], 0) / ns.length;
       out.push(`<text class="areaname" x="${x}" y="${y}">${a.name}</text>`);
     });
-    for (const [name, x, y, up] of BACKDROP[city.id] || []) {
+    for (const [name, x, y, up] of m.grid ? m.backdrop : BACKDROP[city.id] || []) {
       const [px, py] = f([x, y]), gx = Math.round(px / G) * G, gy = Math.round(py / G) * G;
-      out.push(up ? `<text class="backstreet" transform="translate(${gx} ${py}) rotate(-90)">${name}</text>` : `<text class="backstreet" x="${px}" y="${gy + 4}">${name}</text>`);
+      if (m.grid) out.push(`<text class="backstreet" transform="translate(${px} ${py}) rotate(${m.grid.rot - (up ? 90 : 0)})">${name}</text>`);
+      else out.push(up ? `<text class="backstreet" transform="translate(${gx} ${py}) rotate(-90)">${name}</text>` : `<text class="backstreet" x="${px}" y="${gy + 4}">${name}</text>`);
     }
     for (const l of m.landmarks) { const [x, y] = f([l.x, l.y]); out.push(`<text class="landmark" x="${x}" y="${y}">${l.name}</text>`); }
     const lines = lanes(city, Object.fromEntries(Object.values(world.streets).map(s => [s.id, line(city, s, world)])), world);
@@ -144,18 +143,23 @@
     for (const s of drawn) out.push(`<path class="casing" d="${path(lines[s.id])}"/>`);
     for (const s of drawn) {
       const blocked = s.gated && !world.opened[s.id];
-      out.push(`<path class="road${world.known[s.id] ? ' known' : ''}${blocked ? ' blocked' : ''}" d="${path(lines[s.id])}"/>`);
+      out.push(`<path class="road${blocked ? ' blocked' : ''}" d="${path(lines[s.id])}"/>`);
       out.push(arrows(lines[s.id], 'arrow'));
     }
     // A faint dotted line to the address, from wherever the next slice starts.
     const target = R.addressStreet(camp), from = live ? world.streets[live.street].to : picked;
     const here = live && live.street === target && live.x < world.streets[target].door;
     const route = here ? { path: [target] } : from ? R.routes(world, from, target) : null;
-    if (route) route.path.forEach(id => out.push(`<path class="routeline" d="${path(lines[id])}"/>`));
+    // The route runs forward along each street and stops at the door of the address street.
+    if (route) route.path.forEach(id => out.push(`<path class="routeline" d="${path(id === target ? head(lines[id], world.streets[id].door / world.streets[id].length) : lines[id])}"/>`));
     // A road split into stretches or two directions still gets its name just once.
-    const named = new Set();
+    // A name that would land on top of a longer road's name waits for a roomier stretch.
+    const named = new Set(), spots = [];
     for (const s of drawn.slice().sort((a, b) => b.length - a.length)) {
-      if (world.known[s.id] && !named.has(s.name)) { named.add(s.name); out.push(roadLabel(lines[s.id], s.name)); }
+      if (!world.known[s.id] || named.has(s.name)) continue;
+      const p = along(lines[s.id], 0.5);
+      if (spots.some(q => Math.hypot(q.x - p.x, q.y - p.y) < 70)) continue;
+      named.add(s.name); spots.push(p); out.push(roadLabel(lines[s.id], s.name));
     }
     // Only the next address is marked.
     const next = world.delivery, as = world.streets[m.addresses[next]];
@@ -189,7 +193,7 @@
     }
     out.push(`<g class="legend"><circle cx="40" cy="692" r="11" class="k-addr"/><text x="58" y="699">Next stop</text>
       <circle cx="210" cy="692" r="11" class="k-check"/><text x="228" y="699">${live ? 'Checkpoints' : 'Tap to start here'}</text>
-      <path class="k-lost" d="M430 680 L442 692 L430 704 L418 692 Z"/><text x="454" y="699">Slice lost${lost.length ? ' (' + lost.length + ')' : ''}</text>${live ? `<g transform="translate(700 700)">${youImage(live, 14, 0, 30)}</g><text x="736" y="699">You are here</text>` : ''}</g></svg>`);
+      <path class="k-lost" d="M430 680 L442 692 L430 704 L418 692 Z"/><text x="454" y="699">Slice lost${lost.length ? ' (' + lost.length + ')' : ''}</text>${drawn.some(s => s.gated && !world.opened[s.id]) ? '<path class="k-shortcut" d="M900 692 H940"/><text x="954" y="699">Closed shortcut</text>' : ''}${live ? `<g transform="translate(700 700)">${youImage(live, 14, 0, 30)}</g><text x="736" y="699">You are here</text>` : ''}</g></svg>`);
     return out.join('');
   }
 
