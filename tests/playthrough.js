@@ -47,7 +47,7 @@ const pilot = () => {
       continue;
     }
     if (await page.locator('#screen.hidden').count()) { await page.waitForTimeout(400); continue; }
-    const deploy = page.getByRole('button', { name: 'Deploy' });
+    const deploy = page.getByRole('button', { name: 'Deliver', exact: true });
     if (await deploy.count()) { await page.waitForTimeout(1600); await deploy.click({ timeout: 1000 }).catch(() => {}); continue; }
     await page.waitForTimeout(1300);
     await page.locator('#screen:not(.hidden) .actions button').first().click({ timeout: 1000 }).catch(() => {});

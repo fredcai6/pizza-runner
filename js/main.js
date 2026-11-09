@@ -21,6 +21,8 @@
       b.textContent = label; if (cls) b.className = cls; b.onclick = fn;
       row.appendChild(b);
     }
+    const slot = screen.querySelector('[data-actions]');
+    if (slot) slot.appendChild(row);
   }
 
   function scene(shots, done, extra = {}) {
@@ -98,7 +100,7 @@
 
   function lostCity() {
     const city = R.currentCity(camp);
-    show(`<h2>${city.name} went cold</h2><p>All the slices are gone. The streets reset, and everything before ${city.name} stays done.</p>`,
+    show(`<div class="fit duo"><div class="duo-l"><h2>${city.name} went cold</h2><p>All the slices are gone. The streets reset, and everything before ${city.name} stays done.</p><div data-actions></div></div></div>`,
       [[`Back to ${city.name}`, () => { R.retryCity(camp); route(); }], boardButton(lostCity)]);
   }
 
@@ -107,16 +109,12 @@
     // The last door of a city: start fetching the next city while the customer talks.
     if (R.cityComplete(camp) && C.CITIES[camp.cityIndex + 1]) preload(C.CITIES[camp.cityIndex + 1]);
     scene([{ comp: 'door', lines: area.door }], () => {
-      show(`<h2 class="stamp delivered">Delivered</h2>${B.receiptHtml(last)}`, [['Next', () => { R.afterDoor(camp); route(); }]]);
+      show(`<div class="fit duo"><div class="duo-l"><h2 class="stamp delivered">Delivered</h2><div data-actions></div></div><div class="duo-r">${B.receiptHtml(last)}</div></div>`, [['Next', () => { R.afterDoor(camp); route(); }]]);
     }, { customer: area.customer, area, slice: { style: camp.world.lastStyle, topping: camp.world.lastTopping, left: camp.world.lastLeft } });
   }
 
-  function orderScreen() {
-    const city = R.currentCity(camp), st = C.STYLES[city.style];
-    const order = R.printOrder(camp);
-    show(`<h2>Incoming order</h2>${B.receiptHtml(order)}<p><b>${st.name}.</b> ${st.blurb}</p>`,
-      [['Build the pie', () => pieBuilder(city)], boardButton(() => orderScreen())]);
-  }
+  // Order, topping choice and Corkboard share one screen.
+  function orderScreen() { pieBuilder(R.currentCity(camp)); }
 
   // Old-school character select: a grid of topping tiles with a cursor, a big pie beside it wearing
   // the highlighted topping, and the topping's name and blurb as the fighter's stats.
@@ -141,9 +139,9 @@
     requestAnimationFrame(tick);
   }
 
-  function pieBuilder(city) {
+  function pieBuilder(city, held) {
     const options = R.menu(camp, city);
-    let pick = city.signature;
+    let pick = held || city.signature;
     const done = () => { removeEventListener('keydown', keys); box(city, pick); };
     const slot = TOPPING_ORDER.indexOf.bind(TOPPING_ORDER);
     // Cursor moves over the tiles on the order's menu, nearest in the direction pressed, wrapping around.
@@ -164,10 +162,15 @@
       const T = C.TOPPINGS[pick], style = city.style;
       const tiles = TOPPING_ORDER.concat([null]).map(t => !t || !options.includes(t) ? '<div class="tile lock"><span>?</span></div>'
         : `<button class="tile${pick === t ? ' on' : ''}" data-t="${t}" aria-label="${C.TOPPINGS[t].name}"><img src="assets/backgrounds/props/pickup-${t}.png" alt=""><span>${C.TOPPINGS[t].name}</span></button>`).join('');
-      show(`<div class="select"><div class="fighter"><div class="stage"><canvas class="fighterart" aria-label="${C.SPEAKERS[style]} wearing ${T.name.toLowerCase()}"></canvas></div>
+      show(`<div class="fit select"><div class="order">${B.receiptHtml(R.printOrder(camp))}<div data-board></div></div>
+        <div class="fighter"><div class="stage"><canvas class="fighterart" aria-label="${C.SPEAKERS[style]} wearing ${T.name.toLowerCase()}"></canvas></div>
           <div class="plate"><b class="fname">${T.name}</b><span class="fclass">${CLASS[T.kind] || T.kind}</span><p class="blurb">${T.blurb}</p><p class="byline">${C.SPEAKERS[style]}, ${C.STYLES[style].name}</p></div></div>
-        <div class="selgrid"><h2>Pick the topping</h2><div class="tiles">${tiles}</div><p class="hint">Arrows to move, Enter to box it.</p></div></div>`,
-        [['Box it', done]]);
+        <div class="selgrid"><h2>Choose your toppings</h2><div class="tiles">${tiles}</div><p class="hint">Pick your topping.<span> Arrows to move, Enter to start delivery.</span></p><div data-actions></div></div></div>`,
+        [['Start delivery', done]]);
+      const [name, fn] = boardButton(() => pieBuilder(city, pick));
+      const cork = document.createElement('button'); cork.textContent = name; cork.className = 'cork-btn';
+      cork.onclick = () => { removeEventListener('keydown', keys); fn(); };
+      screen.querySelector('[data-board]').appendChild(cork);
       fighter(screen.querySelector('.fighterart'), style, pick);
       screen.querySelectorAll('.tile[data-t]').forEach(b => { b.onclick = () => { if (pick === b.dataset.t) done(); else { pick = b.dataset.t; render(); } }; });
     };
@@ -181,7 +184,7 @@
     // This receipt was printed before she chose. Nobody mentions it.
     if (city.predicts) {
       const r = { ...R.printOrder(camp), lines: [C.TOPPINGS[pick].name, `PRINTED ${C.PRINTER_CLOCK}, BEFORE YOU CHOSE`] };
-      show(`<h2>This was already in the printer</h2>${B.receiptHtml(r)}`, [['...okay', route]]);
+      show(`<div class="fit duo"><div class="duo-l"><h2>This was already in the printer</h2><div data-actions></div></div><div class="duo-r">${B.receiptHtml(r)}</div></div>`, [['Continue', route]]);
     } else route();
   }
 
@@ -197,11 +200,11 @@
       const n = (s) => list.filter(x => x.style === s.style && x.topping === s.topping).length;
       show(`<div class="mapscreen">${M.svg(camp, { picked: node })}<div class="mapside">
         <h2>${city.name}</h2>
-        <p class="tally">Address ${world.delivery + 1} of ${city.areas.length}. ${list.length} slice${list.length === 1 ? '' : 's'} left.</p>
+        <p class="tally">Address ${world.delivery + 1} of ${city.areas.length}. ${list.length} slice${list.length === 1 ? '' : 's'} left. Start from <b>${world.nodes[node].name}</b>.</p>
         ${line ? `<p class="dispatch">${line}</p>` : ''}
-        <div class="slices">${groups.map(s => `<button class="slice${s === chosen ? ' on' : ''}" data-id="${s.id}"><img src="${S.portraitUrl(s.style, s.topping)}" alt=""><span class="sl"><b>${C.STYLES[s.style].name}</b><span>${C.TOPPINGS[s.topping].name} (${n(s)})</span></span></button>`).join('')}</div>
-        <p class="tally">Start from <b>${world.nodes[node].name}</b></p>
-        <div class="mapactions"></div></div></div>`, [['Deploy', () => startRun(chosen, node)], boardButton(mapScreen)]);
+        <div class="slices">${groups.map(s => `<button class="slice${s === chosen ? ' on' : ''}" data-id="${s.id}" aria-label="${C.STYLES[s.style].name}, ${C.TOPPINGS[s.topping].name}, ${n(s)}"><img src="${S.portraitUrl(s.style, s.topping)}" alt="">${n(s) > 1 ? `<i>${n(s)}</i>` : ''}</button>`).join('')}</div>
+        <p class="pick"><b>${C.STYLES[chosen.style].name}</b> ${C.TOPPINGS[chosen.topping].name}${n(chosen) > 1 ? ` (${n(chosen)})` : ''}</p>
+        <div class="mapactions"></div></div></div>`, [['Deliver', () => startRun(chosen, node)], boardButton(mapScreen)]);
       screen.querySelector('.mapactions').appendChild(screen.querySelector('.actions'));
       screen.querySelectorAll('.slice').forEach(b => { b.onclick = () => { chosen = pie.slices[b.dataset.id]; render(); }; });
       screen.querySelectorAll('[data-node]').forEach(g => { g.onclick = () => { node = g.dataset.node; render(); }; });
@@ -231,7 +234,7 @@
     if (result.outcome === 'delivered') return route();
     const receipt = camp.receipts[camp.receipts.length - 1];
     const heading = { cold: 'Gone cold', dead: 'Eaten' }[result.outcome];
-    const again = () => show(`<h2 class="stamp ${result.outcome}">${heading}</h2>${B.receiptHtml(receipt)}`, [[camp.phase === 'map' ? 'Back to the map' : 'Next', route], boardButton(again)]);
+    const again = () => show(`<div class="fit duo"><div class="duo-l"><h2 class="stamp ${result.outcome}">${heading}</h2><div data-actions></div></div><div class="duo-r">${B.receiptHtml(receipt)}</div></div>`, [[camp.phase === 'map' ? 'Back to the map' : 'Next', route], boardButton(again)]);
     again();
   }
 

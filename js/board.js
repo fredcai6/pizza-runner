@@ -12,17 +12,28 @@
 
   // Everything on the cork is pinned loosely: a seeded scatter with tilt and overlap, joined by sagging yarn.
   const seeded = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  function scatter(items, { cell, salt }) {
+  // The cork is laid out at full size, then scaled down (never below FLOOR) so the whole page fits the phone.
+  const FLOOR = 0.62;
+  const room = () => ({ w: Math.min(window.innerWidth - 56, 880), h: window.innerHeight - 84 });
+  function scatter(items, { cell, salt, h, jit = 0.3 }) {
     if (!items.length) return '';
-    const rnd = seeded(salt * 131 + items.length * 17 + 5), width = Math.min(window.innerWidth - 40, 880);
-    const cols = Math.max(2, Math.min(Math.floor(width / (cell[0] * 1.2)), Math.ceil(Math.sqrt(items.length * 1.6)))), colW = width / cols, rowH = cell[1] * 0.8, rows = Math.ceil(items.length / cols);
+    const { w: width, h: tall } = room(), avail = h || tall, rowH = cell[1] * 0.92;
+    const fit = cols => { const rows = Math.ceil(items.length / cols); return { cols, rows, high: Math.round((rows - 1) * rowH + cell[1] + 40) }; };
+    // Most readable layout: full size beats shrunk, and crowding the columns together costs more than shrinking.
+    let best = null;
+    for (let c = 2; c <= Math.max(2, items.length); c++) {
+      if (width / c < cell[0] * 0.8 && c > 2) break;
+      const f = fit(c), k = Math.min(1, avail / f.high), crowd = Math.min(1, width / c / (cell[0] * 0.95)), q = Math.max(FLOOR, k) * crowd * crowd;
+      if (!best || q > best.q + 0.01) best = { ...f, k, q };
+    }
+    const { cols, rows, high } = best, k = Math.max(FLOOR, best.k), rnd = seeded(salt * 131 + items.length * 17 + 5), colW = width / cols;
     const spots = items.map((html, i) => {
       const c = i % cols, r = Math.floor(i / cols);
-      const x = Math.max(2, Math.min(width - cell[0] - 2, c * colW + (colW - cell[0]) / 2 + (rnd() - 0.5) * colW * 0.5 + (r % 2 ? colW * 0.22 : 0)));
+      const x = Math.max(2, Math.min(width - cell[0] - 2, c * colW + (colW - cell[0]) / 2 + (rnd() - 0.5) * colW * jit + (r % 2 ? colW * 0.1 : 0)));
       const y = 14 + r * rowH + rnd() * 16, tilt = (rnd() - 0.5) * 11, z = 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3;
       return `<div class="spot${tape ? ' taped' : ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--tilt:${tilt.toFixed(1)}deg;z-index:${z}">${html}</div>`;
     });
-    return `<div class="cork" style="height:${Math.round(rows * rowH + cell[1] + 24)}px;width:${width}px"><svg class="yarn"></svg>${spots.join('')}</div>`;
+    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})"><svg class="yarn"></svg>${spots.join('')}</div></div>`;
   }
 
   // Red yarn from pin to pin, each loop sagging under its own weight.
@@ -57,7 +68,8 @@
   function theory(camp) {
     const notes = R.theory(camp).map((t, i) => `<div class="sticky s${i % 3}">${t.text}</div>`);
     const names = R.aliases(camp).map(a => `<span class="alias">${a}</span>`);
-    return `<p class="hand">Sergeant Dayold's theory, in his hand.</p>${scatter(notes, { cell: [150, 100], salt: 3 })}${names.length ? `<h4>Customer names. Aliases?</h4>${scatter(names, { cell: [150, 34], salt: 4 })}` : ''}`;
+    const all = names.length ? [...notes, '<span class="alias lbl">Customer names. Aliases?</span>', ...names] : notes;
+    return `<p class="hand">Sergeant Dayold's theory, in his hand.</p>${scatter(all, { cell: window.innerHeight <= 420 ? [128, 100] : [150, 118], salt: 3, jit: 0.12, h: room().h - 26 })}`;
   }
 
   function roster(camp) {
@@ -65,7 +77,7 @@
       const s = C.STYLES[r.style], city = C.CITIES.find(c => c.id === r.city).name;
       const pie = camp.pies[r.city], pic = root.PR_SPRITES.portraitUrl(r.style, pie && pie.topping);
       return `<div class="agent ${r.taped ? 'taped' : ''}"><img class="agentpic" src="${pic}" alt=""><b>${C.SPEAKERS[r.style]}</b><span>${s.name} of ${city}</span><span class="bio">${s.bio}</span><span>${s.specialName || 'No special'}</span>${r.taped ? '' : `<span>${r.left} of 6 left</span>`}${r.taped ? '<div class="tape">DEEP UNDERCOVER</div>' : ''}</div>`;
-    }), { cell: [170, 150], salt: 5 });
+    }), { cell: [170, 190], salt: 5, jit: 0 });
   }
 
   const PAGES = { history, enemies, theory, roster };
