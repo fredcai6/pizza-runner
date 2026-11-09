@@ -160,7 +160,7 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .bday { font-size: 15px; }
 .cardtext { display: flex; flex-direction: column; align-items: center; gap: 22px; }
 .card.withpol { flex-direction: row; gap: 36px; }
-.kpol { max-height: 52vh; max-width: 42vw; border: 8px solid #fff; border-bottom-width: 26px; border-radius: 4px; box-shadow: var(--cut); transform: rotate(-3deg); }
+.kpol { max-height: 64vh; max-width: 46vw; filter: drop-shadow(4px 6px 0 rgba(42,24,48,.6)); }
 #turn { display: none; position: fixed; inset: 0; z-index: 9; background: var(--ink); color: var(--paper); align-items: center; justify-content: center; font: 600 22px var(--display); }
 @media (orientation: portrait) and (max-width: 700px) { #turn { display: flex; } }
 

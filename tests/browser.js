@@ -148,6 +148,8 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
     await page.locator('#screen:not(.hidden) .actions button').first().click({ timeout: 600 }).catch(() => {});
     await page.waitForTimeout(15);
   }
+  await page.locator('.card .kpol:not([hidden])').waitFor({ timeout: 5000 }).catch(() => {});
+  ok('the end card shows Katelyn\'s Polaroid', await page.locator('.card.withpol .kpol:not([hidden])').count() === 1);
   await shot('17-end-card');
   const card = await page.locator('.card').innerText();
   ok('ending reaches the card', /To be continued/.test(card) && /Happy birthday Katelyn/.test(card), card.replace(/\n+/g, ' | '));
