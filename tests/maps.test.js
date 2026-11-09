@@ -131,3 +131,88 @@ test('the last Long Beach address is the bungalow and the pier is a there-and-ba
   assert.ok(back && back.from === out_.to && back.to === out_.from, 'pier needs a way back');
   assert.strictEqual(out(m, out_.to).length, 1, 'the end of the pier is a dead end');
 });
+
+// ---- the picture: where roads, routes and text land on the sheet ----
+const C = require('../js/content.js'), R = require('../js/rules.js');
+globalThis.window = globalThis;
+Object.assign(globalThis, { PR_CONTENT: C, PR_RULES: R, PR_MAPS: MAPS, PR_MAPFIT: { fit }, PR_SPRITES: { layer: () => null, portrait: () => null } });
+require('../js/map.js');
+const MAP = globalThis.PR_MAP;
+
+const worldOf = id => {
+  const camp = R.newCampaign();
+  camp.cityIndex = C.CITIES.findIndex(c => c.id === id);
+  camp.world = R.newWorld(R.currentCity(camp));
+  return camp;
+};
+
+// Crossroads a slice can have reached before it delivers to address addr: all it can get to without crossing that door.
+const startsFor = (m, addr) => {
+  const seen = new Set([m.start]), q = [m.start];
+  while (q.length) {
+    const n = q.shift();
+    for (const s of m.streets) if (s.from === n && s.id !== addr && !seen.has(s.to)) { seen.add(s.to); q.push(s.to); }
+  }
+  return seen;
+};
+
+// How far stretch A runs along stretch B, the same way and within a lane's width of it.
+const along = (A, B) => {
+  const ax = A[1][0] - A[0][0], ay = A[1][1] - A[0][1], bx = B[1][0] - B[0][0], by = B[1][1] - B[0][1], la = Math.hypot(ax, ay), lb = Math.hypot(bx, by);
+  if (!la || !lb || Math.abs(ax * bx + ay * by) / la / lb < Math.cos(20 * Math.PI / 180)) return 0;
+  const ux = bx / lb, uy = by / lb, off = p => Math.abs((p[0] - B[0][0]) * uy - (p[1] - B[0][1]) * ux), at = p => (p[0] - B[0][0]) * ux + (p[1] - B[0][1]) * uy;
+  if (Math.max(off(A[0]), off(A[1])) > 16) return 0;
+  return Math.max(0, Math.min(lb, Math.max(at(A[0]), at(A[1]))) - Math.max(0, Math.min(at(A[0]), at(A[1]))));
+};
+
+test('the dashed route never doubles back, from any start, to any address', () => {
+  for (const id of CITIES) {
+    const m = MAPS[id], camp = worldOf(id), world = camp.world, lines = MAP.roadLines(R.currentCity(camp), world);
+    for (const addr of m.addresses) for (const open of [false, true]) {
+      world.opened = open ? Object.fromEntries(m.streets.filter(s => s.gated).map(s => [s.id, true])) : {};
+      for (const from of startsFor(m, addr)) {
+        const r = R.routes(world, from, addr), where = `${id}: ${from} to ${addr}${r ? ` (${r.path.join(' > ')})` : ''}`;
+        assert.ok(r, `${where}: no way there`);
+        const polys = r.path.map(sid => sid === addr ? MAP.head(lines[sid], world.streets[sid].door / world.streets[sid].length) : lines[sid]);
+        const segs = polys.flatMap((p, i) => p.slice(1).map((q, k) => ({ i, seg: [p[k], q] })));
+        for (const a of segs) for (const b of segs) if (a.i < b.i) assert.ok(along(a.seg, b.seg) <= 10, `${where} retraces itself`);
+        for (let i = 0; i + 1 < polys.length; i++) {
+          const a = polys[i], b = polys[i + 1], p = a[a.length - 1], q = a[a.length - 2], n = b[1];
+          let turn = Math.abs(Math.atan2(n[1] - p[1], n[0] - p[0]) - Math.atan2(p[1] - q[1], p[0] - q[0])) * 180 / Math.PI;
+          if (turn > 180) turn = 360 - turn;
+          assert.ok(turn <= 120, `${where} turns back ${Math.round(turn)} degrees at ${r.path[i]}`);
+        }
+      }
+    }
+  }
+});
+
+// Every picture a city can show: each delivery, each checkpoint picked, a slice on each street, and a grave on every street.
+function pictures(id) {
+  const m = MAPS[id], out = [];
+  const camp = () => { const c = worldOf(id), w = c.world; for (const s of Object.keys(w.streets)) w.known[s] = true; for (const n of Object.keys(m.nodes)) w.reached[n] = 'lead'; return c; };
+  for (let d = 0; d < 3; d++) {
+    const c = camp(); c.world.delivery = d;
+    out.push([c, {}, `delivery ${d}`]);
+    for (const n of Object.keys(m.nodes)) out.push([c, { picked: n }, `delivery ${d}, ${n} picked`]);
+    for (const s of Object.values(c.world.streets)) if (s.id !== 'lead') for (const t of [.15, .5, .85]) out.push([c, { live: { street: s.id, x: s.length * t } }, `delivery ${d}, on ${s.id} at ${t}`]);
+  }
+  const c = camp();
+  Object.values(c.world.streets).filter(s => s.id !== 'lead').forEach((s, i) => { s.dead = [{ x: s.length * .5, at: i }]; });
+  out.push([c, { picked: m.start }, 'a slice lost on every street']);
+  return out;
+}
+
+test('no road runs under a label, no labels overlap, and nothing runs off the sheet', () => {
+  for (const id of CITIES) for (const [camp, opts, what] of pictures(id)) {
+    const { labels, roads, marks } = MAP.layout(camp, opts), here = `${id}, ${what}`;
+    labels.forEach((l, i) => {
+      assert.ok(l.poly.every(([x, y]) => x >= 6 && x <= 1274 && y >= 6 && y <= 714), `${here}: "${l.text}" runs off the sheet`);
+      assert.ok(!roads.some(r => MAP.overlap(l.wide, r)), `${here}: a road crosses "${l.text}"`);
+      const other = labels.find((o, j) => j > i && MAP.overlap(l.poly, o.poly));
+      assert.ok(!other, `${here}: "${l.text}" overlaps "${other && other.text}"`);
+      if (['areaname', 'backstreet', 'landmark'].includes(l.cls)) assert.ok(!marks.some(k => MAP.overlap(l.poly, k)), `${here}: "${l.text}" sits under a pin or checkpoint`);
+    });
+    for (const [a, b] of roads) for (const [x, y] of [a, b]) assert.ok(x >= 20 && x <= 1260 && y >= 70 && y <= 668, `${here}: a road reaches (${x}, ${y}), off the sheet or into the legend`);
+  }
+});
