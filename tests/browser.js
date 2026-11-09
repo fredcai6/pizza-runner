@@ -195,8 +195,9 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
     const fits = async name => { await fit.waitForTimeout(150); const bad = await fit.evaluate(overflow); ok(`${name} fits ${w}x${h}`, !bad.length, bad.join(' | ')); };
     const people = "for (let i = 0; i < 9; i++) camp.receipts.push({ n: i + 1, order: 1, placed: '12:00 AM', to: ['K8lyn', 'Kate-lyn', 'Caitlin'][i % 3], city: 'Chicago', attempt: 1, outcome: ['delivered', 'cold', 'dead'][i % 3], lines: ['Pepperoni'] }); camp.world.delivery = 1;";
     await go(0, 'order'); await fit.locator('.select').waitFor(); await fits('order and toppings (New York)');
-    await go(2, 'order'); await fit.locator('.select').waitFor(); await fits('order and toppings (DC, three toppings)');
-    await go(3, 'order'); await fit.locator('.select').waitFor();
+    // route() waits for a city's paintings, so wait for this city's receipt, not the last screen's.
+    await go(2, 'order'); await fit.locator('.select:has-text("Washington")').waitFor(); await fits('order and toppings (DC, three toppings)');
+    await go(3, 'order'); await fit.locator('.select:has-text("Naples")').waitFor();
     await fit.getByRole('button', { name: 'Start delivery', exact: true }).click(); await fit.getByRole('button', { name: 'Continue', exact: true }).waitFor(); await fits('predicted order');
     await go(4, 'map', "camp.pies.california.slices.forEach((x, i) => { x.style = ['ny', 'deep', 'jumbo', 'naples'][i % 4]; x.topping = ['pepperoni', 'jalapeno', 'garlic', 'basil'][i >> 1]; })");
     await fit.locator('.mapscreen').waitFor(); await fits('Long Beach map with eight different slices');
