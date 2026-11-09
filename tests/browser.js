@@ -188,7 +188,7 @@ const ok = (name, pass, detail = '') => { checks.push(pass); console.log(`${pass
     const fit = await ctx.newPage();
     fit.on('pageerror', e => errors.push(e.message));
     await fit.goto(url);
-    await fit.getByRole('button', { name: 'Start', exact: true }).waitFor();
+    await fit.getByRole('button', { name: 'Start delivery', exact: true }).waitFor();
     const go = async (city, phase, mod) => fit.evaluate(([c, p, m]) => { const camp = PR_RULES.jumpTo(c, 0); camp.phase = p; if (m) eval(m); __pr.camp = camp; __pr.route(); }, [city, phase, mod]);
     const fits = async name => { await fit.waitForTimeout(150); const bad = await fit.evaluate(overflow); ok(`${name} fits ${w}x${h}`, !bad.length, bad.join(' | ')); };
     const people = "for (let i = 0; i < 9; i++) camp.receipts.push({ n: i + 1, order: 1, placed: '12:00 AM', to: ['K8lyn', 'Kate-lyn', 'Caitlin'][i % 3], city: 'Chicago', attempt: 1, outcome: ['delivered', 'cold', 'dead'][i % 3], lines: ['Pepperoni'] }); camp.world.delivery = 1;";
