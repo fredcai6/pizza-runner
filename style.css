@@ -172,7 +172,6 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .areaname { font-family: var(--display); font-size: 34px; font-weight: 700; fill: var(--text); fill-opacity: .45; letter-spacing: 3px; }
 .casing { fill: none; stroke: var(--ink); stroke-width: 22; stroke-linejoin: round; stroke-linecap: round; }
 .road { fill: none; stroke: #fff; stroke-width: 16; stroke-linejoin: round; stroke-linecap: round; }
-.road.known { stroke: var(--sun); }
 .road.blocked { stroke: #d9b99a; stroke-dasharray: 14 12; }
 .arrow { fill: var(--ink); fill-opacity: .7; }
 .route { fill: none; stroke: var(--coral); stroke-width: 15; stroke-linejoin: round; stroke-linecap: round; }
@@ -197,6 +196,7 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .citymap .legend text { font-size: 22px; fill: var(--ink); font-weight: 800; text-anchor: start; paint-order: stroke; stroke: #fff; stroke-width: 7px; stroke-linejoin: round; }
 .k-route { fill: var(--sun); stroke: #fff; stroke-width: 4; }
 .k-addr { fill: var(--coral); stroke: #fff; stroke-width: 4; }
+.k-shortcut { fill: none; stroke: #d9b99a; stroke-width: 10; stroke-dasharray: 8 6; stroke-linecap: round; }
 .k-check { fill: var(--sun); stroke: #fff; stroke-width: 4; }
 .mapview { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
 .mapview .citymap { max-height: 100%; width: auto; max-width: 100%; }

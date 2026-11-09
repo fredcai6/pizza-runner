@@ -23,7 +23,7 @@
   // as pickups on the street. A pie can wear any topping unlocked so far (R.menu).
   const CITIES = [
     {
-      id: 'newyork', name: 'New York', style: 'ny', seed: 23, stretch: 3900, gap: 720,
+      id: 'newyork', name: 'New York City', style: 'ny', seed: 23, stretch: 3900, gap: 720,
       signature: 'pepperoni',
       mix: ['teen', 'teen', 'turtle', 'teen', 'turtle'], pickups: ['pepperoni'],
       areas: [
