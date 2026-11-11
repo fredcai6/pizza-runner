@@ -1,6 +1,6 @@
 """Qwen-Image-Edit 2511 over arbitrary-size layers for the paper art. Unlike forge.generate it never resizes a ref:
 image 1 is the layer to restyle (its size is the output size), the later refs are style references.
-    ws submit --priority 10 --vram 30G --mem 8G --cores 2 --name NAME -- \
+    ws submit --priority 10 --vram 30G --mem 8G --cores 2 --expect 30m --name NAME -- \
       env PYTHONPATH=~/projects/sprite-forge ~/projects/sprite-forge/.venv/bin/python backgrounds/paper_edit.py SPEC.toml
 Run from art/. Spec: run = "paper/ny-x", seeds = [1,2], [shots.NAME] input = "path", refs = ["style.png"], prompt = "...",
 steps (opt), width/height (opt, default input size). Paths are relative to art/. Output:
