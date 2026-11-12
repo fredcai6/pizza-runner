@@ -62,7 +62,8 @@
     // What you can stand on is as tall as it is drawn, so feet land on the painted top.
     fit(street) {
       for (const c of street.barricades) c.h = S.surface(`${this.city.id}/barricade`) || c.h;
-      for (const b of street.boxes) b.h = S.surface(this.boxArt('box')) || b.h;
+      // A stack is drawn sunk by its back corner's rise, so it stands on the street; its top comes down with it.
+      for (const b of street.boxes) { const art = this.boxArt('box'), top = S.surface(art); if (top) b.h = top - S.rise(art); }
     }
 
     // Each city stacks its own pizza boxes; the plain crates stand in where a city has none.
@@ -960,7 +961,7 @@
     drawBox(b) {
       const { ctx } = this;
       if (b.broken) { if (!S.prop(ctx, this.boxArt('box-broken'), b.x + b.w / 2, GROUND)) { ctx.fillStyle = '#8a6030'; ctx.fillRect(b.x, GROUND - 12, b.w, 12); } return; }
-      if (S.prop(ctx, this.boxArt('box'), b.x + b.w / 2, GROUND)) { this.drawCrack(b); return; }
+      if (S.prop(ctx, this.boxArt('box'), b.x + b.w / 2, GROUND + S.rise(this.boxArt('box')))) { this.drawCrack(b); return; }
       ctx.fillStyle = '#b8843f'; ctx.fillRect(b.x, GROUND - b.h, b.w, b.h);
       ctx.strokeStyle = '#2a1830'; ctx.lineWidth = 5; ctx.strokeRect(b.x + 3, GROUND - b.h + 3, b.w - 6, b.h - 6);
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
@@ -988,7 +989,7 @@
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
       for (let i = 0; i < 8; i++) ctx.fillRect(x - 170 + i * 48, GROUND + 4, 28, 60);
       if (j.turn && j.turn.gated && !j.open) {
-        if (!S.prop(ctx, this.boxArt('box-pile'), x, GROUND)) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
+        if (!S.prop(ctx, this.boxArt('box-pile'), x, GROUND + S.rise(this.boxArt('box-pile')))) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
       const label = (text, y, color) => {
