@@ -301,7 +301,7 @@
     filmed: 'A teenager took your picture.', fire: 'Back in the glow. Toasty.',
     recovered: 'Topping back in hand.', note: 'New note on the board.', paper: 'Something was in the box.',
     pickup: 'Swapped in. Three uses.', unlocked: 'New on the menu! Three uses now, and every pie after this can wear it.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
-    flees: 'The teenager bolts for home, phone first.', ninjaGone: 'The ninja bows once more and vanishes. Respect.', ninjaHit: 'It remembers that.',
+    flees: 'The teenager bolts for home, phone first.', ninjaGone: 'The ninja bows once more and vanishes. Respect.', ninjaHit: 'It remembers that.', scatter: 'Everyone in sight remembers somewhere else to be.',
     drain: 'Something in the storm drain.', almost: 'just ahead', missed: 'Rerouting...', bite: 'One bite and it goes home.', nope: 'Not this address yet.',
   };
 
@@ -328,8 +328,8 @@
     auraRadius: 330,
     // A stomp: feet may be this far into the top share of an enemy, hands-off slack at its sides, and a few frames of apex grace.
     stomp: { window: 0.62, reachAbove: 16, slack: 18, apexVy: -3 },
-    // What walking into a crate or a barricade says, once a slice.
-    hints: { box: 'Cracked crate. Shoot it, slam it or dash through.', barricade: 'Solid. Jump it.' },
+    // What walking into a stack of pizza boxes or a barricade says, once a slice.
+    hints: { box: 'Just pizza boxes. Shoot them, slam them or dash through.', barricade: 'Solid. Jump it.' },
   };
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';

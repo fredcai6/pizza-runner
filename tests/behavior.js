@@ -59,6 +59,23 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       s4.input.right = true; s4.input.q.special = true; s4.steps(50);
       ok('dash carries past a stunned turtle', s4.street.enemies[0].alive && s4.run.actors[0].state === 'stun' && s4.run.p.x > 560, s4.run.p.x);
     }
+    { // A special chases off every enemy in sight, and splashes cheese about.
+      for (const [ci, style] of [[1, 'deep'], [2, 'jumbo'], [3, 'naples']]) {
+        const s = scene(ci, style, 'pepperoni', [{ type: 'teen', x: 1100 }, { type: 'ninja', x: 1300, hits: 0 }, { type: 'turtle', x: 360 }, { type: 'turtle', x: 6000 }]);
+        s.street.length = 9000; s.street.turnAt = 8800; s.run.cam = s.run.camera();
+        s.run.invuln = 500; s.input.q.special = true;
+        let cheese = 0; for (let i = 0; i < 120 && !s.run.done; i++) { s.run.step(); cheese = Math.max(cheese, s.run.cheeseBits.length); }
+        const alive = s.street.enemies.map(e => e.alive);
+        ok(`${style}: its special chases off everyone on screen but the turtle`, !alive[0] && !alive[1] && alive[2], alive);
+        ok(`${style}: but not an enemy far down the street`, alive[3], alive);
+        if (style !== 'naples') ok(`${style}: the landing throws cheese everywhere`, cheese > 20, cheese);
+      }
+      const d = scene(3, 'naples', null);
+      d.street.boxes.push({ x: 560, w: 84, h: 84, broken: false }); d.run.enter(d.street.id, 400);
+      d.input.right = true; d.input.q.special = true; let bits = 0;
+      for (let i = 0; i < 30; i++) { d.run.step(); bits = Math.max(bits, d.run.cheeseBits.length); }
+      ok('a dash through a box throws cheese', d.street.boxes[0].broken && bits > 10, bits);
+    }
     { // Mutant: warns, chases from behind, leaves after one bite.
       const s = scene(1, 'ny', 'pepperoni', [{ type: 'mutant', x: 300, drain: 300 }]);
       s.street.length = 20000; s.street.turnAt = 19000;
@@ -183,7 +200,7 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
         s.run.p.x = 520; s.run.p.y = GROUND - bar.h - s.run.p.h - 200; s.run.p.vy = 4; s.run.p.grounded = false; s.steps(120);
         ok(`${style}: the ${city.id} barricade is as tall as it is painted`, want > 40 && bar.h === want, `${bar.h} vs ${want}`);
         ok(`${style}: feet rest on the barricade's painted top`, s.run.p.grounded && Math.abs(s.run.p.y + s.run.p.h - (GROUND - want)) < 0.01, s.run.p.y + s.run.p.h);
-        ok(`${style}: a crate is as tall as its painting`, box.h === PR_SPRITES.surface('props/box'), box.h);
+        ok(`${style}: a box is as tall as its city's painting`, box.h === PR_SPRITES.surface(`${city.id}/box`) && box.h > 40, box.h);
       }
     }
     { // Garlic and onion work on every kind, and a ninja runs from it for good, even from a fire escape.

@@ -1,0 +1,41 @@
+{
+ "rev": {
+  "sha": "8228fa6e3c82478d902e9edeb1e7e24aeadb1d4b",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "qwen-edit": {
+   "run": "paper/boxes-1",
+   "build": "art/backgrounds/pizza_boxes_build.py",
+   "cheese": 3,
+   "sauce": 3,
+   "files": [
+    "cheese-drip-1",
+    "cheese-drip-2",
+    "cheese-drop-1",
+    "cheese-drop-2",
+    "cheese-drop-3",
+    "cheese-drop-4",
+    "cheese-splat-1",
+    "cheese-splat-2",
+    "cheese-splat-3",
+    "cheese-splat-4",
+    "cheese-string-1",
+    "cheese-string-2",
+    "sauce-drip-1",
+    "sauce-drip-2",
+    "sauce-drop-1",
+    "sauce-drop-2",
+    "sauce-drop-3",
+    "sauce-drop-4",
+    "sauce-splat-1",
+    "sauce-splat-2",
+    "sauce-splat-3",
+    "sauce-splat-4",
+    "sauce-string-1",
+    "sauce-string-2"
+   ]
+  }
+ }
+}
