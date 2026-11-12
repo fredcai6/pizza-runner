@@ -33,7 +33,7 @@
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
       this.speech = null; this.quipGap = 0; this.quipCount = {};
-      this.bursts = []; this.cheeseBits = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
+      this.bursts = []; this.cheeseBits = []; this.flour = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
       this.look = 0; this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
       this.done = false; this.offer = null;
       this.wipe = 0; this.pending = null; this.removed = 0; this.found = 0; this.taken = new Set(); this.warned = false;
@@ -54,16 +54,41 @@
       R.clearSpawn(street, x);
       this.fit(street);
       this.actors = street.enemies.filter(e => e.alive).map(e => this.actor(e));
-      this.shots = []; this.foes = []; this.drops = []; this.temp = []; this.sauce = [];
+      this.shots = []; this.foes = []; this.drops = []; this.temp = []; this.sauce = []; this.flour = []; this.cheeseBits = [];
       this.p.x = x; this.p.y = GROUND - this.p.h; this.p.vy = 0; this.p.vx *= 0.5; this.p.grounded = true;
       this.cam = this.camera(); this.warned = false;
     }
 
     // What you can stand on is as tall as it is drawn, so feet land on the painted top.
     fit(street) {
-      for (const c of street.barricades) c.h = S.surface(`${this.city.id}/barricade`) || c.h;
+      for (const c of street.barricades) c.h = S.surface(this.barArt(c)) || c.h;
       // A stack is drawn sunk by its back corner's rise, so it stands on the street; its top comes down with it.
       for (const b of street.boxes) { const art = this.boxArt('box'), top = S.surface(art); if (top) b.h = top - S.rise(art); }
+    }
+
+    // The solid blocks are pizza-shop stock (flour, cans, parmesan, salami); the city's old barricade stands in without the art.
+    barArt(c) { return c.kind && S.layer(`props/obstacle-${c.kind}`) ? `props/obstacle-${c.kind}` : `${this.city.id}/barricade`; }
+
+    // Hitting stock makes it jiggle in its own way: flour sacks squash and puff, cans wobble and drip sauce, the parmesan
+    // rocks and drops crumbs, the salamis sway. A push held against it does not keep setting it off.
+    poke(c, power = 1) {
+      if (!c.kind || this.frame - (c.pokedAt ?? -99) < 24) return;
+      c.pokedAt = this.frame; c.jig = Math.min(1.3, Math.max(c.jig || 0, power)); c.jt = 0;
+      const cx = c.x + c.w / 2, top = GROUND - c.h;
+      if (c.kind === 'flour') for (let i = 0; i < 3 + Math.round(power * 2); i++) {
+        const r = rand(this.frame + i * 3.7);
+        this.flour.push({ x: cx + (r - 0.5) * c.w, y: top + 10 + r * 20, vx: (r - 0.5) * 2.4, vy: -0.8 - r * 1.2, t: 0, life: 40 + Math.round(r * 20), size: 0.5 + r * 0.5 * power, pick: this.frame + i });
+      }
+      if (c.kind === 'cans') for (const k of [0.2, 0.8]) this.cheeseBits.push({ what: 'sauce', art: 'drip', x: c.x + c.w * k, y: top + 6, vx: 0, vy: 0.5, t: 0, stuck: 0, pick: this.frame + k * 10, size: 0.55, spin: 0, rot: Math.PI / 2 });
+      if (c.kind === 'parm') for (let i = 0; i < 4; i++) {
+        const r = rand(this.frame * 1.3 + i);
+        this.cheeseBits.push({ what: 'cheese', art: 'drop', x: cx + (r - 0.5) * c.w, y: top + 4, vx: (r - 0.5) * 5, vy: -4 - r * 3, t: 0, stuck: 0, pick: i, size: 0.3 + r * 0.15, spin: 0.2, rot: 0 });
+      }
+    }
+
+    obstacleStep() {
+      for (const c of this.street.barricades) if (c.jig) { c.jt++; c.jig *= 0.955; if (c.jig < 0.02) c.jig = 0; }
+      this.flour = this.flour.filter(f => { f.x += f.vx; f.y += f.vy; f.vx *= 0.96; f.vy *= 0.97; return ++f.t < f.life; });
     }
 
     // Each city stacks its own pizza boxes; the plain crates stand in where a city has none.
@@ -152,6 +177,7 @@
       for (const c of this.solids()) {
         if (p.y + p.h > GROUND - c.h + 3 && p.x + p.w > c.x && p.x < c.x + c.w) {
           if (dashing && this.isBox(c)) { this.breakBox(c); continue; }
+          if (!this.isBox(c)) this.poke(c, Math.min(1, 0.4 + Math.abs(p.vx) / 12) * (dashing ? 1.3 : 1));
           p.x = p.vx > 0 ? c.x - p.w : c.x + c.w; p.vx = 0;
           this.bump(c);
         }
@@ -184,11 +210,12 @@
         p.y = GROUND - p.h; p.vy = 0; p.grounded = true;
         if (this.pounding) { this.pounding = false; this.smash = 0; this.shockwave(); }
       }
-      const tops = this.solids().map(c => ({ x: c.x, w: c.w, y: GROUND - c.h, solid: true, box: this.isBox(c) ? c : null }));
+      const tops = this.solids().map(c => ({ x: c.x, w: c.w, y: GROUND - c.h, solid: true, box: this.isBox(c) ? c : null, stock: this.isBox(c) ? null : c }));
       for (const pl of [...this.street.platforms, ...tops]) {
         if (p.vy >= 0 && lastBottom <= pl.y + 1 && p.y + p.h >= pl.y && p.x + p.w > pl.x && p.x < pl.x + pl.w) {
           if (pl.box && (this.pounding || (st.stomp && fall > 10))) { this.breakBox(pl.box); continue; }
           p.y = pl.y - p.h; p.vy = 0; p.grounded = true; this.perch = pl.solid ? TOP_SINK.solid : TOP_SINK.platform;
+          if (pl.stock && !wasGrounded && fall > 3) this.poke(pl.stock, Math.min(1.2, 0.3 + fall / 18 + (this.pounding ? 0.6 : 0)));
           if (this.pounding) { this.pounding = false; this.smash = 0; this.shockwave(); }
         }
       }
@@ -199,7 +226,8 @@
       this.dust = this.dust.filter(d => { d.x += d.vx; d.y += d.vy; d.vy += 0.05; return --d.t > 0; });
       this.wispStep();
 
-      this.heat -= st.heatDecay / 60;
+      // Streets are longer than the heat tuning was set for, so the slice cools in step with them.
+      this.heat -= st.heatDecay / C.TUNING.streetScale / 60;
       this.updateBand();
       this.fires();
       this.actorsStep();
@@ -210,6 +238,7 @@
       this.auraStep();
       this.bursts = this.bursts.filter(b => --b.t > 0);
       this.cheeseStep();
+      this.obstacleStep();
       this.junctionStep();
       // The camera leans toward where the slice is heading, so there is room to react.
       this.look += (p.facing * 170 - this.look) * 0.04;
@@ -347,6 +376,7 @@
       this.cheese(x, GROUND - 8, st.flop ? 1.4 : 1.15, 0, true);
       this.chaseOff(a => Math.abs(a.x - x) < reach && a.y > GROUND - 110);
       for (const b of this.street.boxes) if (!b.broken && Math.abs(b.x - x) < reach) this.breakBox(b);
+      for (const c of this.street.barricades) if (Math.abs(c.x + c.w / 2 - x) < reach) this.poke(c, 1.2);
       this.gateHit(x, reach);
     }
 
@@ -894,10 +924,7 @@
       for (const pl of this.street.platforms) this.drawPlatform(pl);
       for (const x of this.street.drains) S.prop(ctx, 'props/drain', x, GROUND + 8);
       for (const x of this.temp) S.prop(ctx, 'props/drain', x, GROUND + 8);
-      for (const c of this.street.barricades) {
-        if (S.prop(ctx, `${this.city.id}/barricade`, c.x + c.w / 2, GROUND)) continue;
-        ctx.fillStyle = '#5b4a3a'; ctx.fillRect(c.x, GROUND - c.h, c.w, c.h);
-      }
+      for (const c of this.street.barricades) this.drawObstacle(c);
       for (const b of this.street.boxes) this.drawBox(b);
       this.drawFires(); this.drawDead(); this.drawDoor();
       this.drawPickups();
@@ -917,6 +944,7 @@
       this.drawPlayer();
       for (const b of this.bursts) this.drawBurst(b);
       this.drawCheese();
+      this.drawFlour();
       this.drawParty();
       ctx.restore();
     }
@@ -965,6 +993,37 @@
       ctx.fillStyle = '#b8843f'; ctx.fillRect(b.x, GROUND - b.h, b.w, b.h);
       ctx.strokeStyle = '#2a1830'; ctx.lineWidth = 5; ctx.strokeRect(b.x + 3, GROUND - b.h + 3, b.w - 6, b.h - 6);
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
+    }
+
+    drawObstacle(c) {
+      const { ctx } = this, cx = c.x + c.w / 2;
+      ctx.save();
+      if (c.jig) {
+        const k = c.jig, t = c.jt;
+        ctx.translate(cx, GROUND);
+        if (c.kind === 'flour') { const o = Math.sin(t * 0.5) * k; ctx.scale(1 + o * 0.1, 1 - o * 0.1); }
+        else if (c.kind === 'cans') ctx.rotate(Math.sin(t * 0.55) * k * 0.07);
+        else if (c.kind === 'parm') ctx.rotate(Math.sin(t * 0.26) * k * 0.06);
+        else if (c.kind === 'salami') ctx.transform(1, 0, -Math.sin(t * 0.3) * k * 0.14, 1, 0, 0);
+        ctx.translate(-cx, -GROUND);
+      }
+      if (!S.prop(ctx, this.barArt(c), cx, GROUND)) { ctx.fillStyle = '#5b4a3a'; ctx.fillRect(c.x, GROUND - c.h, c.w, c.h); }
+      ctx.restore();
+    }
+
+    // Flour hangs in the air and thins out; puffs swell as they fade.
+    drawFlour() {
+      const { ctx } = this;
+      if (!this.flour.length) return;
+      ctx.save(); ctx.imageSmoothingEnabled = false;
+      for (const f of this.flour) {
+        const img = S.layer(`props/flour-puff-${1 + (f.pick % 8)}`);
+        if (!img) continue;
+        const life = f.t / f.life, k = f.size * (0.7 + life * 0.6);
+        ctx.globalAlpha = Math.min(1, (1 - life) * 1.6);
+        ctx.drawImage(img, Math.round(f.x - img.width * k / 2), Math.round(f.y - img.height * k / 2), Math.round(img.width * k), Math.round(img.height * k));
+      }
+      ctx.restore();
     }
 
     // A stack that gives way shows a small tear in its front; a barricade is whole.

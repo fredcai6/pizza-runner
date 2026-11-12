@@ -78,7 +78,8 @@
   const AREA_LAYERS = ['far', 'mid', 'near', 'ground', 'door'];
   const TOPPINGS = ['pepperoni', 'jalapeno', 'garlic', 'mushroom', 'basil', 'pineapple', 'sausage'];
   const FX = ['cheese', 'sauce'].flatMap(w => [['drop', 4], ['drip', 2], ['string', 2], ['splat', 4]].flatMap(([k, n]) => Array.from({ length: n }, (_, i) => `${w}-${k}-${i + 1}`)));
-  const PROPS = [...FX, 'box', 'box-pile', 'box-broken', 'drain', 'sign', 'ledge', 'star', 'fire', 'fire-2', 'fire-out', ...TOPPINGS.flatMap(t => [`pickup-${t}`, `shot-${t}`, ...['ny', 'deep', 'jumbo', 'naples'].map(s => `piece-${t}-${s}`)])];
+  const STOCK = ['flour', 'cans', 'parm', 'salami'].map(k => `obstacle-${k}`), PUFFS = Array.from({ length: 8 }, (_, i) => `flour-puff-${i + 1}`);
+  const PROPS = [...FX, ...STOCK, ...PUFFS, 'box', 'box-pile', 'box-broken', 'drain', 'sign', 'ledge', 'star', 'fire', 'fire-2', 'fire-out', ...TOPPINGS.flatMap(t => [`pickup-${t}`, `shot-${t}`, ...['ny', 'deep', 'jumbo', 'naples'].map(s => `piece-${t}-${s}`)])];
   const SHARED = ['hq/back', 'hq/mid', 'hq/table', 'hq/front', 'hq/alewife-polaroid', ...PROPS.map(p => `props/${p}`)];
 
   const fetchLayers = names => Promise.all(names.map(name => new Promise(done => {

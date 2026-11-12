@@ -47,6 +47,7 @@ const TRIALS = Number(process.argv[2] || 12);
           secs.push(Math.round(f / 60));
           result = result || { outcome: 'cold', x: 0 };
           outcomes[result.outcome]++;
+          if (result.killer) { const k = camp.world.streets[result.killer.street]?.enemies.find(e => e.id === result.killer.id); const key = 'by ' + (k ? k.type : '?'); outcomes[key] = (outcomes[key] || 0) + 1; }
           R.finishRun(camp, slice, result);
           if (camp.phase === 'door') R.afterDoor(camp);
         }
@@ -58,7 +59,7 @@ const TRIALS = Number(process.argv[2] || 12);
   for (const { city, rows } of out) for (const s of ['walk', 'mash']) {
     const r = rows.filter(x => x.skill === s), w = r.filter(x => x.won);
     const secs = r.flatMap(x => x.secs), mean = a => (a.reduce((x, y) => x + y, 0) / (a.length || 1));
-    console.log(city.padEnd(11), s, `won ${w.length}/${r.length}`, `slices ${mean(r.map(x => x.used)).toFixed(1)}`, `run ${Math.round(mean(secs))}s`, `city ${Math.round(mean(r.map(x => x.total)))}s`, `longest ${Math.max(...secs)}s`);
+    console.log(city.padEnd(11), s, `won ${w.length}/${r.length}`, `slices ${mean(r.map(x => x.used)).toFixed(1)}`, `run ${Math.round(mean(secs))}s`, `city ${Math.round(mean(r.map(x => x.total)))}s`, `longest ${Math.max(...secs)}s`, 'ends', JSON.stringify(r.reduce((t, x) => { for (const [k, v] of Object.entries(x.outcomes)) t[k] = (t[k] || 0) + v; return t; }, {})));
   }
   await b.close(); serve.close();
 })();
