@@ -1,0 +1,27 @@
+run = "paper/obstacles-1"
+seeds = [1, 2, 3]
+refs = ["paper/style_pm_sq.png"]
+
+[shots.flour]
+input = "/mnt/data/sprite-forge/paper-obstacles/in/flour.png"
+prompt = "Image 1 is three rough pale shapes on flat magenta. Rebuild them as three big fat cloth flour sacks for a pizzeria, two side by side with one on top, plump and a little slumped, tied at the top with string, off-white cloth with a pale blue stripe and a printed picture of a wheat ear, a dusting of white flour on them, flat paper cut-out art in the material of image 2, seen from the front at eye level, standing on the ground at the bottom of the image, in the same place and at the same size as the shape in image 1. Flat pieces of card with one soft shade each, a faint paper grain, gently cut edges, no pen outlines, no white border, no cast shadow. The top is flat and wide enough to stand on. The background stays perfectly flat magenta. No text, letters, numbers, logos or lettering anywhere: every label is a picture only."
+
+[shots.cans]
+input = "/mnt/data/sprite-forge/paper-obstacles/in/cans.png"
+prompt = "Image 1 is six rough red blocks on flat magenta. Rebuild them as a neat block of six giant tomato cans for a pizzeria, two across and three high: shiny silver tin rims and ridges, red and green labels with a printed picture of a ripe red plum tomato with green leaves, one can slightly dented, flat paper cut-out art in the material of image 2, seen from the front at eye level, standing on the ground at the bottom of the image, in the same place and at the same size as the shape in image 1. Flat pieces of card with one soft shade each, a faint paper grain, gently cut edges, no pen outlines, no white border, no cast shadow. The top is flat and wide enough to stand on. The background stays perfectly flat magenta. No text, letters, numbers, logos or lettering anywhere: every label is a picture only."
+
+[shots.parm]
+input = "/mnt/data/sprite-forge/paper-obstacles/in/parm.png"
+prompt = "Image 1 is two rough golden drums on a brown slab, on flat magenta. Rebuild them as two giant wheels of parmesan cheese lying flat, one stacked on the other, on a low wooden pallet: thick golden-tan rind with a dotted pattern pressed into it, a wedge cut out of the top wheel showing the pale crumbly inside, flat paper cut-out art in the material of image 2, seen from the front at eye level, standing on the ground at the bottom of the image, in the same place and at the same size as the shape in image 1. Flat pieces of card with one soft shade each, a faint paper grain, gently cut edges, no pen outlines, no white border, no cast shadow. The top is flat and wide enough to stand on. The background stays perfectly flat magenta. No text, letters, numbers, logos or lettering anywhere: every label is a picture only."
+
+[shots.salami_pile]
+input = "/mnt/data/sprite-forge/paper-obstacles/in/salami_pile.png"
+prompt = "Image 1 is rough dark red shapes on flat magenta. Rebuild them as a heap of big fat whole Italian salamis and sausages, each wrapped in white string netting, piled up like logs, dark red with pale flecks of fat, tied ends of string, flat paper cut-out art in the material of image 2, seen from the front at eye level, standing on the ground at the bottom of the image, in the same place and at the same size as the shape in image 1. Flat pieces of card with one soft shade each, a faint paper grain, gently cut edges, no pen outlines, no white border, no cast shadow. The top is flat and wide enough to stand on. The background stays perfectly flat magenta. No text, letters, numbers, logos or lettering anywhere: every label is a picture only."
+
+[shots.salami_rack]
+input = "/mnt/data/sprite-forge/paper-obstacles/in/salami_rack.png"
+prompt = "Image 1 is a rough wooden frame with dark red shapes on flat magenta. Rebuild it as a low, sturdy wooden curing rack for a pizzeria with a thick flat plank across the top, and big fat whole Italian salamis and sausages hanging from it, each wrapped in white string netting, dark red with pale flecks of fat, flat paper cut-out art in the material of image 2, seen from the front at eye level, standing on the ground at the bottom of the image, in the same place and at the same size as the shape in image 1. Flat pieces of card with one soft shade each, a faint paper grain, gently cut edges, no pen outlines, no white border, no cast shadow. The top is flat and wide enough to stand on. The background stays perfectly flat magenta. No text, letters, numbers, logos or lettering anywhere: every label is a picture only."
+
+[shots.puffs]
+input = "/mnt/data/sprite-forge/paper-obstacles/in/puffs.png"
+prompt = "Image 1 is eight rough pale cloud shapes on flat magenta. Rebuild each, in the same place and at the same size, as a separate flat paper cut-out in the material of image 2 of a puff of white baking flour bursting in the air: soft lumpy cloud shapes, off-white with one soft pale grey-beige shade, a few tiny specks of flour around each, faint paper grain, no pen outlines, no white border, no shadow. Every puff is separate, with magenta between them. The background stays perfectly flat magenta. No text, letters, numbers, logos or lettering anywhere: every label is a picture only."

@@ -305,6 +305,9 @@
     drain: 'Something in the storm drain.', almost: 'just ahead', missed: 'Rerouting...', bite: 'One bite and it goes home.', nope: 'Not this address yet.',
   };
 
+  // The solid blocks on every street are pizza-shop stock, each with its own jiggle when hit.
+  const OBSTACLES = ['flour', 'cans', 'parm', 'salami'];
+
   const BOX_PAPER = [
     'CARBON COPY: "Still warm?" "Still warm." The same exchange, over and over.',
     'PERSONNEL FILE: Beer Sprite Lite. Powers: none. Performance: exemplary.',
@@ -322,6 +325,10 @@
   const TUNING = {
     // Nothing alive stands or patrols within this far of where a slice is put down.
     spawnSafe: 520,
+    // Every street is this much longer than its city's stretch says (1.5 since the 11-11 playtest: bigger levels).
+    streetScale: 1.5,
+    // Enemies sit this much further apart than the city's gap, so the longer streets hold about a quarter more of them.
+    enemySpread: 1.2,
     // Seconds before a pizza's special (SLAM, FLOP, DASH) can be used again.
     cooldown: { deep: 6, jumbo: 7, naples: 5 },
     // Onion & garlic: how far the stank reaches.
@@ -349,6 +356,6 @@
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
   const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
-  const api = { CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
+  const api = { CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, OBSTACLES, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

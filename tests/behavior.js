@@ -245,6 +245,19 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       a.run.aura = true; let held = 0; for (let i = 0; i < 120; i++) { a.run.step(); if (a.run.freeze > 0) held++; }
       ok('the stank never freezes the picture', held === 0, held);
     }
+    { // The solid blocks are pizza-shop stock: each stands as tall as it is painted and jiggles when bumped.
+      for (const kind of C.OBSTACLES) {
+        const s = scene(0, 'ny', null);
+        s.street.barricades.push({ x: 540, w: 80, h: 100, kind }); s.run.enter(s.street.id, 300);
+        const c = s.street.barricades[0];
+        ok(`${kind}: as tall as its painting`, c.h === PR_SPRITES.surface(`props/obstacle-${kind}`) && c.h > 40, c.h);
+        s.input.right = true; let jig = 0, puffs = 0;
+        for (let i = 0; i < 60; i++) { s.run.step(); jig = Math.max(jig, c.jig || 0); puffs = Math.max(puffs, s.run.flour.length); }
+        ok(`${kind}: walking into it sets it jiggling`, jig > 0.3, jig);
+        if (kind === 'flour') ok('flour puffs out of the sacks', puffs > 2, puffs);
+        ok(`${kind}: and it is still solid`, s.run.p.x + s.run.p.w <= c.x + 1, s.run.p.x);
+      }
+    }
     { // Crates give and barricades do not, and bumping one says which.
       const s = scene(0, 'ny', 'pepperoni');
       s.street.barricades.push({ x: 540, w: 80, h: 100 }); s.run.enter(s.street.id, 300);

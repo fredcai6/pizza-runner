@@ -1,0 +1,4 @@
+{
+  "obstacles": {"flour": ["flour", 2], "cans": ["cans", 2], "parm": ["parm", 2], "salami": ["salami_pile", 1]},
+  "puffs": 1
+}

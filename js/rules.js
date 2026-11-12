@@ -21,10 +21,10 @@
     const map = MAPS[city.id], nodes = {}, streets = {};
     for (const [id, n] of Object.entries(map.nodes)) nodes[id] = { id, ...n };
     for (const s of map.streets) {
-      streets[s.id] = { id: s.id, name: s.name, area: s.area, from: s.from, to: s.to, role: s.gated ? 'alley' : s.back ? 'back' : 'street', length: Math.round(city.stretch * s.length), gated: !!s.gated, spot: s.door };
+      streets[s.id] = { id: s.id, name: s.name, area: s.area, from: s.from, to: s.to, role: s.gated ? 'alley' : s.back ? 'back' : 'street', length: Math.round(city.stretch * C.TUNING.streetScale * s.length), gated: !!s.gated, spot: s.door };
       nodes[s.from][s.turn ? 'turn' : 'keep'] = s.id;
     }
-    streets.lead = { id: 'lead', name: nodes[map.start].name, role: 'lead', area: nodes[map.start].area, from: null, to: map.start, length: Math.round(city.stretch * 0.4), gated: false };
+    streets.lead = { id: 'lead', name: nodes[map.start].name, role: 'lead', area: nodes[map.start].area, from: null, to: map.start, length: Math.round(city.stretch * C.TUNING.streetScale * 0.4), gated: false };
     return { nodes, streets };
   }
 
@@ -44,7 +44,8 @@
     const enemies = [], drains = [];
     let id = 0;
     if (!quiet) {
-      for (let x = 900; x < stop; x += city.gap + Math.floor(r() * 200)) {
+      // Enemies spread out a little with the street, so a longer street also has a couple more of them.
+      for (let x = 900; x < stop; x += city.gap * C.TUNING.enemySpread + Math.floor(r() * 200)) {
         const type = city.mix[(id + Math.floor(r() * 2)) % city.mix.length];
         const e = { id: id++, type, x, y: GROUND, range: 160, alive: true, power: 0, toppings: [], hits: 0 };
         if (type === 'mutant') { e.drain = x; drains.push(x); }
@@ -83,11 +84,13 @@
     const pickups = [];
     for (const l of ledges.slice(0, 2)) pickups.push({ x: l.x + l.w / 2, y: l.y - 40, topping: city.pickups[pickups.length % city.pickups.length] });
     if (!quiet) pickups.push({ x: 600 + Math.floor(r() * (length - 1400)), y: GROUND - 60, topping: city.pickups[Math.floor(r() * city.pickups.length)] });
-    const fires = length > 2500 ? [{ x: Math.floor(length * (0.45 + r() * 0.2)), lit: true }] : [];
+    // One campfire on a street over 2500, and one more for each further 3600 or so, spread evenly.
+    const fireCount = length > 2500 ? Math.max(1, Math.round(length / 3600)) : 0;
+    const fires = Array.from({ length: fireCount }, (_, i) => ({ x: Math.floor(length * ((i + 0.45 + r() * 0.2) / fireCount)), lit: true }));
     const boxes = [], barricades = [];
     for (let x = 1250; x < stop; x += 800 + Math.floor(r() * 700)) {
-      if (Math.abs(x - fires[0]?.x) < 200) continue;
-      if (r() < 0.65) boxes.push({ x, w: 84, h: 84, broken: false }); else barricades.push({ x, w: 80, h: 100 });
+      if (fires.some(f => Math.abs(x - f.x) < 200)) continue;
+      if (r() < 0.65) boxes.push({ x, w: 84, h: 84, broken: false }); else barricades.push({ x, w: 80, h: 100, kind: C.OBSTACLES[(barricades.length + city.seed + length) % C.OBSTACLES.length] });
     }
     return { ...def, turnAt, platforms: [...platforms, ...ledges], enemies, drains, pickups, fires, boxes, barricades, nextId: id, door: addressed === undefined ? null : Math.round(length * def.spot), address: addressed === undefined ? null : addressed, dead: [], filmed: null };
   }

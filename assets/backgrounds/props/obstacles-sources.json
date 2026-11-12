@@ -1,0 +1,49 @@
+{
+ "rev": {
+  "sha": "8228fa6e3c82478d902e9edeb1e7e24aeadb1d4b",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "qwen-edit": {
+   "run": "paper/obstacles-1",
+   "spec": "art/runs/paper_obstacles.toml",
+   "build": "art/backgrounds/obstacles_build.py",
+   "picks": {
+    "obstacles": {
+     "flour": [
+      "flour",
+      2
+     ],
+     "cans": [
+      "cans",
+      2
+     ],
+     "parm": [
+      "parm",
+      2
+     ],
+     "salami": [
+      "salami_pile",
+      1
+     ]
+    },
+    "puffs": 1
+   },
+   "files": [
+    "flour-puff-1",
+    "flour-puff-2",
+    "flour-puff-3",
+    "flour-puff-4",
+    "flour-puff-5",
+    "flour-puff-6",
+    "flour-puff-7",
+    "flour-puff-8",
+    "obstacle-cans",
+    "obstacle-flour",
+    "obstacle-parm",
+    "obstacle-salami"
+   ]
+  }
+ }
+}
