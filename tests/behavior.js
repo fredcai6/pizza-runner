@@ -200,7 +200,7 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
         s.run.p.x = 520; s.run.p.y = GROUND - bar.h - s.run.p.h - 200; s.run.p.vy = 4; s.run.p.grounded = false; s.steps(120);
         ok(`${style}: the ${city.id} barricade is as tall as it is painted`, want > 40 && bar.h === want, `${bar.h} vs ${want}`);
         ok(`${style}: feet rest on the barricade's painted top`, s.run.p.grounded && Math.abs(s.run.p.y + s.run.p.h - (GROUND - want)) < 0.01, s.run.p.y + s.run.p.h);
-        ok(`${style}: a box is as tall as its city's painting`, box.h === PR_SPRITES.surface(`${city.id}/box`) && box.h > 40, box.h);
+        ok(`${style}: a box is as tall as its city's painting, sunk to stand on the street`, box.h === PR_SPRITES.surface(`${city.id}/box`) - PR_SPRITES.rise(`${city.id}/box`) && box.h > 40, box.h);
       }
     }
     { // Garlic and onion work on every kind, and a ninja runs from it for good, even from a fire escape.

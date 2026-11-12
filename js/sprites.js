@@ -156,6 +156,29 @@
     return (surfaces[name] = foot - top);
   }
 
+  // How far a three-quarter-view prop's back corner rises above its foot: the bottom edge of the side face slants up,
+  // so drawing it this much lower puts the back on the street too. Thin edge columns (border, shadow) are ignored,
+  // and it never comes to more than a sixth of the height.
+  const rises = {};
+  function rise(name) {
+    if (name in rises) return rises[name];
+    const image = layers[name];
+    if (!image) return 0;
+    const c = document.createElement('canvas');
+    c.width = image.width; c.height = image.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(image, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height).data, cols = [];
+    for (let x = 0; x < c.width; x++) {
+      let n = 0, low = -1;
+      for (let y = 0; y < c.height; y++) if (data[(y * c.width + x) * 4 + 3] > 128) { n++; low = y; }
+      cols.push({ n, up: low < 0 ? 0 : c.height - 1 - low });
+    }
+    const counts = cols.filter(k => k.n).map(k => k.n).sort((a, b) => a - b), med = counts[counts.length >> 1] || 0;
+    const up = Math.max(0, ...cols.filter(k => k.n >= med * 0.6).map(k => k.up));
+    return (rises[name] = Math.min(up, Math.round(c.height / 6)));
+  }
+
   // Repeats a painted tile across a span, top-left at (x, y).
   function strip(ctx, name, x, y, w) {
     const image = layers[name];
@@ -291,5 +314,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, loadCity, unloadCity, needsCity, layer, tile, ground, prop, strip, surface, has, draw, portrait, portraitUrl, stamp, size };
+  root.PR_SPRITES = { load, loadLayers, loadCity, unloadCity, needsCity, layer, tile, ground, prop, strip, surface, rise, has, draw, portrait, portraitUrl, stamp, size };
 })(window);
