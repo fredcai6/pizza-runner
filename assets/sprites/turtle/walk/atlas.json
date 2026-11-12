@@ -1,7 +1,7 @@
 {
  "frame": {
-  "w": 150,
-  "h": 92
+  "w": 152,
+  "h": 94
  },
  "count": 4,
  "frame_ms": 220,
@@ -29,5 +29,6 @@
    "walk_a/3",
    "walk_b/3"
   ]
- }
+ },
+ "border_padded": true
 }

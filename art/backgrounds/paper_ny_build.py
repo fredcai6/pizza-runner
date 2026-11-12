@@ -13,7 +13,7 @@ from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from paper_near import NEAR, near_layer
-from paper import INK, SHADOW, add_grain, key_rgb, sticker
+from paper import INK, SHADOW, STREET, add_grain, key_rgb, sticker
 from forge.generate import DATA
 from forge.layers import quantize, tile_seam, write_sources
 
@@ -170,13 +170,14 @@ def build_door(area, run, seed):
         sz = ndimage.sum(a, lbl, range(1, n + 1)); a = np.isin(lbl, 1 + np.flatnonzero(sz >= 1500))
     ys, xs = np.where(a)
     d = Image.fromarray(np.dstack([rgb, a * 255]).astype(np.uint8), "RGBA").crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
-    th = 294   # plus the border on top: 300 tall, so the game draws its sign over the blank panel at the top
+    th = 288   # plus the street border top and bottom: 300 tall, so the game draws its sign over the blank panel at the top
     d = d.resize((max(1, round(d.width * th / d.height)), th), Image.LANCZOS)
     arr = np.asarray(d).copy()
     arr = quantize(arr, n=40)
     arr = add_grain(arr, 21, 2.0)
     arr[..., 3] = np.where(arr[..., 3] > 127, 255, 0)
-    return sticker(arr, border=4, shadow=(6, 5)), meta
+    st = sticker(arr, shadow=(6, 5), **STREET)
+    return st[:st.shape[0] - 5], meta   # the shadow's strip under the feet is cut, as in fit_prop
 
 
 def split_props(rgb):
@@ -212,40 +213,45 @@ def clean_tape(crop):
     return out
 
 
-def fit_prop(crop, w, h, seed):
-    """Quantize, add grain, then the sticker; the whole thing is w x h with feet on the bottom row."""
-    inner_w, inner_h = w - 12, h - 7
+def fit_prop(crop, w, h, seed, shadow=(4, 3)):
+    """Quantize, add grain, then the street sticker (paper.STREET: cream border and rim all the way round, feet included);
+    the whole thing is w x h with the bottom of the rim on the bottom row. The game sinks it into the pavement."""
+    side = STREET["border"] + 1
+    inner_w, inner_h = w - 2 * side - shadow[0] - 2, h - 2 * side - shadow[1] - 2
     im = Image.fromarray(crop, "RGBA")
     s = min(inner_w / im.width, inner_h / im.height)
     im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
     arr = quantize(np.asarray(im).copy(), n=30)
     arr = add_grain(arr, 31, 1.8)
     arr[..., 3] = np.where(arr[..., 3] > 127, 255, 0)
-    st = sticker(arr, border=3, shadow=(4, 3))
+    st = sticker(arr, shadow=shadow, **STREET)
+    # the shadow's strip under the feet is cut: the game's own ground shadow sits there
+    st = st[:st.shape[0] - shadow[1]] if shadow[1] else st
     canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     canvas.alpha_composite(Image.fromarray(st, "RGBA"), ((w - st.shape[1]) // 2, h - st.shape[0]))
     return np.asarray(canvas)
 
 
 def platform_tile(card=(196, 182, 226), plank=(170, 154, 206), edge=(214, 202, 238)):
-    """64x28 paper walkway that tiles: dark rim row, a white cut border (the walkable top), lilac card with plank cuts, white
-    border below, rim, and a solid shadow. The top row is where feet stand."""
-    t = np.zeros((28, 64, 4), np.uint8)
-    white, ink = (255, 255, 255), INK
+    """64x31 paper walkway that tiles: rim row, cream border rows (paper.STREET), card with plank cuts, cream border below,
+    rim, and a solid shadow. Row 0 is the rim along the top; the card's top face is row 1 + border."""
+    b = STREET["border"]
+    top, low = 1 + b, 1 + b + 14
+    t = np.zeros((low + b + 1 + 5, 64, 4), np.uint8)
+    paper, ink = STREET["white"], INK
     t[0, :, :3] = ink
-    t[1:4, :, :3] = white
-    t[4:18, :, :3] = card
-    t[4:6, :, :3] = edge
+    t[1:top, :, :3] = paper
+    t[top:low, :, :3] = card
+    t[top:top + 2, :, :3] = edge
     for x in (0, 32):
-        t[4:18, x, :3] = plank
+        t[top:low, x, :3] = plank
     for x in range(8, 64, 16):          # small cut-card studs
-        t[10:12, x:x + 2, :3] = plank
-    t[18:21, :, :3] = white
-    t[21, :, :3] = ink
-    t[22:27, :, :3] = SHADOW
-    t[:27, :, 3] = 255
+        t[top + 6:top + 8, x:x + 2, :3] = plank
+    t[low:low + b, :, :3] = paper
+    t[low + b, :, :3] = ink
+    t[low + b + 1:, :, :3] = SHADOW
+    t[..., 3] = 255
     return add_grain(t, 41, 1.6)
-
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)

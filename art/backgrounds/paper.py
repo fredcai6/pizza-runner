@@ -10,6 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from forge.color import srgb_to_oklab
 
 INK = (42, 24, 48)       # #2a1830, the rim outside the white border
+CREAM = (251, 246, 234)  # the paper border every character sheet carries; street props match it (audit 2026-11-11)
+# The one border for everything on the street: 5 px of cream card (as measured on most character sheets) and a 1 px rim, all the way round (feet included,
+# as on the characters; the game sinks grounded things into the pavement so the bottom border sits in it).
+STREET = dict(border=5, white=CREAM, floor=False)
 SHADOW = (74, 52, 92)    # solid drop shadow, a violet one step lighter than the rim
 
 
@@ -69,7 +73,7 @@ def disk(r):
     return x * x + y * y <= r * r + r * 0.5
 
 
-def sticker(rgba, border=4, shadow=(5, 4), pad=None, floor=True):
+def sticker(rgba, border=4, shadow=(5, 4), pad=None, floor=True, white=(255, 255, 255)):
     """White paper border (then a 1 px #2a1830 rim) around the art and a solid drop shadow, for touchable things.
     The art keeps its feet on the bottom row: the border and shadow stop there, so nothing sinks into the ground.
     floor=False is for things that float (pickups, throwing stars): border and shadow go all the way round."""
@@ -82,6 +86,7 @@ def sticker(rgba, border=4, shadow=(5, 4), pad=None, floor=True):
     if floor:
         art[pad + h - 1] = art0[pad + h - 1]
     big[..., 3] = np.where(art, 255, 0)
+    paper = white
     white = ndimage.binary_dilation(art, structure=disk(border))
     rim = ndimage.binary_dilation(white, structure=disk(1)) & ~white
     body = white | rim
@@ -93,7 +98,7 @@ def sticker(rgba, border=4, shadow=(5, 4), pad=None, floor=True):
     out = np.zeros_like(big)
     out[sh] = (*SHADOW, 255)
     out[rim] = (*INK, 255)
-    out[white] = (255, 255, 255, 255)
+    out[white] = (*paper, 255)
     out[art] = big[art]
     ys, xs = np.where(out[..., 3] > 0)
     return out[ys.min():(feet if floor else ys.max() + 1), xs.min():xs.max() + 1]

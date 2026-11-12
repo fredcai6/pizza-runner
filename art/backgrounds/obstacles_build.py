@@ -1,6 +1,6 @@
 """Cuts the picked Qwen images from runs/paper_obstacles.toml into game art:  python backgrounds/obstacles_build.py ASSETS_BACKGROUNDS   (from art/)
-Picks are in backgrounds/obstacles_picks.json. Writes props/obstacle-{flour,cans,parm,salami}.png (80x100 like the old barricades,
-so collision widths hold; touchable, so sticker-bordered) and props/flour-puff-1..8.png (thin border, they float)."""
+Picks are in backgrounds/obstacles_picks.json. Writes props/obstacle-{flour,cans,parm,salami}.png (104x112; the game takes each one's width from its drawing,
+so collision widths follow; touchable, so sticker-bordered) and props/flour-puff-1..8.png (thin border, they float)."""
 import json
 import sys
 from pathlib import Path
@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import paper_ny_build as nb
 from forge.generate import DATA
 from forge.layers import write_sources
-from paper import sticker
+from paper import STREET, sticker
 from pizza_boxes_build import biggest, crop, finish, keyed
 
 RUN = DATA / "runs" / "paper" / "obstacles-1" / "qwen-edit"
@@ -78,7 +78,7 @@ def puffs(seed):
             part = lbl == 1 + int(np.argmax(sz))
             im = Image.fromarray(crop(rgb[y0:y0 + 512, x0:x0 + 256], part), "RGBA")
             im = im.resize((max(4, round(im.width * PUFF_SCALE)), max(4, round(im.height * PUFF_SCALE))), Image.LANCZOS)
-            made[f"flour-puff-{len(made) + 1}"] = sticker(finish(flour_white(np.asarray(im)), 300 + len(made), 12), border=2, shadow=(0, 0), floor=False)
+            made[f"flour-puff-{len(made) + 1}"] = sticker(finish(flour_white(np.asarray(im)), 300 + len(made), 12), shadow=(0, 0), **STREET)
     return made
 
 
@@ -89,7 +89,7 @@ def main():
         rgb, keep = load(shot, seed)
         if kind == "cans":
             keep = trim_light_foot(rgb, keep)
-        made[f"obstacle-{kind}"] = nb.fit_prop(crop(rgb, body_only(biggest(ndimage.binary_opening(keep, iterations=1), 0.999))), 80, 100, 0)
+        made[f"obstacle-{kind}"] = nb.fit_prop(crop(rgb, body_only(biggest(ndimage.binary_opening(keep, iterations=1), 0.999))), 104, 112, 0)
     made.update(puffs(PICKS["puffs"]))
     for name, arr in made.items():
         Image.fromarray(arr, "RGBA").save(dest / f"{name}.png", optimize=True)

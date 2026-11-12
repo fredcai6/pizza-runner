@@ -1,1 +1,62 @@
-{"frame": {"w": 130, "h": 104}, "count": 2, "frame_ms": 90, "loop": true, "rev": {"sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e", "dirty": false, "comfy": "v0.44.0"}, "game_rev": {"sha": "6999c29feccc6f2aed0cc2415335d5fa5f91cb67", "dirty": true}, "source": {"run": "sheet", "model": "qwen-edit", "job": null, "master": "characters/slice-naples/references/paper-master.png", "cell": 6.479, "border": 3, "palette": 48, "poses": ["jump/1", "jump/1"]}, "seats": [[[43, 30], [80, 18], [73, 53]], [[43, 31], [80, 19], [73, 54]]]}
+{
+ "frame": {
+  "w": 132,
+  "h": 106
+ },
+ "count": 2,
+ "frame_ms": 90,
+ "loop": true,
+ "rev": {
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "6999c29feccc6f2aed0cc2415335d5fa5f91cb67",
+  "dirty": true
+ },
+ "source": {
+  "run": "sheet",
+  "model": "qwen-edit",
+  "job": null,
+  "master": "characters/slice-naples/references/paper-master.png",
+  "cell": 6.479,
+  "border": 3,
+  "palette": 48,
+  "poses": [
+   "jump/1",
+   "jump/1"
+  ]
+ },
+ "seats": [
+  [
+   [
+    44,
+    31
+   ],
+   [
+    81,
+    19
+   ],
+   [
+    74,
+    54
+   ]
+  ],
+  [
+   [
+    44,
+    32
+   ],
+   [
+    81,
+    20
+   ],
+   [
+    74,
+    55
+   ]
+  ]
+ ],
+ "border_padded": true
+}

@@ -1,7 +1,7 @@
 {
  "frame": {
-  "w": 130,
-  "h": 104
+  "w": 132,
+  "h": 106
  },
  "count": 6,
  "frame_ms": 220,
@@ -31,5 +31,6 @@
    "master",
    "master"
   ]
- }
+ },
+ "border_padded": true
 }

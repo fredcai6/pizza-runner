@@ -1,1 +1,152 @@
-{"frame": {"w": 130, "h": 104}, "count": 8, "frame_ms": 80, "loop": false, "rev": {"sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e", "dirty": false, "comfy": "v0.44.0"}, "game_rev": {"sha": "6999c29feccc6f2aed0cc2415335d5fa5f91cb67", "dirty": true}, "source": {"run": "sheet", "model": "qwen-edit", "job": null, "master": "characters/slice-naples/references/paper-master.png", "cell": 6.479, "border": 3, "palette": 48, "poses": ["run/1", "run/1", "run/1", "run/1", "run/1", "run/1", "run/1", "run/1"]}, "seats": [[[50, 31], [95, 26], [78, 64]], [[50, 31], [95, 26], [78, 64]], [[52, 31], [97, 26], [80, 64]], [[52, 31], [97, 26], [80, 64]], [[50, 31], [95, 26], [78, 64]], [[50, 31], [95, 26], [78, 64]], [[52, 31], [97, 26], [80, 64]], [[52, 31], [97, 26], [80, 64]]]}
+{
+ "frame": {
+  "w": 132,
+  "h": 106
+ },
+ "count": 8,
+ "frame_ms": 80,
+ "loop": false,
+ "rev": {
+  "sha": "719b9c175fb4bb608dd16bd86f677f27450f6a7e",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "6999c29feccc6f2aed0cc2415335d5fa5f91cb67",
+  "dirty": true
+ },
+ "source": {
+  "run": "sheet",
+  "model": "qwen-edit",
+  "job": null,
+  "master": "characters/slice-naples/references/paper-master.png",
+  "cell": 6.479,
+  "border": 3,
+  "palette": 48,
+  "poses": [
+   "run/1",
+   "run/1",
+   "run/1",
+   "run/1",
+   "run/1",
+   "run/1",
+   "run/1",
+   "run/1"
+  ]
+ },
+ "seats": [
+  [
+   [
+    51,
+    32
+   ],
+   [
+    96,
+    27
+   ],
+   [
+    79,
+    65
+   ]
+  ],
+  [
+   [
+    51,
+    32
+   ],
+   [
+    96,
+    27
+   ],
+   [
+    79,
+    65
+   ]
+  ],
+  [
+   [
+    53,
+    32
+   ],
+   [
+    98,
+    27
+   ],
+   [
+    81,
+    65
+   ]
+  ],
+  [
+   [
+    53,
+    32
+   ],
+   [
+    98,
+    27
+   ],
+   [
+    81,
+    65
+   ]
+  ],
+  [
+   [
+    51,
+    32
+   ],
+   [
+    96,
+    27
+   ],
+   [
+    79,
+    65
+   ]
+  ],
+  [
+   [
+    51,
+    32
+   ],
+   [
+    96,
+    27
+   ],
+   [
+    79,
+    65
+   ]
+  ],
+  [
+   [
+    53,
+    32
+   ],
+   [
+    98,
+    27
+   ],
+   [
+    81,
+    65
+   ]
+  ],
+  [
+   [
+    53,
+    32
+   ],
+   [
+    98,
+    27
+   ],
+   [
+    81,
+    65
+   ]
+  ]
+ ],
+ "border_padded": true
+}

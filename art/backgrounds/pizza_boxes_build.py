@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import paper_ny_build as nb
 from forge.generate import DATA
 from forge.layers import quantize, write_sources
-from paper import add_grain, key_rgb, peel_halo, sticker
+from paper import STREET, add_grain, key_rgb, peel_halo, sticker
 
 RUN = DATA / "runs" / "paper" / "boxes-1" / "qwen-edit"
 PICKS = json.loads((Path(__file__).resolve().parent / "pizza_boxes_picks.json").read_text())
@@ -99,7 +99,7 @@ def pieces(what, seed):
         im = im.resize((max(3, round(im.width * FX_SCALE)), max(3, round(im.height * FX_SCALE))), Image.LANCZOS)
         art = finish(np.asarray(im), 200 + len(made), 16)
         count[kind] = count.get(kind, 0) + 1
-        made[f"{what}-{kind}-{count[kind]}"] = sticker(art, border=2, shadow=(0, 0), floor=False)
+        made[f"{what}-{kind}-{count[kind]}"] = sticker(art, shadow=(0, 0), **STREET)
     return made
 
 
