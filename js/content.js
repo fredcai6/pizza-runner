@@ -276,7 +276,7 @@
 
   // Sticky notes on "Who is The Order?", all in Sergeant Dayold's hand. They appear on fixed city milestones.
   const THEORY = [
-    { from: 0, text: 'WHO IS THE ORDER?' },
+    { from: 0, text: 'WHO IS THE ORDER?', title: true },   // the corkboard shows this one as the banner from the briefing board
     { from: 0, text: 'Every ticket says ORDER. Printed right on it. HIDING IN PLAIN SIGHT.' },
     { from: 0, text: 'Slices go out. Fewer come back. WHERE IS THE REST?' },
     { from: 1, text: "Vinny's missing slice. No call = DEEP UNDERCOVER. Proud." },
