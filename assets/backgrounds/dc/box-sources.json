@@ -1,0 +1,19 @@
+{
+ "rev": {
+  "sha": "8228fa6e3c82478d902e9edeb1e7e24aeadb1d4b",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "layers": {
+  "qwen-edit": {
+   "run": "paper/boxes-1",
+   "spec": "art/runs/paper_boxes.toml",
+   "build": "art/backgrounds/pizza_boxes_build.py",
+   "picks": {
+    "box": 2,
+    "pile": 2,
+    "broken": 2
+   }
+  }
+ }
+}

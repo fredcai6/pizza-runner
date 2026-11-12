@@ -2,6 +2,10 @@
 (function (root) {
   const C = root.PR_CONTENT, R = root.PR_RULES, S = root.PR_SPRITES, A = root.PR_SOUND, K = root.PR_PAPER;
   const W = 1280, H = 720, GROUND = R.GROUND;
+  // The painted cheese and sauce pieces (assets/backgrounds/props/), by kind.
+  const FX = {};
+  for (const what of ['cheese', 'sauce']) for (const [kind, n] of [['drop', 4], ['drip', 2], ['string', 2], ['splat', 4]]) FX[`${what}-${kind}`] = Array.from({ length: n }, (_, i) => `${what}-${kind}-${i + 1}`);
+  const rand = k => { const v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
   const TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
   const SIZE = { turtle: 92, teen: 118, mutant: 120, ninja: 118 };
@@ -29,7 +33,7 @@
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
       this.speech = null; this.quipGap = 0; this.quipCount = {};
-      this.bursts = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
+      this.bursts = []; this.cheeseBits = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
       this.look = 0; this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
       this.done = false; this.offer = null;
       this.wipe = 0; this.pending = null; this.removed = 0; this.found = 0; this.taken = new Set(); this.warned = false;
@@ -58,8 +62,11 @@
     // What you can stand on is as tall as it is drawn, so feet land on the painted top.
     fit(street) {
       for (const c of street.barricades) c.h = S.surface(`${this.city.id}/barricade`) || c.h;
-      for (const b of street.boxes) b.h = S.surface('props/box') || b.h;
+      for (const b of street.boxes) b.h = S.surface(this.boxArt('box')) || b.h;
     }
+
+    // Each city stacks its own pizza boxes; the plain crates stand in where a city has none.
+    boxArt(name) { return S.layer(`${this.city.id}/${name}`) ? `${this.city.id}/${name}` : `props/${name}`; }
 
     isBox(c) { return this.street.boxes.includes(c); }
 
@@ -149,6 +156,10 @@
         }
       }
 
+      if (dashing) for (const a of this.actors) {
+        if (a.cheesed || a.rise < 0.5 || a.y < GROUND - 60 || Math.abs(a.x - (p.x + p.w / 2)) > a.size / 2 + p.w / 2) continue;
+        a.cheesed = true; this.cheese(a.x, a.y - a.size * 0.5, 0.75, p.facing);
+      }
       if (input.take('jump')) this.buffer = 9;
       if (this.buffer > 0) this.buffer--;
       this.coyote = p.grounded ? 7 : Math.max(0, this.coyote - 1);
@@ -197,6 +208,7 @@
       this.pickupsStep();
       this.auraStep();
       this.bursts = this.bursts.filter(b => --b.t > 0);
+      this.cheeseStep();
       this.junctionStep();
       // The camera leans toward where the slice is heading, so there is room to react.
       this.look += (p.facing * 170 - this.look) * 0.04;
@@ -249,11 +261,19 @@
 
     drawSauce() {
       const { ctx } = this;
-      ctx.fillStyle = '#b3201a';
+      ctx.save(); ctx.imageSmoothingEnabled = false;
       for (const d of this.sauce) {
+        const set = FX[d.pool ? 'sauce-splat' : 'sauce-drip'], img = S.layer(`props/${set[d.seed % set.length]}`);
+        if (img) {
+          const k = d.pool ? Math.min(1, d.t / 40) * (0.45 + (d.seed % 3) * 0.15) : 0.45;
+          ctx.drawImage(img, Math.round(d.x - img.width * k / 2), Math.round(d.pool ? GROUND + 4 - img.height * k : d.y - img.height * k / 2), Math.round(img.width * k), Math.round(img.height * k));
+          continue;
+        }
+        ctx.fillStyle = '#b3201a';
         if (d.pool) ctx.fillRect(Math.round(d.x - d.w / 2), GROUND + 2, d.w, 5);
         else ctx.fillRect(Math.round(d.x) - 3, Math.round(d.y) - 5, 6, 10);
       }
+      ctx.restore();
     }
 
     // A heavy pizza's every step lands on the street.
@@ -310,7 +330,7 @@
       if (!st.special) return;
       if (this.specialCd > 0) { this.denied = 14; return; }
       this.specialCd = this.specialMax;
-      if (st.special === 'dash') { this.smash = 24; this.jolt(0.14); this.invuln = Math.max(this.invuln, 24); A.play('jump'); return; }
+      if (st.special === 'dash') { this.smash = 24; this.jolt(0.14); this.invuln = Math.max(this.invuln, 24); A.play('jump'); this.chaseOff(); return; }
       if (p.grounded) { p.vy = st.flop ? -15 : -16; p.grounded = false; this.bounced = true; } else p.vy = 26;
       this.pounding = true; this.smash = 90;
     }
@@ -323,7 +343,8 @@
       this.jolt(st.flop ? 0.5 : 0.6); this.hold(3); this.wobV += st.flop ? 0.7 : 0.4;
       if (st.flop) this.splat = 26;
       this.puff(x, GROUND, 8);
-      for (const a of this.actors) if (Math.abs(a.x - x) < reach && a.y > GROUND - 110) this.hit(a, 'smash');
+      this.cheese(x, GROUND - 8, st.flop ? 1.4 : 1.15, 0, true);
+      this.chaseOff(a => Math.abs(a.x - x) < reach && a.y > GROUND - 110);
       for (const b of this.street.boxes) if (!b.broken && Math.abs(b.x - x) < reach) this.breakBox(b);
       this.gateHit(x, reach);
     }
@@ -357,6 +378,52 @@
       if (this.charges) return;
       this.topping = null; this.aura = false;
       this.say(C.BARKS.spent); this.quip('spent');
+    }
+
+    // A special sends every enemy in sight packing for good, and a mutant already on the slice's tail.
+    chaseOff(near = null) {
+      let n = 0;
+      for (const a of this.actors) {
+        if (a.leaving || a.rise < 0.3) continue;
+        if (!(a.x > this.cam - 120 && a.x < this.cam + W + 120) && a.state !== 'chase') continue;
+        // Turtles are as they were: a landing stuns those within its reach, and nothing removes one.
+        if (a.e.type === 'turtle') { if (near && near(a)) this.hit(a, 'smash'); continue; }
+        const e = a.e, dropped = R.defeat(this.camp, e);
+        this.removed++; n++;
+        a.hitAt = this.frame; a.hurt = 0; a.caught = null; a.leaving = true; a.t = 0; a.dir = Math.sign(a.x - this.p.x) || 1;
+        for (const t of dropped) this.drops.push({ x: a.x, y: Math.min(a.y, GROUND) - 50, topping: t });
+        this.bursts.push({ x: a.x, y: a.y - 40, r: 48, t: 10, color: '#ffffff' });
+        if (e.type === 'mutant') { a.state = 'sink'; this.temp.push(a.x); continue; }
+        a.state = 'flee';
+        this.note(e.type, { teen: 'flees', ninja: 'gone' }[e.type]);
+      }
+      if (n) this.say(C.BARKS.scatter);
+    }
+
+    // Cheese goes everywhere: gooey blobs fly out, a few on stretchy strings, with a fleck or two of sauce, then drop
+    // and splat flat on the street. power scales the count and the throw; dir leans it forward for a dash; pool
+    // leaves a big puddle under a landing. The pieces are painted sprites; this only throws them.
+    cheese(x, y, power = 1, dir = 0, pool = false) {
+      const bits = this.cheeseBits, n = Math.round(10 + 12 * power);
+      for (let i = 0; i < n; i++) {
+        const r = rand(this.frame * 31 + i * 7), q = rand(this.frame * 17 + i * 13 + 5);
+        const ang = -Math.PI / 2 + (r - 0.5) * (dir ? 1.6 : 2.6) + dir * 0.9, v = (6 + q * 10) * power;
+        const what = i % 7 === 6 ? 'sauce' : 'cheese';
+        bits.push({ what, x, y, ox: x, oy: y, vx: Math.cos(ang) * v + dir * 4, vy: Math.sin(ang) * v, t: 0, stuck: 0,
+          art: i % 2 ? 'drip' : 'drop', pick: i, size: 0.55 + q * 0.6 * Math.min(power, 1.3), spin: (r - 0.5) * 0.3, rot: ang, string: what === 'cheese' && i % 4 === 0 });
+      }
+      if (pool) bits.push({ what: 'cheese', x, y: GROUND, vx: 0, vy: 0, t: 0, stuck: 1, pool: true, pick: this.frame, size: 1.6 * power });
+      if (bits.length > 160) bits.splice(0, bits.length - 160);
+    }
+
+    cheeseStep() {
+      this.cheeseBits = this.cheeseBits.filter(c => {
+        c.t++;
+        if (c.stuck) return ++c.stuck < (c.pool ? 80 : 50);
+        c.vy += 0.62; c.vx *= 0.985; c.x += c.vx; c.y += c.vy; c.rot += c.spin;
+        if (c.y >= GROUND - 2 && c.vy > 0) { c.y = GROUND; c.stuck = 1; c.string = false; }
+        return c.t < 120;
+      });
     }
 
     feedMutant(a) {
@@ -628,6 +695,7 @@
       b.broken = true;
       A.play('smash'); this.jolt(0.16);
       this.bursts.push({ x: b.x + b.w / 2, y: GROUND - 40, r: 70, t: 12, color: '#b8843f' });
+      if (this.smash > 0) this.cheese(b.x + b.w / 2, GROUND - b.h * 0.6, 0.8, this.style.special === 'dash' ? this.p.facing : 0);
     }
 
     gateHit(x, reach) {
@@ -847,6 +915,7 @@
       this.drawWisps();
       this.drawPlayer();
       for (const b of this.bursts) this.drawBurst(b);
+      this.drawCheese();
       this.drawParty();
       ctx.restore();
     }
@@ -890,22 +959,23 @@
 
     drawBox(b) {
       const { ctx } = this;
-      if (b.broken) { if (!S.prop(ctx, 'props/box-broken', b.x + b.w / 2, GROUND)) { ctx.fillStyle = '#8a6030'; ctx.fillRect(b.x, GROUND - 12, b.w, 12); } return; }
-      if (S.prop(ctx, 'props/box', b.x + b.w / 2, GROUND)) { this.drawCrack(b); return; }
+      if (b.broken) { if (!S.prop(ctx, this.boxArt('box-broken'), b.x + b.w / 2, GROUND)) { ctx.fillStyle = '#8a6030'; ctx.fillRect(b.x, GROUND - 12, b.w, 12); } return; }
+      if (S.prop(ctx, this.boxArt('box'), b.x + b.w / 2, GROUND)) { this.drawCrack(b); return; }
       ctx.fillStyle = '#b8843f'; ctx.fillRect(b.x, GROUND - b.h, b.w, b.h);
       ctx.strokeStyle = '#2a1830'; ctx.lineWidth = 5; ctx.strokeRect(b.x + 3, GROUND - b.h + 3, b.w - 6, b.h - 6);
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
     }
 
-    // A crate that gives way is cracked across its face. A barricade is whole.
+    // A stack that gives way shows a small tear in its front; a barricade is whole.
     drawCrack(b) {
       const { ctx } = this, x = b.x, y = GROUND - b.h, w = b.w;
+      const at = (u, v) => [Math.round(x + (0.12 + u * 0.42) * w), Math.round(y + (0.42 + v * 0.5) * b.h)];
       const line = [[0.7, 0.02], [0.56, 0.2], [0.66, 0.34], [0.48, 0.52], [0.56, 0.62], [0.4, 0.8]];
       ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-      for (const [lw, color] of [[7, INK], [3, '#fff3d6']]) {
+      for (const [lw, color] of [[5, INK], [2, '#fff3d6']]) {
         ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.beginPath();
-        line.forEach(([u, v], i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, Math.round(x + u * w), Math.round(y + v * b.h)));
-        ctx.moveTo(Math.round(x + 0.66 * w), Math.round(y + 0.34 * b.h)); ctx.lineTo(Math.round(x + 0.84 * w), Math.round(y + 0.44 * b.h));
+        line.forEach(([u, v], i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, ...at(u, v)));
+        ctx.moveTo(...at(0.66, 0.34)); ctx.lineTo(...at(0.84, 0.44));
         ctx.stroke();
       }
       ctx.restore();
@@ -918,7 +988,7 @@
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
       for (let i = 0; i < 8; i++) ctx.fillRect(x - 170 + i * 48, GROUND + 4, 28, 60);
       if (j.turn && j.turn.gated && !j.open) {
-        if (!S.prop(ctx, 'props/box-pile', x, GROUND)) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
+        if (!S.prop(ctx, this.boxArt('box-pile'), x, GROUND)) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
       const label = (text, y, color) => {
@@ -985,6 +1055,40 @@
         const angle = i * 2.399, far = reach * (0.45 + ((i * 37) % 11) / 18);
         ctx.fillRect(Math.round(b.x + Math.cos(angle) * far) - size / 2, Math.round(b.y + Math.sin(angle) * far) - size / 2, size, size);
       }
+    }
+
+    // Flying pieces turn along their path; early on a few still hang from the middle on a stretched cheese string.
+    // On the street each becomes a splat that shrinks away. Without the painted pieces nothing is drawn.
+    drawCheese() {
+      const { ctx } = this;
+      if (!this.cheeseBits.length) return;
+      ctx.save(); ctx.imageSmoothingEnabled = false;
+      const piece = (what, kind, pick) => { const set = FX[`${what}-${kind}`]; return set && S.layer(`props/${set[pick % set.length]}`); };
+      const blit = (img, x, y, rot, sx, sy, ax = 0.5, ay = 0.5) => {
+        ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(rot); ctx.scale(sx, sy);
+        ctx.drawImage(img, -img.width * ax, -img.height * ay); ctx.restore();
+      };
+      for (const c of this.cheeseBits) {
+        if (!c.string || c.t >= 16) continue;
+        const img = piece('cheese', 'string', c.pick);
+        if (!img) continue;
+        const len = Math.hypot(c.x - c.ox, c.y - c.oy), thin = 1 - c.t / 16;
+        if (len > 4) blit(img, c.ox, c.oy, Math.atan2(c.y - c.oy, c.x - c.ox), len / img.width, Math.max(0.3, thin), 0, 0.5);
+      }
+      for (const c of this.cheeseBits) {
+        if (c.stuck) {
+          const img = piece(c.what, 'splat', c.pick);
+          if (!img) continue;
+          const life = c.pool ? 80 : 50, fade = Math.min(1, (life - c.stuck) / 18), grow = Math.min(1, 0.4 + c.stuck / 5);
+          blit(img, c.x, GROUND + 3, 0, c.size * grow * fade, c.size * fade, 0.5, 1);
+        } else {
+          const img = piece(c.what, c.art, c.pick);
+          if (!img) continue;
+          const st = Math.min(1.5, 1 + Math.hypot(c.vx, c.vy) / 30);
+          blit(img, c.x, c.y, c.art === 'drip' ? Math.atan2(c.vy, c.vx) + Math.PI / 2 : c.rot, c.size / Math.sqrt(st), c.size * st);
+        }
+      }
+      ctx.restore();
     }
 
     drawFires() {

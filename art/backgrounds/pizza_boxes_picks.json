@@ -1,0 +1,11 @@
+{
+  "cities": {
+    "newyork": {"box": 3, "pile": 1, "broken": 2},
+    "chicago": {"box": 2, "pile": 1, "broken": 2},
+    "dc": {"box": 2, "pile": 2, "broken": 2},
+    "naples": {"box": 3, "pile": 1, "broken": 1},
+    "california": {"box": 3, "pile": 1, "broken": 1}
+  },
+  "cheese": 3,
+  "sauce": 3
+}
