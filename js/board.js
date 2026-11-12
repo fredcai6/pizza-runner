@@ -15,8 +15,9 @@
   // The cork is laid out at full size, then scaled down (never below FLOOR) so the whole page fits the phone.
   const FLOOR = 0.62;
   const room = () => ({ w: Math.min(window.innerWidth - 56, 880), h: window.innerHeight - 84 });
-  // tape: some notes are taped as well as pinned. under: the yarn runs behind the notes, so it never covers writing.
-  function scatter(items, { cell, salt, h, jit = 0.3, tape: tapes = true, under = false }) {
+  // tape: some notes are taped as well as pinned. notes: a page of stickies, each row laid over the one above (so a
+  // sticky only ever covers the blank foot of the one behind it), with room made under the yarn (see strings).
+  function scatter(items, { cell, salt, h, jit = 0.3, tape: tapes = true, notes = false }) {
     if (!items.length) return '';
     const { w: width, h: tall } = room(), avail = h || tall, rowH = cell[1] * 0.92;
     const fit = cols => { const rows = Math.ceil(items.length / cols); return { cols, rows, high: Math.round((rows - 1) * rowH + cell[1] + 40) }; };
@@ -31,24 +32,40 @@
     const spots = items.map((html, i) => {
       const c = i % cols, r = Math.floor(i / cols);
       const x = Math.max(2, Math.min(width - cell[0] - 2, c * colW + (colW - cell[0]) / 2 + (rnd() - 0.5) * colW * jit + (r % 2 ? colW * 0.1 : 0)));
-      const y = 14 + r * rowH + rnd() * 16, tilt = (rnd() - 0.5) * 11, z = 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3 && tapes;
+      const y = 14 + r * rowH + rnd() * 16, tilt = (rnd() - 0.5) * 11, z = notes ? 1 + r : 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3 && tapes;
       return `<div class="spot${tape ? ' taped' : ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--tilt:${tilt.toFixed(1)}deg;z-index:${z}">${html}</div>`;
     });
-    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork${under ? ' under' : ''}" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})"><svg class="yarn"></svg>${spots.join('')}</div></div>`;
+    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork${notes ? ' notes' : ''}" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})"><svg class="yarn"></svg>${spots.join('')}</div></div>`;
   }
 
-  // Red yarn from pin to pin, each loop sagging under its own weight.
+  // Red yarn from pin to pin, each loop sagging under its own weight. On a page of notes the yarn runs along each
+  // row only, and every sticky's writing starts below the lowest the yarn (or its pin) comes over it.
   function strings(host) {
     host.querySelectorAll('.cork').forEach(cork => {
-      const svg = cork.querySelector('.yarn'), pts = [...cork.querySelectorAll('.spot')].map(e => [e.offsetLeft + e.offsetWidth / 2, e.offsetTop + 8]);
+      const svg = cork.querySelector('.yarn'), spots = [...cork.querySelectorAll('.spot')], notes = cork.classList.contains('notes');
+      const pts = spots.map(e => [e.offsetLeft + e.offsetWidth / 2, e.offsetTop + 8]);
       svg.setAttribute('width', cork.clientWidth); svg.setAttribute('height', cork.clientHeight);
-      let d = '';
+      const segs = [];
       for (let i = 1; i < pts.length; i++) {
-        if (i % 6 === 0) continue;
-        const [a, b] = [pts[i - 1], pts[i]], sag = 18 + Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.18;
-        d += `M${a[0]} ${a[1]} Q${(a[0] + b[0]) / 2} ${(a[1] + b[1]) / 2 + sag} ${b[0]} ${b[1]} `;
+        const [a, b] = [pts[i - 1], pts[i]];
+        if (notes ? Math.abs(b[1] - a[1]) > 60 || b[0] < a[0] : i % 6 === 0) continue;
+        const sag = 18 + Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.18;
+        segs.push([a, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + sag], b]);
       }
+      const d = segs.map(([a, c, b]) => `M${a[0]} ${a[1]} Q${c[0]} ${c[1]} ${b[0]} ${b[1]} `).join('');
       svg.innerHTML = `<path class="y-shadow" d="${d}" transform="translate(2 3)"/><path class="y-line" d="${d}"/><path class="y-glint" d="${d}" transform="translate(0 -1)"/>`;
+      if (!notes) return;
+      for (const spot of spots) {
+        const note = spot.querySelector('.sticky');
+        if (!note) continue;
+        const x0 = spot.offsetLeft, x1 = x0 + spot.offsetWidth, top = spot.offsetTop;
+        let low = top + 20;   // the pin and its shadow
+        for (const [a, c, b] of segs.filter(([a]) => Math.abs(a[1] - top - 8) < 60)) for (let t = 0; t <= 1; t += 0.02) {   // its own row's yarn
+          const x = (1 - t) ** 2 * a[0] + 2 * t * (1 - t) * c[0] + t * t * b[0], y = (1 - t) ** 2 * a[1] + 2 * t * (1 - t) * c[1] + t * t * b[1];
+          if (x > x0 - 6 && x < x1 + 6) low = Math.max(low, y + 4);   // the yarn is 3 px with a shadow below
+        }
+        note.style.paddingTop = `${Math.ceil(low - top + 8)}px`;
+      }
     });
   }
 
@@ -67,13 +84,15 @@
     }), { cell: [170, 180], salt: 2 });
   }
 
-  // Just the stickies: Dayold's notes, and one more listing the customer names he thinks are aliases. No tape, and the
-  // yarn runs behind them, so every word can be read.
+  // Just the stickies, in Dayold's scrawl: his notes, and one more listing the customer names he thinks are aliases.
+  // A few have had a slice set down on them. No tape; the yarn runs over the top and the writing starts below it.
+  const GREASY = [1, 4, 6];
   function theory(camp) {
-    const notes = R.theory(camp).map((t, i) => `<div class="sticky s${i % 3}">${t.text}</div>`);
+    const sticky = (i, html, extra = '') => `<div class="sticky s${i % 3}${GREASY.includes(i) ? ` greasy g${1 + (i % 3)}` : ''}${extra}">${html}</div>`;
+    const notes = R.theory(camp).map((t, i) => sticky(i, t.text));
     const names = R.aliases(camp);
-    if (names.length) notes.push(`<div class="sticky s${notes.length % 3} names">Customer names. Aliases?<span>${names.join(', ')}</span></div>`);
-    return scatter(notes, { cell: window.innerHeight <= 420 ? [150, 124] : [176, 144], salt: 3, jit: 0.12, tape: false, under: true });
+    if (names.length) notes.push(sticky(notes.length, `Customer names. Aliases?<span>${names.join(', ')}</span>`, ' names'));
+    return scatter(notes, { cell: window.innerHeight <= 420 ? [150, 196] : [176, 214], salt: 3, jit: 0.16, tape: false, notes: true });
   }
 
   function roster(camp) {

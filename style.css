@@ -3,6 +3,7 @@
 @font-face { font-family: 'Fredoka'; src: url(assets/fonts/fredoka-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Fredoka'; src: url(assets/fonts/fredoka-latin-600-normal.woff2) format('woff2'); font-weight: 600; font-display: swap; }
 @font-face { font-family: 'Fredoka'; src: url(assets/fonts/fredoka-latin-700-normal.woff2) format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Caveat Brush'; src: url(assets/fonts/caveat-brush-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Nunito'; src: url(assets/fonts/nunito-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Nunito'; src: url(assets/fonts/nunito-latin-400-italic.woff2) format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
 @font-face { font-family: 'Nunito'; src: url(assets/fonts/nunito-latin-700-normal.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
@@ -13,6 +14,7 @@
   --coral: #ff5a4f; --coral-d: #d93a30; --sun: #ffc933; --teal: #7fd2c4; --sky: #8fe0d4; --cork: #d8a56a;
   --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
   --body: 'Nunito', system-ui, sans-serif;
+  --scrawl: 'Caveat Brush', 'Comic Sans MS', cursive;   /* Dayold's hand on the stickies */
   /* The cut: white border, 2px violet rim outside it, then a solid violet drop shadow. */
   --cut: 0 0 0 2px var(--ink), 4px 5px 0 2px var(--ink);
   --cut-s: 0 0 0 2px var(--ink), 3px 4px 0 2px var(--ink);
@@ -286,7 +288,6 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .cork { position: relative; margin: 0; transform-origin: 0 0; }
 .cork-fit { margin: 0 auto; }
 .cork .yarn { position: absolute; inset: 0; pointer-events: none; z-index: 9; overflow: visible; }
-.cork.under .yarn { z-index: 0; }
 .y-line { fill: none; stroke: #e8362b; stroke-width: 3; stroke-linecap: round; }
 .y-shadow { fill: none; stroke: rgba(42,24,48,.5); stroke-width: 3.5; stroke-linecap: round; }
 .y-glint { fill: none; stroke: rgba(255,200,190,.7); stroke-width: 1; stroke-linecap: round; }
@@ -298,14 +299,19 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .spot .paper { width: 150px; margin: 0; padding: 20px 8px 10px; transform: none; box-shadow: 3px 4px 0 rgba(42,24,48,.85); }
 .spot .polaroid { padding-top: 14px; }
 .spot .sticky { transform: none; padding-top: 24px; }   /* the pin sits in the margin above the writing */
-.sticky.names span { display: block; margin-top: 6px; font: 700 13px/1.3 var(--body); }
-.cork.under .sticky { width: 176px; }   /* the theory page: wide enough that no note runs past four lines */
+/* A page of notes: Dayold's scrawl, the top margin set in board.js to clear the yarn, a blank foot for the next row to overlap. */
+.cork.notes .sticky { width: 176px; position: relative; overflow: hidden; padding: 24px 12px 22px; font: 400 24px/1.08 var(--scrawl); letter-spacing: .2px; }
+.cork.notes .sticky.greasy::after { content: ''; position: absolute; width: 120px; height: 120px; background: center / contain no-repeat; mix-blend-mode: multiply; pointer-events: none; }
+.cork.notes .sticky.g1::after { background-image: url(assets/paper/grease-1.png); right: -18px; bottom: -22px; transform: rotate(20deg); }
+.cork.notes .sticky.g2::after { background-image: url(assets/paper/grease-2.png); left: -26px; bottom: 6px; width: 96px; height: 96px; }
+.cork.notes .sticky.g3::after { background-image: url(assets/paper/grease-3.png); right: 10px; top: 30%; width: 104px; height: 104px; transform: rotate(-35deg); }
+.sticky.names span { display: block; margin-top: 6px; font: 400 20px/1.1 var(--scrawl); }
 .spot .alias { display: block; padding: 16px 10px 4px; box-shadow: 2px 3px 0 rgba(42,24,48,.8); }
 .spot .agent { width: 170px; padding-top: 18px; box-shadow: 3px 4px 0 rgba(42,24,48,.85); }
 .spot:has(> .pin) { filter: drop-shadow(3px 4px 0 rgba(42,24,48,.85)); }
 .spot .alias.lbl { background: none; box-shadow: none; font: 600 14px var(--display); color: var(--ink); }
 @media (max-height: 420px) { .spot .sticky { width: 128px; min-height: 78px; padding: 22px 8px 8px; font-size: 13px; } }
-@media (max-height: 420px) { .cork.under .sticky { width: 150px; } }
+@media (max-height: 420px) { .cork.notes .sticky { width: 150px; padding: 22px 9px 18px; font-size: 21px; } }
 /* Tommy's painted Polaroids carry their own white frame and transparent corners: no card behind them, a paper label under. */
 .spot .polaroid.painted { width: 160px; padding: 0; background: none; box-shadow: none; gap: 0; }
 .polaroid.painted img { width: 100%; display: block; filter: drop-shadow(3px 4px 0 rgba(42,24,48,.85)); }
