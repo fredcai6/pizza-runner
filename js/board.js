@@ -15,7 +15,8 @@
   // The cork is laid out at full size, then scaled down (never below FLOOR) so the whole page fits the phone.
   const FLOOR = 0.62;
   const room = () => ({ w: Math.min(window.innerWidth - 56, 880), h: window.innerHeight - 84 });
-  function scatter(items, { cell, salt, h, jit = 0.3 }) {
+  // tape: some notes are taped as well as pinned. under: the yarn runs behind the notes, so it never covers writing.
+  function scatter(items, { cell, salt, h, jit = 0.3, tape: tapes = true, under = false }) {
     if (!items.length) return '';
     const { w: width, h: tall } = room(), avail = h || tall, rowH = cell[1] * 0.92;
     const fit = cols => { const rows = Math.ceil(items.length / cols); return { cols, rows, high: Math.round((rows - 1) * rowH + cell[1] + 40) }; };
@@ -30,10 +31,10 @@
     const spots = items.map((html, i) => {
       const c = i % cols, r = Math.floor(i / cols);
       const x = Math.max(2, Math.min(width - cell[0] - 2, c * colW + (colW - cell[0]) / 2 + (rnd() - 0.5) * colW * jit + (r % 2 ? colW * 0.1 : 0)));
-      const y = 14 + r * rowH + rnd() * 16, tilt = (rnd() - 0.5) * 11, z = 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3;
+      const y = 14 + r * rowH + rnd() * 16, tilt = (rnd() - 0.5) * 11, z = 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3 && tapes;
       return `<div class="spot${tape ? ' taped' : ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--tilt:${tilt.toFixed(1)}deg;z-index:${z}">${html}</div>`;
     });
-    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})"><svg class="yarn"></svg>${spots.join('')}</div></div>`;
+    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork${under ? ' under' : ''}" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})"><svg class="yarn"></svg>${spots.join('')}</div></div>`;
   }
 
   // Red yarn from pin to pin, each loop sagging under its own weight.
@@ -61,15 +62,18 @@
   function enemies(camp) {
     return scatter(Object.keys(C.ENEMIES).map(type => {
       const file = R.enemyFile(camp, type);
-      return `<button class="polaroid" data-enemy="${type}"><img class="shot" src="assets/polaroids/${type}.png" alt=""><b>${file.name}</b><span>${file.notes.length ? `${file.notes.length} note${file.notes.length > 1 ? 's' : ''}` : '???'}</span></button>`;
-    }), { cell: [140, 170], salt: 2 });
+      // Tommy's painted Polaroids (the ones on the board in the briefing), with a paper label pinned under each.
+      return `<button class="polaroid painted" data-enemy="${type}"><img src="assets/cutscenes/board/polaroid-${type}.webp" alt=""><span class="label"><b>${file.name}</b><span>${file.notes.length ? `${file.notes.length} note${file.notes.length > 1 ? 's' : ''}` : '???'}</span></span></button>`;
+    }), { cell: [170, 180], salt: 2 });
   }
 
+  // Just the stickies: Dayold's notes, and one more listing the customer names he thinks are aliases. No tape, and the
+  // yarn runs behind them, so every word can be read.
   function theory(camp) {
     const notes = R.theory(camp).map((t, i) => `<div class="sticky s${i % 3}">${t.text}</div>`);
-    const names = R.aliases(camp).map(a => `<span class="alias">${a}</span>`);
-    const all = names.length ? [...notes, '<span class="alias lbl">Customer names. Aliases?</span>', ...names] : notes;
-    return `<p class="hand">Sergeant Dayold's theory, in his hand.</p>${scatter(all, { cell: window.innerHeight <= 420 ? [128, 100] : [150, 118], salt: 3, jit: 0.12, h: room().h - 26 })}`;
+    const names = R.aliases(camp);
+    if (names.length) notes.push(`<div class="sticky s${notes.length % 3} names">Customer names. Aliases?<span>${names.join(', ')}</span></div>`);
+    return scatter(notes, { cell: window.innerHeight <= 420 ? [150, 124] : [176, 144], salt: 3, jit: 0.12, tape: false, under: true });
   }
 
   function roster(camp) {

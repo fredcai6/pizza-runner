@@ -114,7 +114,7 @@ Same recipe, plus what the other twenty characters taught. Specs are scripts, no
 - paperkit frame keys: `clip` (paint over everything below a height, for a pose the model drew resting on a ledge), `rot` (turn the source picture),
   `own_palette` (a recoloured pose such as cold cuts its own 48 colours; the master's palette has no blue).
 - Decals: a pose rotated or squashed past forge.decals' registration range keeps its toppings (see the jumbo flop); use an upright pose before it.
-- Candid Polaroids: `polaroids.py` (generation to `assets/polaroids/TYPE.png`, softened). DJ Alewife's ending photo is `alewife_polaroid.py`: the model drew pixel art
+- Candid Polaroids: `polaroids.py` (generation to `assets/polaroids/TYPE.png`, softened; retired 2026-11-11, the corkboard now shows Tommy's painted Polaroids from `assets/cutscenes/board/`). DJ Alewife's ending photo is `alewife_polaroid.py`: the model drew pixel art
   and a laptop logo, so the room is drawn in code around her master.
 
 ## Tommy's character sheets (2026-11-08)

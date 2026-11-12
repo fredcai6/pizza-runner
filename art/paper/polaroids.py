@@ -1,6 +1,6 @@
 """Corkboard Polaroids: a picked candid generation in, the game's photo out.
 
-    python3 art/paper/polaroids.py enemy CHARACTER SHOT SEED JOB     -> assets/polaroids/TYPE.png (244x176, shown by js/board.js)
+    python3 art/paper/polaroids.py enemy CHARACTER SHOT SEED JOB     -> assets/polaroids/TYPE.png (244x176; no longer shown: since 2026-11-11 the corkboard uses Tommy's painted Polaroids in assets/cutscenes/board/)
     python3 art/paper/polaroids.py alewife SHOT SEED JOB [RUN]      -> assets/backgrounds/hq/alewife-polaroid.png (300x300, the final shot)
 
 The generated image is kept as art/characters/CHARACTER/references/polaroid-source.png (+ .json record). The photo is softened (it was snapped from
