@@ -459,7 +459,7 @@
     if (live) live.stop();
     const bar = document.getElementById('sceneBar'), skipBtn = document.getElementById('skipBtn');
     const ctx = canvas.getContext('2d'), A = root.PR_SOUND;
-    let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9;
+    let s = 0, l = 0, raf, stopped = false, start = performance.now(), lineAt = start, cutAt = start, thumpAt = -1e9, opened = start;
     let script = null, shown = 0, full = false, box = null;
     shots.forEach(sh => sh.pic && pic(sh.pic));
     BOARD_ART.forEach(n => pic(`board/${n}`));
@@ -486,6 +486,14 @@
     const frame = now => {
       if (stopped) return;
       raf = requestAnimationFrame(frame); // first, so one bad frame cannot end the loop for good
+      // Until the painted board room has loaded (a fresh visit after a publish), hold on black with the clocks stopped,
+      // rather than flash the old drawn room. After 4 s of waiting (a file that never came) the drawn room stands in.
+      const painted = paintedReady();
+      if (OVER_TABLE.has(shots[s].comp) && !painted && now - opened < 4000) {
+        start = lineAt = cutAt = now;
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+        return;
+      }
       const shot = shots[s], cam = cameraOf(shot.comp), t = Math.min(1, (now - start) / (shot.ms || cam.ms || 6000));
       const { x, y, z } = camAt(shot, t);
       type(now);
@@ -503,7 +511,7 @@
       else {
         ctx.translate(W / 2, H / 2); ctx.scale(z, z);
         ctx.translate(-x + Math.round(whip / z), -y);
-        if (OVER_TABLE.has(shot.comp) && paintedReady()) paintedBoard(ctx, view.hq, now, view, shot);
+        if (OVER_TABLE.has(shot.comp) && painted) paintedBoard(ctx, view.hq, now, view, shot);
         else room(ctx, view.hq, now, view);
       }
       ctx.restore();
