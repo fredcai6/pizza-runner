@@ -17,25 +17,26 @@
   const room = () => ({ w: Math.min(window.innerWidth - 56, 880), h: window.innerHeight - 84 });
   // tape: some notes are taped as well as pinned. notes: a page of stickies, each row laid over the one above (so a
   // sticky only ever covers the blank foot of the one behind it), with room made under the yarn (see strings).
-  function scatter(items, { cell, salt, h, jit = 0.3, tape: tapes = true, notes = false }) {
+  // head: a title pinned across the top of the cork, [html, height]; it scales with everything else.
+  function scatter(items, { cell, salt, h, jit = 0.3, tape: tapes = true, notes = false, head = null }) {
     if (!items.length) return '';
     const { w: width, h: tall } = room(), avail = h || tall, rowH = cell[1] * 0.92;
-    const fit = cols => { const rows = Math.ceil(items.length / cols); return { cols, rows, high: Math.round((rows - 1) * rowH + cell[1] + 40) }; };
+    const top = head ? head[1] : 0, fit = cols => { const rows = Math.ceil(items.length / cols); return { cols, rows, high: Math.round(top + (rows - 1) * rowH + cell[1] + 40) }; };
     // Most readable layout: full size beats shrunk, and crowding the columns together costs more than shrinking.
     let best = null;
     for (let c = 2; c <= Math.max(2, items.length); c++) {
       if (width / c < cell[0] * 0.8 && c > 2) break;
       const f = fit(c), k = Math.min(1, avail / f.high), crowd = Math.min(1, width / c / (cell[0] * 0.95)), q = Math.max(FLOOR, k) * crowd * crowd;
-      if (!best || q > best.q + 0.01) best = { ...f, k, q };
+      if (!best || q > best.q + 0.01 || (q > best.q - 0.01 && k > best.k)) best = { ...f, k, q };   // at the floor, the one that shrinks least
     }
     const { cols, rows, high } = best, k = Math.max(FLOOR, best.k), rnd = seeded(salt * 131 + items.length * 17 + 5), colW = width / cols;
     const spots = items.map((html, i) => {
       const c = i % cols, r = Math.floor(i / cols);
       const x = Math.max(2, Math.min(width - cell[0] - 2, c * colW + (colW - cell[0]) / 2 + (rnd() - 0.5) * colW * jit + (r % 2 ? colW * 0.1 : 0)));
-      const y = 14 + r * rowH + rnd() * (notes ? 34 : 16), tilt = (rnd() - 0.5) * 11, z = notes ? 1 + r : 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3 && tapes;
+      const y = top + 14 + r * rowH + rnd() * (notes ? 34 : 16), tilt = (rnd() - 0.5) * 11, z = notes ? 1 + r : 1 + Math.floor(rnd() * 4), tape = rnd() < 0.3 && tapes;
       return `<div class="spot${tape ? ' taped' : ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--tilt:${tilt.toFixed(1)}deg;z-index:${z}">${html}</div>`;
     });
-    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork${notes ? ' notes' : ''}" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})"><svg class="yarn"></svg>${spots.join('')}</div></div>`;
+    return `<div class="cork-fit" style="width:${Math.round(width * k)}px;height:${Math.round(high * k)}px"><div class="cork${notes ? ' notes' : ''}" style="height:${high}px;width:${width}px;transform:scale(${k.toFixed(3)})">${head ? head[0] : ''}<svg class="yarn"></svg>${spots.join('')}</div></div>`;
   }
 
   // Red yarn from pin to pin, each loop sagging under its own weight.
@@ -127,10 +128,12 @@
   }
   function theory(camp) {
     const sticky = (i, html, extra = '') => `<div class="sticky s${i % 3}${GREASY.includes(i) ? ` greasy g${1 + (i % 3)}` : ''}${extra}" style="--indent:${[4, 0, 10, 2, 7][i % 5]}px">${html}</div>`;
-    const notes = R.theory(camp).map((t, i) => sticky(i, scrawl(t.text, i + 1)));
+    const notes = R.theory(camp).filter(t => !t.title).map((t, i) => sticky(i, scrawl(t.text, i + 1)));
     const names = R.aliases(camp);
     if (names.length) notes.push(sticky(notes.length, `${scrawl('Customer names. Aliases?', 40)}<span>${scrawl(names.join(', '), 41)}</span>`, ' names'));
-    return scatter(notes, { cell: window.innerHeight <= 420 ? [150, 196] : [176, 214], salt: 3, jit: 0.42, tape: false, notes: true });
+    // The title is the torn-paper banner cut from Tommy's painted board room (art/paper/order_banner.py), pinned up top.
+    const banner = '<div class="order-banner"><img src="assets/paper/order-banner.png" alt="Who is The Order?"></div>';
+    return scatter(notes, { cell: window.innerHeight <= 420 ? [150, 196] : [176, 214], salt: 3, jit: 0.42, tape: false, notes: true, head: [banner, window.innerHeight <= 420 ? 84 : 96] });
   }
 
   function roster(camp) {

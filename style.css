@@ -289,6 +289,11 @@ h4 { margin-top: 12px; font: 600 14px var(--display); color: var(--ink); }
 .cork-fit { margin: 0 auto; }
 .cork .yarn { position: absolute; inset: 0; pointer-events: none; z-index: 9; overflow: visible; }
 .cork .yarn.low { z-index: 0; }   /* strands of a web that pass behind the notes */
+/* The theory page's title: the torn banner from the briefing board, pinned at both ends. */
+.order-banner { position: absolute; left: 50%; top: 8px; width: 420px; margin-left: -210px; transform: rotate(-1.6deg); filter: drop-shadow(3px 4px 0 rgba(42,24,48,.6)); z-index: 8; }
+.order-banner img { width: 100%; display: block; }
+.order-banner::before, .order-banner::after { content: ''; position: absolute; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--coral); border: 2px solid #fff; box-shadow: 0 0 0 1.5px var(--ink), 2px 3px 0 1.5px var(--ink); }
+.order-banner::before { left: -1%; top: 18px; } .order-banner::after { right: -2%; top: 4px; }
 .y-line { fill: none; stroke: #e8362b; stroke-width: 3; stroke-linecap: round; }
 .y-shadow { fill: none; stroke: rgba(42,24,48,.5); stroke-width: 3.5; stroke-linecap: round; }
 .y-glint { fill: none; stroke: rgba(255,200,190,.7); stroke-width: 1; stroke-linecap: round; }
