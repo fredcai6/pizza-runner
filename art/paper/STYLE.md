@@ -35,6 +35,20 @@ that file's rules on the 1:1 stage-pixel grid, sprite heights and no fake text s
 - Only things you can touch get the white border and a drop shadow: platforms, barrels, barricades, doors,
   boxes. Scenery never does. This settles the "background drawn like foreground" complaints by rule.
 
+## How things sit and their borders (audit, 2026-11-11)
+- One paper border for everything on the street: a 1 px #2a1830 rim and 5 px of cream (251, 246, 234) inside it, all the
+  way round, under the feet too. That is what the character sheets carry; `paper.STREET` gives it to every built prop
+  (boxes, obstacles, doors, pickups, star, campfire, platforms, thrown toppings, cheese and sauce). Margherita, recruit
+  Margherita and the turtle were a pixel thinner: `art/tools/grow_border.py` widened theirs (frames padded by 1 px, so
+  their heights in js are 106 and 94). A rebuilt sheet must be put through it again, or drawn with the border at 5.
+- Street sprites are drawn 1:1 (height = frame height), so the border is the same width on screen. Characters scaled up
+  in scenes (customers, DJ Alewife at the door and in cutscenes) still show it wider.
+- Grounded things stand in the pavement: the bottom of their border is FOOT_SINK (8 px) under the ground line, for
+  characters and props alike (`PROP_SINK`); three-quarter-view box stacks sink further by their side face's rise.
+  Borderless debris lies 3 px in.
+- Standing on something, the pizza's border overlaps the border of what it stands on, so the two drawings meet:
+  `TOP_SINK` 11 on platforms, solids and, for a stomp, the top of the enemy's drawing in the frame on screen.
+
 ## UI
 - Cardstock and paper: menus are card tabs, dialogue boxes are paper cards with the white border and a small
   drop shadow, HUD pieces are stickers. The receipts, corkboard and Polaroids are already paper; bring them

@@ -1,7 +1,7 @@
 {
  "frame": {
-  "w": 150,
-  "h": 92
+  "w": 152,
+  "h": 94
  },
  "count": 4,
  "frame_ms": 220,
@@ -29,5 +29,6 @@
    "munch_a/2",
    "munch_b/3"
   ]
- }
+ },
+ "border_padded": true
 }

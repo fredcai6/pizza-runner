@@ -76,6 +76,16 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       for (let i = 0; i < 30; i++) { d.run.step(); bits = Math.max(bits, d.run.cheeseBits.length); }
       ok('a dash through a box throws cheese', d.street.boxes[0].broken && bits > 10, bits);
     }
+    { // A stomp lands all the way: the feet go onto the top of the drawing, border over border, before the bounce.
+      for (const [type, style] of [['turtle', 'ny'], ['teen', 'ny'], ['turtle', 'naples']]) {
+        const s = scene(0, style, 'pepperoni', [{ type, x: 500, range: 0 }]);
+        s.run.p.x = 500 - s.run.p.w / 2; s.run.p.y = GROUND - 400; s.run.p.vy = 6; s.run.p.grounded = false;
+        let planted = null;
+        for (let i = 0; i < 90 && planted == null; i++) { s.run.step(); if (s.run.freeze > 0) planted = s.run.p.y + s.run.p.h; }
+        const a = s.run.actors[0], top = PR_SPRITES.top(type, s.run.actorAnim(a), s.run.frame * 16.7, a.y, a.size, 8);
+        ok(`${style} on a ${type}: feet planted on its drawing at the stomp`, planted != null && Math.abs(planted - top) < 0.5 && s.run.p.grounded, `${planted} vs ${top}`);
+      }
+    }
     { // Mutant: warns, chases from behind, leaves after one bite.
       const s = scene(1, 'ny', 'pepperoni', [{ type: 'mutant', x: 300, drain: 300 }]);
       s.street.length = 20000; s.street.turnAt = 19000;
@@ -198,9 +208,9 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
         s.run.enter(s.street.id, 300);
         const bar = s.street.barricades[0], want = PR_SPRITES.surface(`${city.id}/barricade`), box = s.street.boxes[0];
         s.run.p.x = 520; s.run.p.y = GROUND - bar.h - s.run.p.h - 200; s.run.p.vy = 4; s.run.p.grounded = false; s.steps(120);
-        ok(`${style}: the ${city.id} barricade is as tall as it is painted`, want > 40 && bar.h === want, `${bar.h} vs ${want}`);
-        ok(`${style}: feet rest on the barricade's painted top`, s.run.p.grounded && Math.abs(s.run.p.y + s.run.p.h - (GROUND - want)) < 0.01, s.run.p.y + s.run.p.h);
-        ok(`${style}: a box is as tall as its city's painting, sunk to stand on the street`, box.h === PR_SPRITES.surface(`${city.id}/box`) - PR_SPRITES.rise(`${city.id}/box`) && box.h > 40, box.h);
+        ok(`${style}: the ${city.id} barricade is as tall as it is painted, sunk into the pavement`, want > 40 && bar.h === want - 8, `${bar.h} vs ${want}`);
+        ok(`${style}: feet rest on the barricade's painted top`, s.run.p.grounded && Math.abs(s.run.p.y + s.run.p.h - (GROUND - bar.h)) < 0.01, s.run.p.y + s.run.p.h);
+        ok(`${style}: a box is as tall as its city's painting, sunk to stand on the street`, box.h === PR_SPRITES.surface(`${city.id}/box`) - PR_SPRITES.rise(`${city.id}/box`) - 8 && box.h > 40, box.h);
       }
     }
     { // Garlic and onion work on every kind, and a ninja runs from it for good, even from a fire escape.
@@ -250,7 +260,7 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
         const s = scene(0, 'ny', null);
         s.street.barricades.push({ x: 540, w: 80, h: 100, kind }); s.run.enter(s.street.id, 300);
         const c = s.street.barricades[0];
-        ok(`${kind}: as tall as its painting`, c.h === PR_SPRITES.surface(`props/obstacle-${kind}`) && c.h > 40, c.h);
+        ok(`${kind}: as tall as its painting, sunk into the pavement`, c.h === PR_SPRITES.surface(`props/obstacle-${kind}`) - 8 && c.h > 40, c.h);
         s.input.right = true; let jig = 0, puffs = 0;
         for (let i = 0; i < 60; i++) { s.run.step(); jig = Math.max(jig, c.jig || 0); puffs = Math.max(puffs, s.run.flour.length); }
         ok(`${kind}: walking into it sets it jiggling`, jig > 0.3, jig);

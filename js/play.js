@@ -8,12 +8,18 @@
   const rand = k => { const v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
   const TURN_ZONE = [-420, 110];
   const FACE = { turtle: '🐢', teen: '🧑‍🎤', mutant: '🧟', ninja: '🥷' };
-  const SIZE = { turtle: 92, teen: 118, mutant: 120, ninja: 118 };
+  // Drawn at their frame heights, so sprites stay 1:1 and every paper border is the same width on screen.
+  const SIZE = { turtle: 94, teen: 118, mutant: 120, ninja: 118 };
   const INK = '#2a1830';
   // Characters stand this far into the street surface, as feet do in a picture seen from slightly above.
   const FOOT_SINK = 8;
   // On a platform's painted top face the feet sink a little, as on the street; on a crate or barricade, barely.
-  const TOP_SINK = { platform: 5, solid: 2 };
+  // Standing on top of something, the pizza's paper border overlaps that thing's border, so the two drawings touch:
+  // its rim and border (6 px) go over the top's rim and border (6 px), less a pixel. Same on a platform and on a solid.
+  const TOP_SINK = { platform: 11, solid: 11 };
+  // Painted props stand in the pavement as the characters' feet do: the bottom of their border sits FOOT_SINK below
+  // the ground line. Debris has no border and lies just into the pavement.
+  const PROP_SINK = FOOT_SINK, DEBRIS_SINK = 3;
   const HIT_GAP = 8, MUTANT_GAP = 450;
   const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
 
@@ -61,9 +67,14 @@
 
     // What you can stand on is as tall as it is drawn, so feet land on the painted top.
     fit(street) {
-      for (const c of street.barricades) c.h = S.surface(this.barArt(c)) || c.h;
+      // A solid is as wide as its drawing inside the border, kept centred where the street put it.
+      for (const c of street.barricades) {
+        const art = this.barArt(c), top = S.surface(art), img = S.layer(art);
+        if (top) c.h = top - PROP_SINK;
+        if (img && !c.fitted) { const w = S.width(art) - 12; c.x += (c.w - w) / 2; c.w = w; c.fitted = true; }
+      }
       // A stack is drawn sunk by its back corner's rise, so it stands on the street; its top comes down with it.
-      for (const b of street.boxes) { const art = this.boxArt('box'), top = S.surface(art); if (top) b.h = top - S.rise(art); }
+      for (const b of street.boxes) { const art = this.boxArt('box'), top = S.surface(art); if (top) b.h = top - S.rise(art) - PROP_SINK; }
     }
 
     // The solid blocks are pizza-shop stock (flour, cans, parmesan, salami); the city's old barricade stands in without the art.
@@ -150,6 +161,8 @@
     step() {
       // A brief freeze on a hit gives it weight.
       if (this.freeze > 0) { this.freeze--; return; }
+      // A stomp's bounce, held back while the pizza stood on the head it landed on.
+      if (this.spring) { const v = this.spring; this.spring = 0; this.bounce(v); }
       if (this.wipe > 0) {
         if (--this.wipe === WIPE / 2) { const { id, x } = this.pending; this.enter(id, x); }
         return;
@@ -628,13 +641,13 @@
       const stomped = this.stompable(a);
       if (this.smash > 0) { this.hit(a, 'smash'); return; }
       if (e.type === 'turtle') {
-        if (stomped) { a.state = 'stun'; a.t = STUN; this.bounce(27); this.note('turtle', 'stun'); this.note('turtle', 'armored'); return; }
+        if (stomped) { a.state = 'stun'; a.t = STUN; this.plant(a); this.bounce(27); this.note('turtle', 'stun'); this.note('turtle', 'armored'); return; }
         if (a.state !== 'walk') return;
         this.hurt(e.id, a.x);
         a.state = 'munch'; a.t = CHOMP; this.note('turtle', 'bites');
         return;
       }
-      if (e.type === 'teen' && stomped) { this.bounce(16); this.note('teen', 'stomp'); this.quip('stomp'); this.flee(a); return; }
+      if (e.type === 'teen' && stomped) { this.plant(a); this.bounce(16); this.note('teen', 'stomp'); this.quip('stomp'); this.flee(a); return; }
       if (e.type === 'ninja' && stomped) this.note('ninja', 'bounce');
       if (e.type === 'mutant') {
         this.hurt(e.id, a.x);
@@ -647,7 +660,9 @@
       this.hurt(e.id, a.x);
     }
 
-    bounce(v) { this.p.vy = -v; this.p.grounded = false; this.bounced = true; this.wobV += 0.14; A.play('jump'); }
+    bounce(v) {
+      if (this.planting) { this.spring = v; this.planting = false; return; }
+      this.p.vy = -v; this.p.grounded = false; this.bounced = true; this.wobV += 0.14; A.play('jump'); }
 
     flee(a) {
       const dropped = R.defeat(this.camp, a.e);
@@ -932,7 +947,7 @@
       for (const d of this.drops) this.drawToken(d.topping, d.x, d.y);
       for (const s of this.shots) this.drawShot(s, s.wave ? 16 : 11);
       for (const k of this.foes) {
-        if (k.star && S.prop(ctx, 'props/star', k.x, k.y + 12)) continue;
+        if (k.star && S.prop(ctx, 'props/star', k.x, k.y + 16)) continue;
         if (k.topping) { this.drawShot(k, 11); continue; }
         ctx.fillStyle = k.color; ctx.fillRect(k.x - 9, k.y - 9, 18, 18);
       }
@@ -988,8 +1003,8 @@
 
     drawBox(b) {
       const { ctx } = this;
-      if (b.broken) { if (!S.prop(ctx, this.boxArt('box-broken'), b.x + b.w / 2, GROUND)) { ctx.fillStyle = '#8a6030'; ctx.fillRect(b.x, GROUND - 12, b.w, 12); } return; }
-      if (S.prop(ctx, this.boxArt('box'), b.x + b.w / 2, GROUND + S.rise(this.boxArt('box')))) { this.drawCrack(b); return; }
+      if (b.broken) { if (!S.prop(ctx, this.boxArt('box-broken'), b.x + b.w / 2, GROUND + DEBRIS_SINK)) { ctx.fillStyle = '#8a6030'; ctx.fillRect(b.x, GROUND - 12, b.w, 12); } return; }
+      if (S.prop(ctx, this.boxArt('box'), b.x + b.w / 2, GROUND + PROP_SINK + S.rise(this.boxArt('box')))) { this.drawCrack(b); return; }
       ctx.fillStyle = '#b8843f'; ctx.fillRect(b.x, GROUND - b.h, b.w, b.h);
       ctx.strokeStyle = '#2a1830'; ctx.lineWidth = 5; ctx.strokeRect(b.x + 3, GROUND - b.h + 3, b.w - 6, b.h - 6);
       ctx.beginPath(); ctx.moveTo(b.x + 4, GROUND - b.h + 4); ctx.lineTo(b.x + b.w - 4, GROUND - 4); ctx.moveTo(b.x + b.w - 4, GROUND - b.h + 4); ctx.lineTo(b.x + 4, GROUND - 4); ctx.stroke();
@@ -1007,7 +1022,7 @@
         else if (c.kind === 'salami') ctx.transform(1, 0, -Math.sin(t * 0.3) * k * 0.14, 1, 0, 0);
         ctx.translate(-cx, -GROUND);
       }
-      if (!S.prop(ctx, this.barArt(c), cx, GROUND)) { ctx.fillStyle = '#5b4a3a'; ctx.fillRect(c.x, GROUND - c.h, c.w, c.h); }
+      if (!S.prop(ctx, this.barArt(c), cx, GROUND + PROP_SINK)) { ctx.fillStyle = '#5b4a3a'; ctx.fillRect(c.x, GROUND - c.h, c.w, c.h); }
       ctx.restore();
     }
 
@@ -1048,7 +1063,7 @@
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
       for (let i = 0; i < 8; i++) ctx.fillRect(x - 170 + i * 48, GROUND + 4, 28, 60);
       if (j.turn && j.turn.gated && !j.open) {
-        if (!S.prop(ctx, this.boxArt('box-pile'), x, GROUND + S.rise(this.boxArt('box-pile')))) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
+        if (!S.prop(ctx, this.boxArt('box-pile'), x, GROUND + PROP_SINK + S.rise(this.boxArt('box-pile')))) { ctx.fillStyle = '#b8843f'; ctx.fillRect(x - 90, GROUND - 120, 180, 120); }
       }
       if (!S.prop(ctx, 'props/sign', x + 150, GROUND)) { ctx.fillStyle = '#3a4a3a'; ctx.fillRect(x + 145, GROUND - 200, 10, 200); }
       const label = (text, y, color) => {
@@ -1074,7 +1089,7 @@
 
     drawToken(topping, x, y) {
       const { ctx } = this;
-      if (S.prop(ctx, `props/pickup-${topping}`, x, y + 26)) return;
+      if (S.prop(ctx, `props/pickup-${topping}`, x, y + 28)) return;
       ctx.fillStyle = '#fff3c4'; dot(ctx, x, y, 24);
       ctx.fillStyle = C.TOPPINGS[topping].color; dot(ctx, x, y, 17);
     }
@@ -1155,7 +1170,7 @@
       const { ctx } = this;
       for (const f of this.street.fires) {
         // A little pixel campfire with a plus on it, flickering between two frames; embers once used.
-        if (S.prop(ctx, `props/${f.lit ? (Math.floor(this.frame / 9) % 2 ? 'fire-2' : 'fire') : 'fire-out'}`, f.x, GROUND)) continue;
+        if (S.prop(ctx, `props/${f.lit ? (Math.floor(this.frame / 9) % 2 ? 'fire-2' : 'fire') : 'fire-out'}`, f.x, GROUND + PROP_SINK)) continue;
         ctx.fillStyle = '#39302b'; ctx.fillRect(f.x - 27, GROUND - 62, 54, 62);
         if (f.lit) { ctx.font = '46px serif'; ctx.textAlign = 'center'; ctx.fillText('🔥', f.x, GROUND - 62); }
       }
@@ -1173,7 +1188,7 @@
       if (street.door == null) return;
       const x = street.door, active = street.address === world.delivery;
       const name = S.layer(this.art('door')) ? this.art('door') : null;
-      if (!name || !S.prop(ctx, name, x, GROUND)) {
+      if (!name || !S.prop(ctx, name, x, GROUND + PROP_SINK)) {
         ctx.fillStyle = '#2b1d14'; ctx.fillRect(x - 56, GROUND - 165, 112, 165);
         ctx.fillStyle = active ? '#ffd76a' : '#6b5a4a'; ctx.fillRect(x - 42, GROUND - 150, 84, 150);
         this.drawDoorSign(x - 56, GROUND - 206, 112, 41, active);
@@ -1210,12 +1225,29 @@
       ctx.restore();
     }
 
+    // Which animation an enemy shows for its state.
+    actorAnim(a) {
+      const e = a.e;
+      const bob = a.hurt > 0 && S.has(e.type, 'hurt') ? 'hurt' : { walk: 'walk', film: 'film', flee: 'flee', munch: 'munch', stun: 'stun', leap: 'leap', perch: 'crouch', chase: 'run', rise: 'idle', peek: 'idle', lurk: 'idle', sink: 'idle', bow: 'crouch' }[a.state] || 'walk';
+      let anim = a.threw > this.frame && S.has(e.type, 'throw') ? 'throw' : bob;
+      if (!S.has(e.type, anim)) anim = S.has(e.type, 'walk') ? 'walk' : 'run';
+      return anim;
+    }
+
+    // A stomp lands all the way: the pizza stands on the top of the enemy's drawing, its border over the enemy's as on
+    // any top, and the picture holds there a moment. The bounce waits until the hold is over.
+    plant(a) {
+      const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : a.state === 'perch' ? TOP_SINK.platform : 0;
+      const top = S.top(a.e.type, this.actorAnim(a), this.frame * 16.7, a.y, a.size, sink);
+      if (top == null) return;
+      const { p } = this;
+      p.y = top - p.h; p.vy = 0; p.grounded = true; this.perch = TOP_SINK.solid; this.planting = true;
+      this.hold(3);
+    }
+
     drawActor(a) {
       const { ctx } = this, e = a.e;
-      const bob = a.hurt > 0 && S.has(e.type, 'hurt') ? 'hurt' : { walk: 'walk', film: 'film', flee: 'flee', munch: 'munch', stun: 'stun', leap: 'leap', perch: 'crouch', chase: 'run', rise: 'idle', peek: 'idle', lurk: 'idle', sink: 'idle', bow: 'crouch' }[a.state] || 'walk';
-      const anim0 = a.threw > this.frame && S.has(e.type, 'throw') ? 'throw' : bob;
-      let anim = anim0;
-      if (!S.has(e.type, anim)) anim = S.has(e.type, 'walk') ? 'walk' : 'run';
+      const anim = this.actorAnim(a);
       if (a.rise <= 0) return;
       ctx.save();
       // Mutants come up through the street, so the ground hides whatever has not risen yet.

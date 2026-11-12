@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from paper import add_grain, sticker
+from paper import STREET, add_grain, sticker
 from paper_near import SS, _canvas, _layer
 import paper_ny_build as nb
 from forge.layers import quantize, write_sources
@@ -156,9 +156,9 @@ def draw_star():
     a.poly(pts, "star")
     a.ell(9, 9, 2, 2, "cream", shade=False)
     art = fin(a.rgba(), 11, 16, 1.2)
-    st = sticker(art, border=2, shadow=(2, 2), floor=False)
-    out = np.zeros((24, 24, 4), np.uint8)
-    y0, x0 = (24 - st.shape[0]) // 2, (24 - st.shape[1]) // 2
+    st = sticker(art, shadow=(2, 2), **STREET)
+    out = np.zeros((32, 32, 4), np.uint8)
+    y0, x0 = (32 - st.shape[0]) // 2, (32 - st.shape[1]) // 2
     out[y0:y0 + st.shape[0], x0:x0 + st.shape[1]] = st
     return out
 
@@ -221,7 +221,7 @@ def topping(name, a):
 
 def draw_pickup(name, seed):
     """A pastel sticker disc with the topping in flat card on it, drawn a little large: 52x52, border all the way round,
-    readable at 26 px."""
+    readable at 26 px. 56x56 with the street border."""
     a = Art(40, 40)
     r, g, b = DISC[name]
     C["disc"] = ((r, g, b), (r - 22, g - 24, b - 22))
@@ -230,9 +230,9 @@ def draw_pickup(name, seed):
     topping(name, t)
     a.im.alpha_composite(t.im)
     art = fin(a.rgba(), seed, 28, 1.4)
-    st = sticker(art, border=3, shadow=(3, 3), floor=False)
-    out = np.zeros((52, 52, 4), np.uint8)
-    y0, x0 = (52 - st.shape[0]) // 2, (52 - st.shape[1]) // 2
+    st = sticker(art, shadow=(3, 3), **STREET)
+    out = np.zeros((56, 56, 4), np.uint8)
+    y0, x0 = (56 - st.shape[0]) // 2, (56 - st.shape[1]) // 2
     out[y0:y0 + st.shape[0], x0:x0 + st.shape[1]] = st
     return out
 

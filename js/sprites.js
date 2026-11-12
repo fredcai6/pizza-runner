@@ -11,7 +11,7 @@
     await image.decode();
     const mask = atlas.seats ? new Image() : null;
     if (mask) { mask.src = `${base}/mask.png`; await mask.decode(); }
-    loaded[`${character}/${anim}`] = { atlas, image, mask, pad: footPad(image, atlas), rims: character.startsWith('slice-') ? rims(image, { ...atlas, count: atlas.count + (atlas.blink != null ? 1 : 0) }) : null };
+    loaded[`${character}/${anim}`] = { atlas, image, mask, pad: footPad(image, atlas), head: headPad(image, atlas), rims: character.startsWith('slice-') ? rims(image, { ...atlas, count: atlas.count + (atlas.blink != null ? 1 : 0) }) : null };
   }
 
   // Transparent rows under the lowest foot in a strip, taken over every frame. Art is painted with a margin
@@ -30,6 +30,35 @@
       pad = Math.min(pad, h - 1 - y);
     }
     return pad === h ? 0 : pad;
+  }
+
+  // Transparent rows above the top of the drawing's middle half (where a pizza lands on it), for each frame: the top of
+  // a turtle's shell or a teenager's head, so a stomp can put feet on it.
+  function headPad(image, { frame: { w, h }, count }) {
+    const c = document.createElement('canvas');
+    c.width = image.width; c.height = image.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(image, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height).data, x0 = Math.round(w * 0.25), x1 = Math.round(w * 0.75);
+    const tops = [];
+    for (let i = 0; i < count; i++) {
+      let y = 0;
+      for (; y < h; y++) { let hit = false; for (let x = x0; x < x1 && !hit; x++) hit = data[(y * c.width + i * w + x) * 4 + 3] > 128; if (hit) break; }
+      tops.push(y === h ? 0 : y);
+    }
+    return tops;
+  }
+
+  // Where a drawing's top edge (its rim, over the middle half) lands on screen when drawn as draw() would, at the same
+  // ms, foot, height and sink. Only for looping and one-shot animations (an idle's calm frames are not followed).
+  function top(character, anim, ms, foot, height, sink = 0) {
+    const s = loaded[`${character}/${anim}`];
+    if (!s) return null;
+    const { count, frame_ms, loop } = s.atlas;
+    let i = Math.floor(ms / frame_ms);
+    i = loop ? i % count : Math.min(i, count - 1);
+    const scale = height / s.atlas.frame.h;
+    return foot + sink + s.pad * scale - (s.atlas.frame.h - s.head[i]) * scale;
   }
 
   // Where bites come out of a slice, frame by frame: the corners and sides of the crust end,
@@ -180,6 +209,22 @@
     return (rises[name] = Math.min(up, Math.round(c.height / 6)));
   }
 
+  // How wide a painted prop's drawing is (widest opaque row), cached like surface().
+  const widths = {};
+  function width(name) {
+    if (name in widths) return widths[name];
+    const image = layers[name];
+    if (!image) return null;
+    const c = document.createElement('canvas');
+    c.width = image.width; c.height = image.height;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(image, 0, 0);
+    const data = g.getImageData(0, 0, c.width, c.height).data;
+    let lo = c.width, hi = -1;
+    for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (data[(y * c.width + x) * 4 + 3] > 128) { lo = Math.min(lo, x); hi = Math.max(hi, x); }
+    return (widths[name] = hi < 0 ? null : hi - lo + 1);
+  }
+
   // Repeats a painted tile across a span, top-left at (x, y).
   function strip(ctx, name, x, y, w) {
     const image = layers[name];
@@ -315,5 +360,5 @@
     return true;
   }
 
-  root.PR_SPRITES = { load, loadLayers, loadCity, unloadCity, needsCity, layer, tile, ground, prop, strip, surface, rise, has, draw, portrait, portraitUrl, stamp, size };
+  root.PR_SPRITES = { load, loadLayers, loadCity, unloadCity, needsCity, layer, tile, ground, prop, strip, surface, rise, width, top, has, draw, portrait, portraitUrl, stamp, size };
 })(window);
