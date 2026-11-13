@@ -14,7 +14,7 @@ PICKS = {
     "dc": ("round-05", "DC-s11"),
     "naples": ("round-05", "NAP-s11"),
     "california": ("round-05", "LB-s11"),
-    "finale": "hq",
+    "finale": ("round-06", "FIN-B-s11"),
 }
 
 DEST.mkdir(parents=True, exist_ok=True)
