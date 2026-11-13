@@ -528,8 +528,21 @@
       if (a.t > 90) a.goneNow = true;
     }
 
+    // Wandering respects the crates and barricades: a teen or turtle turns round at one, a ninja hops up onto it
+    // and drops off the far side. One that starts the street overlapping a block may walk out of it.
+    // (Fleeing and chasing are not wandering: a fleeing teen or a mutant on the chase still goes straight through.)
     patrol(a, pace) {
-      a.x += a.dir * pace;
+      const half = a.size * 0.3, next = a.x + a.dir * pace;
+      const hit = x => this.solids().find(c => x + half > c.x && x - half < c.x + c.w);
+      if (a.e.type === 'ninja') {
+        a.x = next;
+        const under = hit(a.x), floor = under ? GROUND - under.h : GROUND;
+        a.y += (floor - a.y) * (floor < a.y ? 0.45 : 0.3);   // up quickly, down a touch slower: a hop
+        if (Math.abs(a.y - floor) < 1) a.y = floor;
+      } else {
+        const ahead = hit(next);
+        if (ahead && ahead !== hit(a.x)) a.dir *= -1; else a.x = next;
+      }
       if (Math.abs(a.x - a.home) > a.e.range) { a.x = a.home + Math.sign(a.x - a.home) * a.e.range; a.dir *= -1; }
     }
 
@@ -561,7 +574,7 @@
       if (a.state === 'bow') {
         a.dir = Math.sign(this.p.x + this.p.w / 2 - a.x) || 1;
         if (++a.t === BOW) this.throwBack(a);
-        if (a.t >= BOW + 14) { a.state = a.y < GROUND - 1 ? 'perch' : 'leap'; a.t = 0; }
+        if (a.t >= BOW + 14) { a.state = a.ledge && a.y < GROUND - 1 ? 'perch' : 'leap'; a.t = 0; }
         return;
       }
       if (a.state === 'leap') {
@@ -1247,10 +1260,17 @@
       return anim;
     }
 
+    // How far an enemy's feet sink into what it stands on: the pavement, a fire escape, or (a wandering ninja) a block's top.
+    actorSink(a, grounded) {
+      if (grounded) return FOOT_SINK;
+      if (a.state === 'perch') return TOP_SINK.platform;
+      return a.e.type === 'ninja' && a.state === 'walk' && this.solids().some(c => a.y === GROUND - c.h && a.x > c.x && a.x < c.x + c.w) ? TOP_SINK.solid : 0;
+    }
+
     // A stomp lands all the way: the pizza stands on the top of the enemy's drawing, its border over the enemy's as on
     // any top, and the picture holds there a moment. The bounce waits until the hold is over.
     plant(a) {
-      const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : a.state === 'perch' ? TOP_SINK.platform : 0;
+      const grounded = a.y >= GROUND - 1, sink = this.actorSink(a, grounded);
       const top = S.top(a.e.type, this.actorAnim(a), this.frame * 16.7, a.y, a.size, sink);
       if (top == null) return;
       const { p } = this;
@@ -1278,7 +1298,7 @@
       const facing = a.dir, bow = a.state === 'bow' ? Math.sin(Math.min(1, a.t / (BOW * 0.6)) * Math.PI) : 0;
       // The bow: a dip and a lean toward the slice, holding up what it caught.
       if (bow) { ctx.translate(a.x, a.y); ctx.rotate(bow * 0.45 * facing); ctx.translate(-a.x, -a.y); }
-      const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : a.state === 'perch' ? TOP_SINK.platform : 0;
+      const grounded = a.y >= GROUND - 1, sink = this.actorSink(a, grounded);
       if (grounded) this.shadow(a.x, GROUND + FOOT_SINK * 0.6, a.size * 0.3, 0.3);
       const look = this.artOf(e), args = [anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12, { sink }];
       if (!S.draw(ctx, look, ...args) && (look === e.type || !S.draw(ctx, e.type, ...args))) {
