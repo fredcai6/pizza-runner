@@ -1,18 +1,18 @@
 {
  "frame": {
   "w": 128,
-  "h": 118
+  "h": 132
  },
  "count": 8,
  "frame_ms": 100,
  "loop": true,
  "rev": {
-  "sha": "36e788bac54df805d3e8d2ed3a5cfc4d9c3a1b30",
+  "sha": "8228fa6e3c82478d902e9edeb1e7e24aeadb1d4b",
   "dirty": false,
   "comfy": "v0.44.0"
  },
  "game_rev": {
-  "sha": "d52e4caec880cf8dfe9444e755e127dff2649a01",
+  "sha": "da7d13be9b4755e31a18af1ff0d137c455e92d7f",
   "dirty": true
  },
  "source": {
@@ -33,5 +33,6 @@
   "master": "characters/ninja/references/paper-master.png",
   "border": 4,
   "palette": 48
- }
+ },
+ "draw_h": 118
 }
