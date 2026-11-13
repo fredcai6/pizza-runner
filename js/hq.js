@@ -23,7 +23,8 @@
   const STAGE_CENTER = [W / 2, H / 2];
   // The same shots on Tommy's painted board room (paintedBoard below), which has its own 1280x720 space.
   const BOARD_CAMERAS = {
-    board: { from: [640, 360, 1], to: [700, 300, 1.25], ms: 9000 },
+    // A gentle push held to the left edge, so Dayold stays whole while he talks and the banner stays in.
+    board: { from: [640, 360, 1], to: [593, 345, 1.08], ms: 9000 },
     boardTeen: { from: [455, 215, 2.4], to: [460, 205, 2.6] },
     boardTurtle: { from: [470, 380, 2.4], to: [475, 370, 2.6] },
     polaroid: { from: [930, 280, 1.6], to: [930, 270, 1.75] },
