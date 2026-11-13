@@ -268,6 +268,24 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
         ok(`${kind}: and it is still solid`, s.run.p.x + s.run.p.w <= c.x + 1, s.run.p.x);
       }
     }
+    { // Wandering enemies respect the blocks: teens and turtles turn round at one, ninjas hop onto it.
+      // Blocks are refitted to their paintings on entry, so the checks read the block's own x and h.
+      for (const type of ['teen', 'turtle']) {
+        const s = scene(0, 'ny', null, [{ type, x: 900, range: 400 }]);
+        s.street.barricades.push({ x: 1000, w: 80, h: 100 }); s.run.enter(s.street.id, 300); s.run.god = true;
+        const a = s.run.actors.find(x => x.e.type === type), half = a.size * 0.3, c = s.street.barricades[0];
+        let deepest = -Infinity, turned = false, d0 = a.dir;
+        for (let i = 0; i < 600 && !s.run.done; i++) { s.run.step(); deepest = Math.max(deepest, a.x + half - c.x); if (a.dir !== d0) turned = true; }
+        ok(`a wandering ${type} never walks into a barricade`, deepest <= 0, deepest.toFixed(1));
+        ok(`a wandering ${type} still wanders`, turned);
+      }
+      const n = scene(0, 'ny', null, [{ type: 'ninja', x: 900, range: 400 }]);
+      n.street.barricades.push({ x: 960, w: 80, h: 100 }); n.run.enter(n.street.id, 300); n.run.god = true;
+      const nj = n.run.actors.find(x => x.e.type === 'ninja'); nj.dir = 1;
+      let top = GROUND;
+      for (let i = 0; i < 240 && !n.run.done; i++) { n.run.step(); if (nj.state === 'walk') top = Math.min(top, nj.y); }
+      ok('a wandering ninja hops up onto a barricade', top <= GROUND - n.street.barricades[0].h + 1, `${top} vs top ${GROUND - n.street.barricades[0].h}`);
+    }
     { // Crates give and barricades do not, and bumping one says which.
       const s = scene(0, 'ny', 'pepperoni');
       s.street.barricades.push({ x: 540, w: 80, h: 100 }); s.run.enter(s.street.id, 300);
