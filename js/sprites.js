@@ -57,7 +57,7 @@
     const { count, frame_ms, loop } = s.atlas;
     let i = Math.floor(ms / frame_ms);
     i = loop ? i % count : Math.min(i, count - 1);
-    const scale = height / s.atlas.frame.h;
+    const scale = height / (s.atlas.draw_h || s.atlas.frame.h);
     return foot + sink + s.pad * scale - (s.atlas.frame.h - s.head[i]) * scale;
   }
 
@@ -341,7 +341,8 @@
     i = idle ? calm(s, ms) : s.atlas.loop ? i % count : Math.min(i, count - 1);
     let source = (dress && dress.count > 0 && dressed(s, i, dress)) || s.image, sx = source === s.image ? i * w : 0;
     if (bites > 0 && s.rims) { source = bitten(s, i, source, sx, bites); sx = 0; }
-    const scale = height / h;
+    // draw_h: a frame made taller than its character's others for head room is still drawn at their scale.
+    const scale = height / (s.atlas.draw_h || h);
     if (idle) squash *= 1 + Math.sin(ms / 800) * 0.012;
     ctx.save();
     ctx.imageSmoothingEnabled = false;
