@@ -1,0 +1,52 @@
+round = "round-05"
+note = "Refinement from Naples (round 4). Every song shares Naples' base (lo-fi hip-hop beat, melancholic piano motif, deep round bass, warm tape sound) and one main chord loop, Am - F - Dm - E7, with a small local turn per city. Jazz words are gone from the prompts and each city's signature instruments now lead its description. A minor, 90 bpm, two takes each, with loops."
+seeds = [11, 7]
+loop_seconds = 120
+
+[[tracks]]
+id = "NAP"
+title = "Naples (the base)"
+tags = "lo-fi hip-hop chillhop instrumental, Neapolitan mandolin tremolo and nylon guitar answer a melancholic piano motif, a touch of accordion, deep rounded bass, laid-back boom bap drums with soft snare and muted kick, warm tape saturation and vinyl crackle, simple chord loop Am, F, Dm, E7 with an E augmented turn at the end of the phrase, loop-based beat that adds and strips layers, sunny but wistful, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "NYC"
+title = "New York: boom bap"
+tags = "1994 New York boom bap hip-hop instrumental, hard dusty kick and cracking snare up front, vinyl scratches, chopped soul piano stabs, filtered upright bass, a melancholic piano motif on top, gritty sampler crunch, warm tape saturation and vinyl crackle, simple chord loop Am, F, Dm, E7 with the F held an extra bar, loop-based beat that adds and strips layers, confident head-nod street groove, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "CHI"
+title = "Chicago: soul beat"
+tags = "early 2000s Chicago soul hip-hop instrumental, sped-up soul record sample feel, big gospel organ and sweeping string section stabs, hand claps and hard punchy drums, heavy warm bass, a melancholic piano motif on top, warm tape saturation and vinyl crackle, simple chord loop Am, F, Dm, E7 with a gospel walk-up from Dm to E7, loop-based beat that adds and strips layers, triumphant and heavy, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "DC"
+title = "Washington DC: go-go"
+tags = "Washington DC go-go hip-hop instrumental, congas, rototoms, timbales and cowbell drive a swung live percussion pocket, funky clavinet and muted rhythm guitar, bouncing bass, a melancholic piano motif on top, warm tape saturation, simple chord loop Am, F, Dm, E7 with a percussion break before the loop comes back around, loop-based beat that adds and strips layers, party bounce kept easygoing, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "LB"
+title = "Long Beach: G-funk"
+tags = "1994 Long Beach G-funk hip-hop instrumental, whining high-pitched sine portamento synth lead carries the hook, fat squelchy Moog bass, crisp claps and laid-back West Coast drums, shimmering electric piano chords, a melancholic piano motif underneath, warm tape saturation, simple chord loop Am, F, Dm, E7 with the lead sliding up into the E7, loop-based beat that adds and strips layers, sunny cruising bounce, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "HQ"
+title = "HQ: serious"
+tags = "serious cinematic lo-fi hip-hop instrumental for a secret briefing room, sparse dark piano motif, low string section and a steady sub bass pulse, restrained boom bap drums with rimshot, tense and focused, warm tape saturation, simple chord loop Am, F, Dm, E7 played slow and low, loop-based beat that adds and strips layers, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
