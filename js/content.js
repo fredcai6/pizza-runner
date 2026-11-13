@@ -53,9 +53,9 @@
         ] },
         { pic: 'recruits-table', pan: [[0.82, 0.46, 1.6], [0.86, 0.43, 1.75]], ms: 6000, card: ['Big Stan', 'Deep Dish of Chicago'], lines: [
           { who: 'old', text: 'Big Stan. Two inches of sauce, four inches of grudge. Slow to start. Slower to stop.' },
-          { who: 'deep', text: "It's not a casserole." },
-          { who: 'old', text: 'Nobody said it was.' },
-          { who: 'deep', text: 'Somebody will.' },
+          { who: 'deep', text: "I'm not a casserole." },
+          { who: 'old', text: "I didn't say you were." },
+          { who: 'deep', text: 'Someone would.' },
         ] },
         { pic: 'recruits-table', pan: [[0.37, 0.42, 1.5], [0.42, 0.39, 1.65]], ms: 6000, card: ['Phil A. Buster', 'Jumbo Slice of Washington'], cardSide: 'right', lines: [
           { who: 'old', text: 'Phil A. Buster. Largest slice in the free world. Three names, because one would not hold him. Reads every lid. Twice.' },
