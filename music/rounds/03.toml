@@ -1,0 +1,41 @@
+round = "round-03"
+note = "MusicGen: every track takes its melody from Naples take 11 (round 1), and only the melody; the description sets the sound. A minor, 90 bpm, 30 s each (MusicGen's limit per clip). Two takes per place. HQ is more serious, DC toned down."
+melody = "round-01/NAP-s11.mp3"
+seconds = 30
+seeds = [11, 23]
+guidance = 3.0
+
+[[tracks]]
+id = "HQ"
+title = "HQ: serious"
+tags = "serious, focused chill hip-hop instrumental, briefing-room tension, dark felt piano carries the melody, muted strings, steady low synth pulse, restrained boom bap drums, sparse high bell, soft 8-bit lead, cinematic, video game soundtrack"
+bpm = 90
+key = "A minor"
+
+[[tracks]]
+id = "NYC"
+title = "New York: mid-90s Bad Boy soul (Biggie)"
+tags = "mid-90s New York hip-hop instrumental, glossy smooth soul and R&B sample feel, warm electric piano plays the melody, lush chords, round bass, crisp boom bap drums, confident head-nod groove, playful, video game soundtrack"
+bpm = 90
+key = "A minor"
+
+[[tracks]]
+id = "CHI"
+title = "Chicago: chipmunk soul (old Kanye)"
+tags = "early 2000s Chicago chipmunk soul hip-hop instrumental, sped-up pitched-up soul vocal chops sing the melody, warm piano, sweeping strings, hard soulful drums, triumphant, whimsical, video game soundtrack"
+bpm = 90
+key = "A minor"
+
+[[tracks]]
+id = "DC"
+title = "Washington DC: a light go-go pocket (Chuck Brown)"
+tags = "laid-back hip-hop instrumental over a light Washington DC go-go pocket, soft congas and gentle cowbell, understated, mellow electric piano and muted guitar play the melody, funky bass, no horn section, playful, video game soundtrack"
+bpm = 90
+key = "A minor"
+
+[[tracks]]
+id = "LB"
+title = "Long Beach: G-funk (Warren G)"
+tags = "1994 Long Beach G-funk instrumental, whiny high-pitched sine portamento synth lead plays the melody, smooth soft-rock electric piano, talkbox, deep funky Moog bass, laid-back West Coast bounce, sunny, video game soundtrack"
+bpm = 90
+key = "A minor"

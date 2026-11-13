@@ -1,0 +1,20 @@
+round = "round-06"
+note = "Finale candidates: plays from the last street with DJ Alewife through the final cutscene, the card and the title. The same base as the city songs (lo-fi hip-hop, the piano motif) lifted to the relative major, happier, with deeper bass hits. C major, 96 bpm. Two directions, three takes each, with loops."
+seeds = [11, 7, 23]
+loop_seconds = 120
+
+[[tracks]]
+id = "FIN-A"
+title = "Finale A: the city songs, lifted"
+tags = "uplifting lo-fi hip-hop instrumental, joyful and triumphant, the melancholic piano motif now bright and major, deep booming 808 sub bass hits on the downbeats, punchy boom bap drums with claps, warm tape saturation, sunny shimmering synth chords, a catchy high-pitched synth hook, simple major chord loop C, Am, F, G, loop-based beat that builds and adds layers, happy ending, celebration, instrumental, no vocals"
+bpm = 96
+key = "C major"
+seconds = 150
+
+[[tracks]]
+id = "FIN-B"
+title = "Finale B: DJ set at the beach"
+tags = "feel-good hip-hop party instrumental, a DJ's victory set on a sunny California beach, bright major piano hook, deep booming 808 sub bass drops, big claps and bouncing drums, G-funk whistle synth lead answering the piano, vinyl scratches, warm and wide, simple major chord loop C, Am, F, G, builds from a filtered intro into the full beat, euphoric, celebration, instrumental, no vocals"
+bpm = 96
+key = "C major"
+seconds = 150

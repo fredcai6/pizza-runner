@@ -10,6 +10,12 @@
   function load() { try { return JSON.parse(localStorage.getItem(SAVE)); } catch { return null; } }
   function save() { localStorage.setItem(SAVE, JSON.stringify(camp)); }
 
+  // Which song: HQ in the back room, the city's own in its streets, and the finale from the last
+  // street (the Bungalows) through the ending, the card and the title.
+  function tune(where) {
+    A.song(where === 'title' || where === 'finale' || (where === 'city' && camp.finaleOn) ? 'finale' : where === 'hq' ? 'hq' : R.currentCity(camp).id);
+  }
+
   function show(html, actions = []) {
     controls.classList.add('hidden');
     screen.classList.remove('hidden');
@@ -34,6 +40,7 @@
     for (const k of ['left', 'right', 'jumpHeld']) input[k] = false;
     input.queued = {};
     $('pause').classList.add('hidden');
+    A.duck(false);
     overlay.classList.add('hidden');
     controls.classList.add('hidden');
   }
@@ -77,6 +84,7 @@
 
   function title() {
     halt();
+    tune('title');
     const acts = [];
     if (camp) acts.push(['Continue', () => { if (touch) goFull(); route(); }]);
     acts.push(['Start delivery', () => { if (touch) goFull(); camp = R.newCampaign(); save(); route(); }, camp ? 'quiet' : '']);
@@ -101,6 +109,7 @@
     halt();
     save();
     const mine = epoch, city = R.currentCity(camp), ready = preload(city);
+    tune(camp.phase === 'briefing' || camp.phase === 'gameover' ? 'hq' : camp.phase === 'ending' ? 'finale' : 'city');
     if (camp.phase === 'briefing') {
       // Arriving in a city: let go of the paintings of every city that is not this one or the next.
       const keep = new Set([city.id, C.CITIES[camp.cityIndex + 1]?.id]);
@@ -128,7 +137,7 @@
   function lostCity() {
     const city = R.currentCity(camp);
     show(`<div class="fit duo"><div class="duo-l"><h2>${city.name} went cold</h2><p>All the slices are gone. The streets reset, and everything before ${city.name} stays done.</p><div data-actions></div></div></div>`,
-      [[`Back to ${city.name}`, () => { R.retryCity(camp); route(); }], boardButton(lostCity)]);
+      [[`Back to ${city.name}`, () => { R.retryCity(camp); delete camp.finaleOn; route(); }], boardButton(lostCity)]);
   }
 
   function doorScene() {
@@ -141,7 +150,7 @@
   }
 
   // Order, topping choice and Corkboard share one screen.
-  function orderScreen() { pieBuilder(R.currentCity(camp)); }
+  function orderScreen() { tune('city'); pieBuilder(R.currentCity(camp)); }
 
   // Old-school character select: a grid of topping tiles with a cursor, a big pie beside it wearing
   // the highlighted topping, and the topping's name and blurb as the fighter's stats.
@@ -243,6 +252,8 @@
   function startRun(slice, node) {
     const city = R.currentCity(camp), world = camp.world;
     halt();
+    if (city.final && world.delivery === city.areas.length - 1) camp.finaleOn = true;
+    tune('city');
     world.checkpoint = node;
     screen.classList.add('hidden');
     controls.classList.remove('hidden');
@@ -270,6 +281,7 @@
 
   function endCard() {
     const card = C.ENDING.card;
+    tune('finale');
     const link = card.youtube ? `<a class="listen" href="${card.youtube}" target="_blank" rel="noopener">${card.listen}</a>` : '';
     // Katelyn's Polaroid sits beside the words once its file exists. Until then the card is just the words.
     show(`<div class="card"><img class="kpol" src="assets/cutscenes/katelyn-polaroid.webp" alt="Katelyn in front of the house" hidden><div class="cardtext"><h2>${card.line}</h2>${link}<p class="bday">${card.birthday}</p></div></div>`, [['Back to title', title, 'quiet']]);
@@ -283,7 +295,9 @@
     run.paused = on;
     if (on) { for (const k of ['left', 'right', 'jumpHeld']) input[k] = false; input.queued = {}; }
     $('pause').classList.toggle('hidden', !on);
+    A.duck(on);
     $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on';
+    $('musicBtn').textContent = A.musicOn ? 'Music: on' : 'Music: off';
   }
 
   // One input object, fed by keyboard and touch.
@@ -325,6 +339,7 @@
   document.addEventListener('webkitfullscreenchange', syncFull);
   $('fullBtn').classList.toggle('hidden', !canFull);
   $('muteBtn').onclick = () => { A.toggle(); $('muteBtn').textContent = A.muted ? 'Sound: off' : 'Sound: on'; };
+  $('musicBtn').onclick = () => { $('musicBtn').textContent = A.musicToggle() ? 'Music: on' : 'Music: off'; };
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
   setInterval(() => {
     const offer = run && !run.done && run.offer;

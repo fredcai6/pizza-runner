@@ -1,0 +1,51 @@
+round = "round-02"
+note = "Every city is built from Naples take 11 (round 1), in its key (A minor) and tempo (90 bpm). Three versions each, loosest first: a cover from scratch, a 70% remix, a 50% remix (closest to the Naples take). HQ is more serious, DC is toned down, Long Beach stays close to Naples."
+seeds = [11]
+denoise = [1.0, 0.7, 0.5]
+
+# Shared by every track: the Naples take's own description carries the vibe, each city adds a little.
+
+[[tracks]]
+id = "HQ"
+title = "HQ: serious"
+source = "round-01/NAP-s11.mp3"
+tags = "chill French rap beat, serious and focused, briefing-room tension, minimal, dark felt piano, muted strings, steady low pulse, restrained boom bap drums, sparse high bell motif, soft 8-bit lead, cinematic undertone, melancholic, video game soundtrack, instrumental"
+bpm = 90
+key = "A minor"
+seconds = 60
+
+[[tracks]]
+id = "NYC"
+title = "New York: Naples vibe, mid-90s soul"
+source = "round-01/NAP-s11.mp3"
+tags = "chill French rap beat, melancholic but sunny, mid-90s New York soul flavour, warm electric piano, crisp boom bap drums, round bass, whimsical catchy high-pitched synth motif, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 90
+key = "A minor"
+seconds = 60
+
+[[tracks]]
+id = "CHI"
+title = "Chicago: Naples vibe, chipmunk soul"
+source = "round-01/NAP-s11.mp3"
+tags = "chill French rap beat, melancholic but sunny, early 2000s Chicago soul flavour, pitched-up soul vocal chops, warm piano, soft strings, heavier drums, whimsical catchy high-pitched synth motif, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 90
+key = "A minor"
+seconds = 60
+
+[[tracks]]
+id = "DC"
+title = "Washington DC: Naples vibe, a light go-go pocket"
+source = "round-01/NAP-s11.mp3"
+tags = "chill French rap beat, melancholic but sunny, subtle Washington DC go-go pocket, light congas and soft cowbell, understated, no horn section, mellow keys, whimsical catchy high-pitched synth motif, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 90
+key = "A minor"
+seconds = 60
+
+[[tracks]]
+id = "LB"
+title = "Long Beach: Naples vibe, G-funk lead"
+source = "round-01/NAP-s11.mp3"
+tags = "chill French rap beat, melancholic but sunny, Long Beach G-funk flavour, whiny high-pitched sine portamento synth lead, smooth electric piano, funky bass, laid-back West Coast bounce, whimsical, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 90
+key = "A minor"
+seconds = 60
