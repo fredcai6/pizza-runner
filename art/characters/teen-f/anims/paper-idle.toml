@@ -1,0 +1,15 @@
+master = "characters/teen-f/references/paper-master.png"
+canvas = [120, 118]
+job = 619
+frame_ms = 260
+loop = true
+run = "paper"
+[[frames]]
+pose = "idle_a/2"
+hold = 2
+[[frames]]
+pose = "idle_b/2"
+hold = 2
+[[frames]]
+pose = "idle_a/2"
+hold = 1

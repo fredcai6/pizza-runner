@@ -1,0 +1,10 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "{action}"
+
+[shots.m_A]
+refs = ["characters/teen/references/paper-master.png", "paper/style_pm_tall.png"]
+prompt = "Edit image 1. Keep the exact same paper standee: the same side view facing right, the same pose with the head bowed over the glowing phone held in both hands, the same size and framing, the same baggy blue jeans and big white sneakers, the same thick white paper border. Change only the person: it is now a teenage girl with warm tan skin and a long dark brown high ponytail, wearing an oversized sunny mustard-yellow hoodie. Paper Mario style papercraft cutout, a standee cut from card: simple bold shapes, clean flat colours, a clear white paper cut border about as thick as a finger around the entire silhouette, a faint paper grain texture. The face stays as simple as in image 1: one small dot eye and a flat bored line mouth, no detail. No pink or magenta anywhere on the figure. Image 2 shows only the drawing style to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
