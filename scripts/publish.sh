@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 # Publish the game to archerpeligo.club/pizza-runner/ (public, no login).
-# Caddy serves /mnt/data/site/pizza-runner read-only; this swaps in a fresh copy.
+# Caddy bind-mounts /mnt/data/site/pizza-runner read-only. The mount is pinned to
+# that directory itself, so update its contents in place: replacing the
+# directory (mv/rm) leaves caddy serving the deleted one, and every URL 404s.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 dest=/mnt/data/site/pizza-runner
-next="$dest.next"
-rm -rf "$next"
-mkdir -p "$next"
-cp -r "$root/index.html" "$root/style.css" "$root/js" "$root/assets" "$next/"
-rm -rf "$dest.old"
-if [ -d "$dest" ]; then mv "$dest" "$dest.old"; fi
-mv "$next" "$dest"
-rm -rf "$dest.old"
+mkdir -p "$dest"
+rsync -a --delete --exclude='.*' \
+  "$root/index.html" "$root/style.css" "$root/js" "$root/assets" "$dest/"
 echo "https://archerpeligo.club/pizza-runner/"
