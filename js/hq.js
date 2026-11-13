@@ -374,8 +374,8 @@
 
   // Each door painting carries a blank signboard on top. This is how many rows of the art to leave off so it is not drawn.
   const DOOR_SIGN = {
-    'newyork/centralpark': 74, 'newyork/brooklyn': 70, 'chicago/loop': 66, 'chicago/lincolnpark': 60, 'chicago/wickerpark': 68,
-    'dc/georgetown': 62, 'naples/harbor': 60, 'naples/center': 48, 'naples/hillside': 62,
+    'newyork/centralpark': 79, 'newyork/brooklyn': 70, 'chicago/loop': 66, 'chicago/lincolnpark': 60, 'chicago/wickerpark': 68,
+    'dc/georgetown': 62, 'naples/harbor': 60, 'naples/center': 48, 'naples/hillside': 72,
     'california/downtown': 74, 'california/beach': 68, 'california/bungalows': 66,
   };
 
@@ -468,6 +468,7 @@
     const show = () => {
       const line = shots[s].lines[l];
       name.textContent = nameOf(line.who);
+      name.dataset.who = line.who; // the tag's colour, one per speaker (style.css)
       script = spans(line.text); shown = 0; full = false;
       text.innerHTML = typed(script, 0); text.dataset.full = line.text.replace(/\*\*/g, '');
       dialog.classList.remove('hidden', 'done');
