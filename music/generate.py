@@ -16,6 +16,7 @@ COMFY_OUT = pathlib.Path("/mnt/data/sprite-forge/out")
 OUT = pathlib.Path("/mnt/data/pizza-runner-music")
 API = "http://127.0.0.1:8188"
 CONTAINER = "pizza-music-comfy"
+COMFY_IN = pathlib.Path("/mnt/data/sprite-forge/in")
 
 
 def post(path, body):
@@ -38,10 +39,16 @@ def wait_up(proc, secs=300):
     sys.exit("ComfyUI did not come up")
 
 
-def graph(t, seed, prefix):
-    """The blueprint 'Text to Audio (ACE-Step 1.5)' in API form: turbo model, 8 steps, cfg 1."""
+def graph(t, seed, prefix, denoise=None):
+    """The blueprint 'Text to Audio (ACE-Step 1.5)' in API form: turbo model, 8 steps, cfg 1.
+
+    With a `source` the track is a cover of that clip: the clip goes in as ACE-Step's reference audio
+    (which turns on its cover mode and turns off the language model's own audio codes). denoise 1.0
+    re-performs it from noise; lower values start from the clip itself and keep more of it.
+    """
     secs = float(t["seconds"])
-    return {
+    src = t.get("source")
+    g = {
         "unet": {"class_type": "UNETLoader", "inputs": {"unet_name": "acestep_v1.5_turbo.safetensors", "weight_dtype": "default"}},
         "shift": {"class_type": "ModelSamplingAuraFlow", "inputs": {"model": ["unet", 0], "shift": 3}},
         "clip": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "qwen_0.6b_ace15.safetensors", "clip_name2": "qwen_4b_ace15.safetensors", "type": "ace", "device": "default"}},
@@ -49,7 +56,7 @@ def graph(t, seed, prefix):
         "pos": {"class_type": "TextEncodeAceStepAudio1.5", "inputs": {
             "clip": ["clip", 0], "tags": t["tags"], "lyrics": t.get("lyrics", "[Instrumental]"), "seed": seed,
             "bpm": int(t["bpm"]), "duration": secs, "timesignature": str(t.get("time", 4)), "language": "en",
-            "keyscale": t["key"], "generate_audio_codes": True, "cfg_scale": 2.0, "temperature": 0.85,
+            "keyscale": t["key"], "generate_audio_codes": not src, "cfg_scale": 2.0, "temperature": 0.85,
             "top_p": 0.9, "top_k": 0, "min_p": 0.0}},
         "neg": {"class_type": "ConditioningZeroOut", "inputs": {"conditioning": ["pos", 0]}},
         "latent": {"class_type": "EmptyAceStep1.5LatentAudio", "inputs": {"seconds": secs, "batch_size": 1}},
@@ -59,6 +66,24 @@ def graph(t, seed, prefix):
         "decode": {"class_type": "VAEDecodeAudio", "inputs": {"samples": ["sample", 0], "vae": ["vae", 0]}},
         "save": {"class_type": "SaveAudioMP3", "inputs": {"audio": ["decode", 0], "filename_prefix": prefix, "quality": "V0"}},
     }
+    if src:
+        g["src"] = {"class_type": "LoadAudio", "inputs": {"audio": staged(src)}}
+        g["src_lat"] = {"class_type": "VAEEncodeAudio", "inputs": {"audio": ["src", 0], "vae": ["vae", 0]}}
+        g["ref"] = {"class_type": "ReferenceTimbreAudio", "inputs": {"conditioning": ["pos", 0], "latent": ["src_lat", 0]}}
+        g["sample"]["inputs"]["positive"] = ["ref", 0]
+        if denoise < 1:
+            g["sample"]["inputs"]["latent_image"] = ["src_lat", 0]
+            g["sample"]["inputs"]["denoise"] = denoise
+    return g
+
+
+def staged(src):
+    """Copy a source clip (a path under OUT, e.g. round-01/NAP-s11.mp3) into ComfyUI's input folder."""
+    name = "pizza-music-" + src.replace("/", "-")
+    COMFY_IN.mkdir(parents=True, exist_ok=True)
+    if not (COMFY_IN / name).exists():
+        shutil.copyfile(OUT / src, COMFY_IN / name)
+    return name
 
 
 def run(g, dest):
@@ -76,20 +101,32 @@ def run(g, dest):
 
 
 def clips(spec):
+    """(track, seed, denoise, file name) for every clip in the round."""
     for t in spec["tracks"]:
         for seed in t.get("seeds", spec.get("seeds", [1])):
-            yield t, seed, f"{t['id']}-s{seed}.mp3"
+            if t.get("source"):
+                for d in t.get("denoise", spec.get("denoise", [1.0])):
+                    yield t, seed, d, f"{t['id']}-s{seed}-d{round(d * 100)}.mp3"
+            else:
+                yield t, seed, None, f"{t['id']}-s{seed}.mp3"
+
+
+def label(t, seed, d):
+    if d is None:
+        return f"take {seed}"
+    return f"take {seed} · " + ("cover from scratch" if d >= 1 else f"remix, {round(d * 100)}% changed")
 
 
 def page(spec, folder):
     rows = []
     for t in spec["tracks"]:
         players = "".join(
-            f'<figure><figcaption>{html.escape(t["id"])} · take {seed}</figcaption><audio controls preload="none" src="{name}"></audio></figure>'
-            for tt, seed, name in clips(spec) if tt is t and (folder / name).exists())
+            f'<figure><figcaption>{html.escape(t["id"])} · {label(t, seed, d)}</figcaption><audio controls preload="none" src="{name}"></audio></figure>'
+            for tt, seed, d, name in clips(spec) if tt is t and (folder / name).exists())
         rows.append(f'<section><h2>{html.escape(t["id"])}: {html.escape(t["title"])}</h2>'
                     f'<p class="tags">{html.escape(t["tags"])}</p>'
-                    f'<p class="meta">{t["bpm"]} bpm · {html.escape(t["key"])} · {t["seconds"]} s</p>{players}</section>')
+                    f'<p class="meta">{t["bpm"]} bpm · {html.escape(t["key"])} · {t["seconds"]} s'
+                    + (f' · from {html.escape(t["source"])}' if t.get("source") else "") + f'</p>{players}</section>')
     note = html.escape(spec.get("note", ""))
     (folder / "index.html").write_text(f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>Pizza Runner music: {html.escape(spec['round'])}</title>
@@ -107,7 +144,7 @@ def main():
     spec = tomllib.loads(path.read_text())
     folder = OUT / spec["round"]
     folder.mkdir(parents=True, exist_ok=True)
-    todo = [c for c in clips(spec) if not (folder / c[2]).exists()]
+    todo = [c for c in clips(spec) if not (folder / c[3]).exists()]
     if not only_page and todo:
         env = {"FORGE_CONTAINER": CONTAINER}
         import os
@@ -117,8 +154,8 @@ def main():
         signal.signal(signal.SIGTERM, stop)
         try:
             wait_up(proc)
-            for i, (t, seed, name) in enumerate(todo, 1):
-                secs = run(graph(t, seed, f"pizza-music/{spec['round']}/{name[:-4]}"), folder / name)
+            for i, (t, seed, d, name) in enumerate(todo, 1):
+                secs = run(graph(t, seed, f"pizza-music/{spec['round']}/{name[:-4]}", d), folder / name)
                 print(f"chunk {i}/{len(todo)} {name} {secs:.0f}s", flush=True)
                 page(spec, folder)
         finally:
