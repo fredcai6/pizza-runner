@@ -1,0 +1,17 @@
+models = ["qwen-edit"]
+seeds = [1, 2, 3]
+width = 1024
+height = 1024
+comfy_args = ["--reserve-vram", "1.5"]
+template = "Redraw the character from image 1 exactly as it is: the same paper standee, the same thick white paper border all around the silhouette like a sticker, the same flat colours, the same face style. Exactly two arms and two legs, two hands. {action} The whole figure is visible in frame with the white border complete. Image 2 shows only the paper material to borrow; do not copy its characters. The background is one perfectly flat, uniformly lit magenta fill: no spotlight, no gradient, no cast shadow, no floor shadow and no shadow shapes on the background. Absolutely no text, letters, numbers, logos, labels, signs or lettering anywhere in the image. Exactly two arms and two legs, no extra limbs or hands."
+refs = ["characters/teen-g/references/paper-master.png", "paper/style_pm_sq.png"]
+
+[shots.idle_a]
+prompt = "Idle: standing still, side view facing right, both feet together flat on the ground, both hands holding the glowing phone in front of the chest, the head bowed over it."
+
+[shots.idle_b]
+prompt = "Idle: standing still, side view facing right, both feet together flat on the ground, both hands holding the glowing phone, the head bowed over it, a tiny smirk, shoulders slightly raised."
+
+
+[shots.film_b]
+prompt = "Filming: standing facing right, the phone raised high at eye level in both hands, leaning forward a little to frame the shot."

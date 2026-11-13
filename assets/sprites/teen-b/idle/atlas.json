@@ -1,0 +1,34 @@
+{
+ "frame": {
+  "w": 120,
+  "h": 118
+ },
+ "count": 5,
+ "frame_ms": 260,
+ "loop": true,
+ "rev": {
+  "sha": "8228fa6e3c82478d902e9edeb1e7e24aeadb1d4b",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "9d8cae79f63349054af0d87ff6f4cbd3322bb17c",
+  "dirty": true
+ },
+ "source": {
+  "run": "paper",
+  "model": "qwen-edit",
+  "job": 618,
+  "master": "characters/teen-b/references/paper-master.png",
+  "cell": 8.444,
+  "border": 4,
+  "palette": 48,
+  "poses": [
+   "idle_a/2",
+   "idle_a/2",
+   "idle_b/2",
+   "idle_b/2",
+   "idle_a/2"
+  ]
+ }
+}

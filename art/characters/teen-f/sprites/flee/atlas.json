@@ -1,0 +1,37 @@
+{
+ "frame": {
+  "w": 150,
+  "h": 118
+ },
+ "count": 8,
+ "frame_ms": 70,
+ "loop": true,
+ "rev": {
+  "sha": "8228fa6e3c82478d902e9edeb1e7e24aeadb1d4b",
+  "dirty": false,
+  "comfy": "v0.44.0"
+ },
+ "game_rev": {
+  "sha": "9d8cae79f63349054af0d87ff6f4cbd3322bb17c",
+  "dirty": true
+ },
+ "source": {
+  "poseguide": "qwen-pose-paper",
+  "motion": "flee",
+  "seed": 1,
+  "place": "skel",
+  "frames": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "master": "characters/teen-f/references/paper-master.png",
+  "border": 4,
+  "palette": 48
+ }
+}

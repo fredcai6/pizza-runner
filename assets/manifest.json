@@ -117,5 +117,41 @@
   ],
   "recruit-naples": [
     "idle"
+  ],
+  "teen-b": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
+  ],
+  "teen-c": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
+  ],
+  "teen-d": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
+  ],
+  "teen-g": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
+  ],
+  "teen-f": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
+  ],
+  "teen-e": [
+    "idle",
+    "walk",
+    "film",
+    "flee"
   ]
 }
