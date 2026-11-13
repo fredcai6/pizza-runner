@@ -122,10 +122,22 @@ def page(spec, folder):
     notes = json.loads(notes_path.read_text()) if notes_path.exists() else {}
     note_for = lambda name: (f'<details><summary>Listening notes (Music Flamingo)</summary><p class="notes">'
                              f'{html.escape(notes[name])}</p></details>' if name in notes else "")
+    loops_path = folder / "loops" / "loops.json"
+    loops = json.loads(loops_path.read_text()) if loops_path.exists() else {}
+
+    def loop_for(name):
+        if name not in loops:
+            return ""
+        seam = name.replace(".mp3", "-seam.mp3")
+        return (f'<p class="looplab">In the game: the loop ({loops[name]["length"]:.0f} s, plays on repeat)</p>'
+                f'<audio controls loop preload="none" src="loops/{name}"></audio>'
+                f'<p class="looplab">Across the loop point: last 8 s, then the first 8 s</p>'
+                f'<audio controls preload="none" src="loops/{seam}"></audio>')
+
     rows = []
     for t in spec["tracks"]:
         players = "".join(
-            f'<figure><figcaption>{html.escape(t["id"])} · {label(t, seed, d)}</figcaption><audio controls preload="none" src="{name}"></audio>{note_for(name)}</figure>'
+            f'<figure><figcaption>{html.escape(t["id"])} · {label(t, seed, d)}</figcaption><audio controls preload="none" src="{name}"></audio>{loop_for(name)}{note_for(name)}</figure>'
             for tt, seed, d, name in clips(spec) if tt is t and (folder / name).exists())
         rows.append(f'<section><h2>{html.escape(t["id"])}: {html.escape(t["title"])}</h2>'
                     f'<p class="tags">{html.escape(t["tags"])}</p>'
@@ -137,7 +149,7 @@ def page(spec, folder):
 <style>body{{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:0 auto;padding:16px;background:#fdf6e8;color:#2a1f18}}
 h1{{font-size:1.4rem}}h2{{font-size:1.1rem;margin:0 0 4px}}section{{background:#fff;border:1px solid #0002;border-radius:12px;padding:14px;margin:14px 0}}
 .tags{{margin:0;color:#6b5747;font-size:.9rem}}.meta{{margin:2px 0 8px;color:#6b5747;font-size:.85rem}}
-figure{{margin:8px 0}}figcaption{{font-size:.85rem;font-weight:600}}audio{{width:100%}}details{{margin:4px 0 0;font-size:.88rem}}summary{{cursor:pointer;color:#6b5747}}.notes{{white-space:pre-wrap;margin:6px 0}}</style></head><body>
+figure{{margin:8px 0}}figcaption{{font-size:.85rem;font-weight:600}}audio{{width:100%}}details{{margin:4px 0 0;font-size:.88rem}}summary{{cursor:pointer;color:#6b5747}}.notes{{white-space:pre-wrap;margin:6px 0}}.looplab{{margin:8px 0 2px;font-size:.82rem;color:#6b5747}}</style></head><body>
 <h1>Pizza Runner music: {html.escape(spec['round'])}</h1><p>{note}</p>{''.join(rows)}</body></html>""")
 
 

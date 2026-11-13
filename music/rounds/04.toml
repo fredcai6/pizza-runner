@@ -1,0 +1,53 @@
+round = "round-04"
+note = "Game songs: about two minutes each, made to loop. Prompts are Music Flamingo's descriptions of the round-3 take 11s (Naples: its round-1 prompt), a little less jazzy, no vocals. A minor, 90 bpm. Each song has the full take, the loop as it will play in the game, and a short 'across the loop point' clip to check the seam."
+seeds = [11]
+# Generated a little long so the loop can be cut before ACE-Step's ending.
+loop_seconds = 120
+
+[[tracks]]
+id = "HQ"
+title = "HQ"
+tags = "melancholic, contemplative ambient neo-classical instrumental for a secret briefing room, a resonant grand piano carries the main melody over lush reverberant synth pads and a deep sustained synth bass, a soft understated pulse underneath, slowly evolving chords Am, Em, Fmaj7, Dm, G6, C6 with wistful sixths and major sevenths, gentle swells and breathing space, spacious reverb and delay, polished high-fidelity mix, steady gentle dynamics, serious and serene, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "NYC"
+title = "New York"
+tags = "mellow jazzy instrumental with a laid-back hip-hop lean, a warm lyrical saxophone carries the main melody, lush electric piano with extended voicings, smooth melodic electric bass, light drum kit with soft snare, crisp hi-hat and subtle ride, gentle head-nod groove, chords Fmaj7, Em, Am, Dm, G7, Cmaj7, piano intro then the saxophone states the main theme, clean warm wide mix with the saxophone slightly forward, sophisticated late-night city mood, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "CHI"
+title = "Chicago"
+tags = "mellow soulful instrumental with a laid-back groove, a warm lyrical alto saxophone leads the melody, lush electric piano as the harmonic backbone, smooth melodic bass, light drums with soft snare, hi-hat and ride and a little more weight in the kick, rich chords Am7, Dm7, Em7, Fmaj7, G6, F6, G7 with a passing half-diminished chord, intro, main theme, a short saxophone then piano solo section, return to the theme, warm clean high-fidelity mix, relaxed and sophisticated, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "DC"
+title = "Washington DC"
+tags = "mellow groovy instrumental, a warm Rhodes electric piano carries the melody, melodic electric bass with fluid walking lines, light swung drums with a soft go-go pocket, subtle synth pads for atmosphere, chords Am, Dm, G, C, F, Bm7b5, Em, Fmaj7, Dm6, G7, Cmaj7, piano intro, main theme, a short piano solo variation, return to the theme, clean warm spacious mix, relaxed and easy, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "NAP"
+title = "Naples"
+tags = "chill French rap beat, melancholic but sunny, Quebec francophone hip-hop, airy guitar and a hint of Neapolitan mandolin, mellow keys, soft trap hi-hats, whimsical catchy high-pitched synth motif, soft 8-bit lead, video game soundtrack, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
+
+[[tracks]]
+id = "LB"
+title = "Long Beach"
+tags = "relaxed lounge-leaning instrumental with a laid-back West Coast bounce, a warm Rhodes electric piano carries the melody and chords, smooth flowing electric bass, light drums with a soft swaying pulse, subtle reverb, chords Fmaj7, Dm, Am, G, F, Em, sunny and easygoing, intro, main theme, instrumental piano interludes, clean warm balanced mix, instrumental, no vocals"
+bpm = 90
+key = "A minor"
+seconds = 150
