@@ -316,9 +316,10 @@ test('the story keeps its secrets', () => {
 
 test('every speaker and every pizza has a voice', () => {
   for (const city of C.CITIES) for (const b of city.briefing) for (const l of b.lines) assert.ok(C.SPEAKERS[l.who], l.who);
-  const events = Object.keys(C.QUIPS.ny);
+  const events = Object.keys(C.VOICES.ny);
   for (const style of ['ny', 'deep', 'jumbo', 'naples']) {
-    assert.deepStrictEqual(Object.keys(C.QUIPS[style]), events);
+    assert.deepStrictEqual(Object.keys(C.VOICES[style]), events);
+    for (const e of events) assert.ok(C.VOICES[style][e].length, `${style}.${e}`);
     for (const r of C.RETURNS) for (const l of r.lines) if (l.by) assert.ok(l.by[style]);
   }
 });
@@ -381,4 +382,16 @@ test('the board starts with his two suspects and pins up the others once met', (
   assert.deepStrictEqual(R.headquarters(c).known, ['teen', 'turtle']);
   c.seen['mutant.peeks'] = true;
   assert.deepStrictEqual(R.headquarters(c).known, ['teen', 'turtle', 'mutant']);
+});
+
+test('street lines take turns, and frequent events thin out without going quiet', () => {
+  // The same arithmetic as Run.speak in js/play.js.
+  const speaks = (rate, n) => !(rate === 'often' && n >= 3 && n % 2) && !(rate === 'sometimes' && n > 0 && n % 3);
+  const first12 = rate => Array.from({ length: 12 }, (_, n) => speaks(rate, n));
+  assert.deepStrictEqual(first12(undefined).filter(Boolean).length, 12);
+  assert.deepStrictEqual(first12('often'), [true, true, true, false, true, false, true, false, true, false, true, false]);
+  assert.deepStrictEqual(first12('sometimes'), [true, false, false, true, false, false, true, false, false, true, false, false]);
+  assert.strictEqual(C.VOICE_RATE.flees, 'sometimes');
+  for (const e of Object.keys(C.VOICE_RATE)) assert.ok(C.VOICES.ny[e], e);
+  for (const e of C.BUBBLE) assert.ok(C.VOICES.ny[e], e);
 });

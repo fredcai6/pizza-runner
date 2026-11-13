@@ -21,7 +21,7 @@
   // the ground line. Debris has no border and lies just into the pavement.
   const PROP_SINK = FOOT_SINK, DEBRIS_SINK = 3;
   const HIT_GAP = 8, MUTANT_GAP = 450;
-  const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
+  const BARK_TIME = 170, BARK_READ = 100, QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
 
   class Run {
     constructor(canvas, input, { camp, city, world, slice, start, onEnd, onStreet }) {
@@ -38,15 +38,15 @@
       this.coyote = 0; this.buffer = 0; this.bounced = false; this.perch = 0;
       this.wob = 0; this.wobV = 0; this.trauma = 0; this.freeze = 0;
       this.aura = false; this.auraTick = 0;
-      this.speech = null; this.quipGap = 0; this.quipCount = {};
+      this.speech = null; this.quipGap = 0;
       this.bursts = []; this.cheeseBits = []; this.flour = []; this.dust = []; this.sauce = []; this.wisps = []; this.sweep = 0;
       this.look = 0; this.cam = 0; this.frame = 0; this.paused = false; this.bark = null; this.barkT = 0; this.heatBand = 'hot';
       this.done = false; this.offer = null;
       this.wipe = 0; this.pending = null; this.removed = 0; this.found = 0; this.taken = new Set(); this.warned = false;
       this.enter(start.street, start.x);
       const gone = Object.values(world.streets).reduce((n, s) => n + s.enemies.filter(e => !e.alive).length, 0);
-      this.say(gone ? `${gone} still gone from these streets. Deliver to ${this.area0().customer}.` : `Deliver to: ${this.area0().customer}`);
-      this.quip('deploy', true);
+      this.speak(gone ? 'deliverToGone' : 'deliverTo', { gone, customer: this.area0().customer });
+      this.speak('deploy', {}, true);
     }
 
     area0() { return this.city.areas[Math.min(this.world.delivery, this.city.areas.length - 1)]; }
@@ -128,15 +128,27 @@
       this.raf = requestAnimationFrame(tick);
     }
     stop() { this.done = true; cancelAnimationFrame(this.raf); this.paused = false; }
-    say(text) { this.bark = text; this.barkT = 170; }
+    // One pop-up at a time. A new one waits until the current one has been up long enough to read (BARK_READ frames),
+    // and only the newest waiting line is kept: if two arrive while one is up, the later one is the one that matters.
+    say(text) {
+      if (this.barkT > BARK_TIME - BARK_READ) this.barkNext = text;
+      else { this.bark = text; this.barkT = BARK_TIME; this.barkNext = null; }
+    }
 
-    // The pizza talks to itself now and then. `urgent` lines ignore the gap, not each other.
-    quip(event, urgent = false) {
-      if (this.speech || (this.quipGap > 0 && !urgent)) return;
-      const lines = C.QUIPS[this.slice.style][event], n = this.quipCount[event] || 0;
-      this.quipCount[event] = n + 1;
-      this.speech = { text: lines[n % lines.length], age: 0 };
-      this.quipGap = QUIP_GAP;
+    // The pizza out there says something about what just happened (C.VOICES). Every event is counted per pizza in the
+    // save: the count decides whether this one speaks (C.VOICE_RATE) and which line is next, so lines take turns and
+    // a thing that happens all the time is answered now and then rather than every time, or never.
+    speak(event, vars = {}, urgent = false) {
+      const style = C.VOICES[this.slice.style] ? this.slice.style : 'ny', lines = C.VOICES[style][event];
+      if (!lines) return;
+      const said = this.camp.said || (this.camp.said = {}), k = `${style}.${event}`, c = said[k] || (said[k] = { n: 0, spoke: 0 });
+      const n = c.n++, rate = C.VOICE_RATE[event];
+      if (rate === 'often' && n >= 3 && n % 2) return;
+      if (rate === 'sometimes' && n > 0 && n % 3) return;
+      const bubble = C.BUBBLE.has(event);
+      if (bubble && (this.speech || (this.quipGap > 0 && !urgent))) return;
+      const text = lines[c.spoke++ % lines.length].replace(/\{(\w+)\}/g, (_, x) => vars[x] ?? '');
+      if (bubble) { this.speech = { text, age: 0 }; this.quipGap = QUIP_GAP; } else this.say(text);
     }
     jolt(t) { this.trauma = Math.min(1, this.trauma + t); }
     // A hit holds the picture for a few frames. Holds never add up: a second one inside the first just extends to its end.
@@ -172,6 +184,7 @@
       this.trauma = Math.max(0, this.trauma - 0.022);
       const { p, input, style: st } = this;
       if (this.barkT > 0) this.barkT--;
+      if (this.barkNext && this.barkT <= BARK_TIME - BARK_READ) { this.bark = this.barkNext; this.barkT = BARK_TIME; this.barkNext = null; }
       if (this.quipGap > 0) this.quipGap--;
       if (this.speech && ++this.speech.age > this.speech.text.length * 2 + QUIP_HOLD) this.speech = null;
       if (this.invuln > 0) this.invuln--;
@@ -269,7 +282,7 @@
     bump(c) {
       const kind = this.isBox(c) ? 'box' : 'barricade', seen = this.hinted || (this.hinted = new Set());
       if (seen.has(kind)) return;
-      seen.add(kind); this.say(C.TUNING.hints[kind]);
+      seen.add(kind); this.speak(kind === 'box' ? 'hintBox' : 'hintBarricade');
     }
 
     // Jelly on a spring: every pizza has one, and each has its own stiffness.
@@ -336,12 +349,12 @@
 
     junctionStep() {
       const { p, street, junction: j } = this, cx = p.x + p.w / 2;
-      if (cx > street.turnAt - 320 && R.reach(this.world, street)) { this.found++; this.say(`${C.BARKS.checkpoint} ${j.name}`); A.play('note'); }
+      if (cx > street.turnAt - 320 && R.reach(this.world, street)) { this.found++; this.speak('checkpoint', { name: j.name }); A.play('note'); }
       const inZone = cx > street.turnAt + TURN_ZONE[0] && cx < street.turnAt + TURN_ZONE[1] && !!j.turn;
       this.offer = inZone && j.open ? j.turn : null;
       this.heading = R.guide(this.camp, street, cx);
-      if (this.heading.kind === 'door' && this.heading.left < 700 && !this.warned) { this.warned = true; this.say(`${this.area0().customer}'s door, ${C.BARKS.almost}`); this.quip('door'); }
-      if (inZone && !j.open && !this.warned) { this.warned = true; this.say(C.BARKS.gate); }
+      if (this.heading.kind === 'door' && this.heading.left < 700 && !this.warned) { this.warned = true; this.speak('doorAhead', { customer: this.area0().customer }); }
+      if (inZone && !j.open && !this.warned) { this.warned = true; this.speak('gate'); }
       if (p.x + p.w >= street.length - 2 && !this.wipe) this.go(j.keep.id);
     }
 
@@ -352,19 +365,19 @@
       const { p, street, world } = this;
       if (street.door == null || p.x + p.w / 2 < street.door) return;
       if (street.address === world.delivery) this.end('delivered');
-      else if (street.address > world.delivery && !this.warned) { this.warned = true; this.say(C.BARKS.nope); }
+      else if (street.address > world.delivery && !this.warned) { this.warned = true; this.speak('nope'); }
     }
 
     updateBand() {
       const f = this.heat / this.heatMax;
       const band = f > 0.6 ? 'hot' : f > 0.3 ? 'warm' : 'cold';
-      if (band !== this.heatBand) { this.heatBand = band; this.say(C.BARKS[band]); if (band === 'cold') this.quip('cold', true); }
+      if (band !== this.heatBand) { this.heatBand = band; this.speak(band); }
     }
 
     fires() {
       for (const f of this.street.fires) {
         if (f.lit && Math.abs(this.p.x + this.p.w / 2 - f.x) < 58 && this.p.y + this.p.h > GROUND - 90) {
-          f.lit = false; this.heat = Math.min(this.cap, this.heat + 40); this.say(C.BARKS.fire); A.play('fire');
+          f.lit = false; this.heat = Math.min(this.cap, this.heat + 40); this.speak('fire'); A.play('fire');
         }
       }
     }
@@ -422,7 +435,7 @@
       this.charges = Math.max(0, this.charges - n);
       if (this.charges) return;
       this.topping = null; this.aura = false;
-      this.say(C.BARKS.spent); this.quip('spent');
+      this.speak('spent');
     }
 
     // A special sends every enemy in sight packing for good, and a mutant already on the slice's tail.
@@ -442,7 +455,7 @@
         a.state = 'flee';
         this.note(e.type, { teen: 'flees', ninja: 'gone' }[e.type]);
       }
-      if (n) this.say(C.BARKS.scatter);
+      if (n) this.speak('scatter');
     }
 
     // Cheese goes everywhere: gooey blobs fly out, a few on stretchy strings, with a fleck or two of sauce, then drop
@@ -473,7 +486,7 @@
 
     feedMutant(a) {
       R.feed(this.camp, a.e);
-      this.removed++; this.say(C.BARKS.feed); this.note('mutant', 'feed'); A.play('bribe');
+      this.removed++; this.note('mutant', 'feed'); this.speak('feed'); A.play('bribe');
       a.state = 'sink'; a.leaving = true; a.t = 0;
       this.temp.push(a.x);
     }
@@ -533,7 +546,7 @@
           a.state = 'film'; a.t = 50; a.dir = Math.sign(this.p.x - a.x) || 1;
           this.street.filmed = a.x;
           this.bursts.push({ x: a.x, y: a.y - 100, r: 40, t: 8, color: '#ffffff' });
-          this.say(C.BARKS.filmed); this.note('teen', 'films'); this.quip('filmed', true);
+          this.note('teen', 'films'); this.speak('filmed');
         }
       }
     }
@@ -573,7 +586,7 @@
       switch (a.state) {
         case 'lurk':
           if (cx > a.x + 60 && cx < a.x + 900) {
-            a.state = 'peek'; a.t = 0; this.note('mutant', 'peeks'); this.say(C.BARKS.drain); A.play('note'); this.quip('mutant'); this.puff(a.x, GROUND, 6);
+            a.state = 'peek'; a.t = 0; this.note('mutant', 'peeks'); this.speak('drain'); A.play('note'); this.puff(a.x, GROUND, 6);
           }
           break;
         case 'peek':
@@ -648,12 +661,12 @@
         a.state = 'munch'; a.t = CHOMP; this.note('turtle', 'bites');
         return;
       }
-      if (e.type === 'teen' && stomped) { this.plant(a); this.bounce(16); this.note('teen', 'stomp'); this.quip('stomp'); this.flee(a); return; }
+      if (e.type === 'teen' && stomped) { this.plant(a); this.bounce(16); this.note('teen', 'stomp'); this.speak('stomp'); this.flee(a); return; }
       if (e.type === 'ninja' && stomped) this.note('ninja', 'bounce');
       if (e.type === 'mutant') {
         this.hurt(e.id, a.x);
         if (this.done) return;
-        R.feed(this.camp, e); this.removed++; this.note('mutant', 'bite'); this.say(C.BARKS.bite);
+        R.feed(this.camp, e); this.removed++; this.note('mutant', 'bite'); this.speak('bite');
         a.state = 'sink'; a.leaving = true; a.t = 0; this.temp.push(a.x);
         return;
       }
@@ -670,7 +683,7 @@
       this.removed++;
       for (const t of dropped) this.drops.push({ x: a.x, y: a.y - 50, topping: t });
       a.leaving = true; a.t = 0; a.state = 'flee'; a.dir = Math.sign(a.x - this.p.x) || 1;
-      this.say(C.BARKS.flees);
+      this.speak('flees');
     }
 
     // What each hit does depends entirely on who it hits. how is 'shot', 'wave', 'aura' or 'smash',
@@ -700,12 +713,12 @@
           if (dropped) {
             this.removed++; a.leaving = true; a.t = 0; a.state = 'flee'; a.dir = Math.sign(a.x - this.p.x) || 1;
             for (const t of dropped) this.drops.push({ x: a.x, y: Math.min(a.y, GROUND) - 50, topping: t });
-            this.say(C.BARKS.ninjaGone); this.note('ninja', 'gone');
+            this.note('ninja', 'gone'); this.speak('ninjaGone');
           } else if (topping) {
             a.state = 'bow'; a.t = 0; a.caught = topping;
-            this.say(C.BARKS.bow); this.note('ninja', 'bows'); A.play('bribe');
+            this.note('ninja', 'bows'); this.speak('bow'); A.play('bribe');
           } else {
-            this.say(C.BARKS.ninjaHit); this.note('ninja', 'climbs');
+            this.note('ninja', 'climbs'); this.speak('ninjaHit');
             if (a.state === 'walk') { a.state = 'leap'; a.t = 0; }
           }
           break;
@@ -715,13 +728,13 @@
 
     // A learned behavior goes on the board at once, in case she pauses to look.
     note(type, key) {
-      if (R.learn(this.camp, type, key)) { this.say(C.BARKS.note); A.play('note'); }
+      if (R.learn(this.camp, type, key)) { this.speak('note'); A.play('note'); }
     }
 
     // A bite comes off the slice, and with it a share of the heat it can ever hold again.
     hurt(owner, fromX) {
       if (this.invuln > 0) return;
-      this.quip('hurt');
+      this.speak('hurt');
       const chunk = this.heatMax / C.BITES;
       this.bites++; this.cap = this.heatMax - this.bites * chunk; this.heat = Math.min(this.cap, this.heat - chunk);
       this.invuln = 90; this.jolt(0.45); this.hold(4); this.wobV += 0.2;
@@ -752,8 +765,7 @@
       this.junction = R.junction(this.world, street);
       this.bursts.push({ x: street.turnAt, y: GROUND - 50, r: 110, t: 14, color: '#b8843f' });
       A.play('smash'); this.jolt(0.3);
-      this.say(R.nextPaper(this.camp) ? C.BARKS.paper : `${j.turn.name} is open.`);
-      this.quip('box');
+      if (R.nextPaper(this.camp)) this.speak('paper'); else this.speak('opened', { street: j.turn.name });
       return true;
     }
 
@@ -792,7 +804,7 @@
     // A new topping replaces whatever was on the slice.
     grab(topping) {
       this.topping = topping; this.charges = C.CHARGES;
-      this.quip('grab');
+      this.speak('grab');
       this.aura = false;
       A.play('fire');
     }
@@ -803,7 +815,7 @@
         if (d.y < GROUND - 28) d.y += 4;
         if (Math.abs(d.x - p.x - p.w / 2) < 62 && Math.abs(d.y - p.y - p.h / 2) < 80) {
           d.taken = true;
-          this.say(C.BARKS.recovered);
+          this.speak('recovered');
           this.grab(d.topping);
         }
       }
@@ -820,7 +832,7 @@
           this.grab(k.topping);
           // A first pickup of a topping also unlocks it for every pie after this one.
           const fresh = R.collect(this.camp, k.topping);
-          this.say(`${C.TOPPINGS[k.topping].name}! ${fresh ? C.BARKS.unlocked : C.BARKS.pickup}`);
+          this.speak(fresh ? 'unlocked' : 'pickup', { topping: C.TOPPINGS[k.topping].name });
         }
       });
     }
@@ -1246,6 +1258,16 @@
       this.hold(3);
     }
 
+    // Which drawing an enemy uses. Teens are one of their city's three (C.TEENS), fixed per teen so the same kid
+    // is the same kid every time the street is entered.
+    artOf(e) {
+      const kids = e.type === 'teen' && C.TEENS[this.city.id];
+      if (!kids) return e.type;
+      let h = e.id * 31;
+      for (const ch of this.street.id) h = (h * 33 + ch.charCodeAt(0)) >>> 0;
+      return kids[h % kids.length];
+    }
+
     drawActor(a) {
       const { ctx } = this, e = a.e;
       const anim = this.actorAnim(a);
@@ -1258,7 +1280,8 @@
       if (bow) { ctx.translate(a.x, a.y); ctx.rotate(bow * 0.45 * facing); ctx.translate(-a.x, -a.y); }
       const grounded = a.y >= GROUND - 1, sink = grounded ? FOOT_SINK : a.state === 'perch' ? TOP_SINK.platform : 0;
       if (grounded) this.shadow(a.x, GROUND + FOOT_SINK * 0.6, a.size * 0.3, 0.3);
-      if (!S.draw(ctx, e.type, anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12, { sink })) {
+      const look = this.artOf(e), args = [anim, this.frame * 16.7, a.x, a.y, a.size, facing, 1 - bow * 0.12, { sink }];
+      if (!S.draw(ctx, look, ...args) && (look === e.type || !S.draw(ctx, e.type, ...args))) {
         ctx.font = `${a.size}px serif`; ctx.textAlign = 'center'; ctx.fillText(FACE[e.type], a.x, a.y - 4);
       }
       ctx.restore();
