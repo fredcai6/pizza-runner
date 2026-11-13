@@ -443,6 +443,8 @@
   const CHARGES = 3;
   // Gameplay feel. Distances are stage pixels, times are seconds, frames run at 60 a second.
   const TUNING = {
+    // Dollars a delivered slice earns straight from the oven. It falls in a straight line with the slice's heat, to $0 at stone cold.
+    tipPerSlice: 5,
     // Nothing alive stands or patrols within this far of where a slice is put down.
     spawnSafe: 520,
     // Every street is this much longer than its city's stretch says (1.5 since the 11-11 playtest: bigger levels).

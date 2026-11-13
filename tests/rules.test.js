@@ -12,6 +12,22 @@ const lose = c => R.finishRun(c, R.ready(pie(c))[0], { outcome: 'cold', x: 100 }
 const deliver = c => { R.finishRun(c, R.ready(pie(c))[0], { outcome: 'delivered', x: 100 }); R.afterDoor(c); };
 const finishCity = (c, a) => { if (!city(c).final) order(c, a); else R.startFinale(c); for (let i = 0; i < city(c).areas.length; i++) deliver(c); R.leaveCity(c); };
 
+test('a delivered slice tips $5 hot, falling linearly to $0 cold; lost slices tip nothing', () => {
+  assert.strictEqual(R.tip({ outcome: 'delivered', heat: 1 }), 5);
+  assert.strictEqual(R.tip({ outcome: 'delivered', heat: 0.5 }), 2.5);
+  assert.strictEqual(R.tip({ outcome: 'delivered', heat: 0.123 }), 0.62);
+  assert.strictEqual(R.tip({ outcome: 'delivered', heat: 0 }), 0);
+  assert.strictEqual(R.tip({ outcome: 'cold', heat: 0 }), 0);
+  assert.strictEqual(R.tip({ outcome: 'dead', heat: 0.8 }), 0);
+  const c = fresh();
+  R.finishRun(c, R.ready(pie(c))[0], { outcome: 'delivered', x: 100, heat: 0.6 }); R.afterDoor(c);
+  lose(c);
+  R.finishRun(c, R.ready(pie(c))[0], { outcome: 'delivered', x: 100, heat: 0.9 });
+  assert.strictEqual(c.tips, 7.5);
+  assert.ok(c.receipts[2].lines.includes('TIP: $4.50 (90% hot)'));
+  assert.ok(c.receipts[2].lines.includes('TIPS SO FAR: $7.50'));
+});
+
 test('the route runs New York to Long Beach with four city pizzas', () => {
   assert.deepStrictEqual(C.CITIES.map(x => x.id), ['newyork', 'chicago', 'dc', 'naples', 'california']);
   assert.deepStrictEqual(Object.keys(C.STYLES), ['ny', 'deep', 'jumbo', 'naples']);
