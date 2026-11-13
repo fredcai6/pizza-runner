@@ -1,0 +1,37 @@
+{
+ "hq": {
+  "file": "hq.mp3",
+  "length": 120.0,
+  "from": "round-05/HQ-s11"
+ },
+ "newyork": {
+  "file": "newyork.mp3",
+  "length": 124.16,
+  "from": "round-05/NYC-s11"
+ },
+ "chicago": {
+  "file": "chicago.mp3",
+  "length": 110.464,
+  "from": "round-05/CHI-s11"
+ },
+ "dc": {
+  "file": "dc.mp3",
+  "length": 117.013,
+  "from": "round-05/DC-s11"
+ },
+ "naples": {
+  "file": "naples.mp3",
+  "length": 117.333,
+  "from": "round-05/NAP-s11"
+ },
+ "california": {
+  "file": "california.mp3",
+  "length": 118.699,
+  "from": "round-05/LB-s11"
+ },
+ "finale": {
+  "file": "hq.mp3",
+  "length": 120.0,
+  "from": "round-05/HQ-s11"
+ }
+}
