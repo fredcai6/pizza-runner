@@ -1,0 +1,54 @@
+round = "round-01"
+note = "Shared base, after Rymz's 'Hedoniste' as described: chill European hip-hop that wishes it were American, whimsical, a catchy high-pitched motif, soft 8-bit edge. Each city adds its classic sound. Two takes each. Say what's close and what to change."
+seeds = [11, 23]
+
+# Every track starts from the same base so the cities sound like one game.
+# (Kept inline per track: tomllib has no string interpolation.)
+
+[[tracks]]
+id = "HQ"
+title = "HQ: the base sound"
+tags = "chill European hip-hop beat, laid-back boom bap groove, whimsical, catchy high-pitched synth bell motif, soft 8-bit lead, warm Rhodes chords, mellow sub bass, crisp soft drums, playful, video game soundtrack, instrumental"
+bpm = 88
+key = "F major"
+seconds = 60
+
+[[tracks]]
+id = "NYC"
+title = "New York: 90s Bad Boy era (Biggie)"
+tags = "chill hip-hop beat, mid-90s New York, glossy smooth soul and R&B sample feel, warm electric piano, lush chords, round bass, crisp boom bap drums, whimsical catchy high-pitched synth motif, soft 8-bit lead, confident head-nod groove, playful, video game soundtrack, instrumental"
+bpm = 94
+key = "Eb major"
+seconds = 60
+
+[[tracks]]
+id = "CHI"
+title = "Chicago: early-2000s chipmunk soul (old Kanye)"
+tags = "chill hip-hop beat, early 2000s Chicago chipmunk soul, sped-up pitched-up soul vocal chops as the catchy high motif, warm piano, sweeping strings, hard soulful drums, triumphant, whimsical, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 88
+key = "C major"
+seconds = 60
+
+[[tracks]]
+id = "DC"
+title = "Washington DC: go-go (Chuck Brown)"
+tags = "chill hip-hop beat over a Washington DC go-go groove, live band swing, congas, roto-toms and cowbell, call-and-response horn section, funky bass, party feel, whimsical catchy high-pitched synth motif, soft 8-bit lead, playful, video game soundtrack, instrumental"
+bpm = 98
+key = "Bb major"
+seconds = 60
+
+[[tracks]]
+id = "NAP"
+title = "Naples, by way of French rap (Rymz)"
+tags = "chill French rap beat, melancholic but sunny, Quebec francophone hip-hop, airy guitar and a hint of Neapolitan mandolin, mellow keys, soft trap hi-hats, whimsical catchy high-pitched synth motif, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 90
+key = "A minor"
+seconds = 60
+
+[[tracks]]
+id = "LB"
+title = "Long Beach: G-funk (Warren G)"
+tags = "chill hip-hop beat, 1994 Long Beach G-funk, smooth mellow soft-rock electric piano, whiny high-pitched sine portamento synth lead motif, talkbox, deep funky Moog bass, laid-back West Coast bounce, sunny, whimsical, soft 8-bit lead, video game soundtrack, instrumental"
+bpm = 92
+key = "D major"
+seconds = 60
