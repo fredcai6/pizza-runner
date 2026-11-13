@@ -471,7 +471,7 @@
 
   const ENDING = {
     finale: [{ pic: 'dayold-desk', lift: 0.12, pan: [[0.5, 0.5, 1], [0.5, 0.5, 1]], ms: 8000, lines: [{ who: 'old', text: 'Know thy enemy...' }] }],
-    card: { line: 'To be continued...?', listen: 'Listen to DJ Alewife here', youtube: 'https://www.youtube.com/@djalewife', birthday: '(Happy birthday Katelyn!)' },
+    card: { line: 'To be continued...?', listen: 'Listen to DJ Alewife here', youtube: 'https://www.youtube.com/@djalewife', birthday: 'Happy birthday Katelyn!', tips: 'Total tips' },
   };
 
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.

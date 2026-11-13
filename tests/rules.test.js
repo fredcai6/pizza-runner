@@ -28,6 +28,19 @@ test('a delivered slice tips $5 hot, falling linearly to $0 cold; lost slices ti
   assert.ok(c.receipts[2].lines.includes('TIPS SO FAR: $7.50'));
 });
 
+test('running out of slices wipes that city\'s tips but keeps earlier cities\'', () => {
+  const c = R.newCampaign();
+  finishCity(c);
+  const banked = c.tips;
+  assert.strictEqual(banked, city(R.newCampaign()).areas.length * 5);
+  order(c);
+  R.finishRun(c, R.ready(pie(c))[0], { outcome: 'delivered', x: 100, heat: 1 }); R.afterDoor(c);
+  assert.strictEqual(c.tips, banked + 5);
+  while (R.ready(pie(c)).length) lose(c);
+  R.retryCity(c);
+  assert.strictEqual(c.tips, banked);
+});
+
 test('the route runs New York to Long Beach with four city pizzas', () => {
   assert.deepStrictEqual(C.CITIES.map(x => x.id), ['newyork', 'chicago', 'dc', 'naples', 'california']);
   assert.deepStrictEqual(Object.keys(C.STYLES), ['ny', 'deep', 'jumbo', 'naples']);

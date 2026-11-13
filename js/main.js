@@ -285,7 +285,7 @@
     tune('finale');
     const link = card.youtube ? `<a class="listen" href="${card.youtube}" target="_blank" rel="noopener">${card.listen}</a>` : '';
     // Katelyn's Polaroid sits beside the words once its file exists. Until then the card is just the words.
-    show(`<div class="card"><img class="kpol" src="assets/cutscenes/katelyn-polaroid.webp" alt="Katelyn in front of the house" hidden><div class="cardtext"><h2>${card.line}</h2>${link}<p class="bday">${card.birthday}</p></div></div>`, [['Back to title', title, 'quiet']]);
+    show(`<div class="card"><img class="kpol" src="assets/cutscenes/katelyn-polaroid.webp" alt="Katelyn in front of the house" hidden><div class="cardtext"><h2>${card.line}</h2><p class="tips">${card.tips}: <b>$${(camp.tips || 0).toFixed(2)}</b></p>${link}<p class="bday">${card.birthday}</p></div></div>`, [['Back to title', title, 'quiet']]);
     const pol = screen.querySelector('.kpol');
     pol.onload = () => { pol.hidden = false; pol.parentNode.classList.add('withpol'); };
     pol.onerror = () => pol.remove();

@@ -351,6 +351,7 @@
     if (city.final) { camp.phase = 'ending'; return; }
     camp.reserves[city.id] = [0, 1].map(() => ({ style: city.style, topping: pie.topping, from: city.id }));
     camp.world = null;
+    camp.tipsBanked = camp.tips || 0;
     camp.cityIndex++;
     camp.phase = 'briefing';
   }
@@ -359,6 +360,8 @@
   function retryCity(camp) {
     const city = currentCity(camp);
     camp.world = null;
+    // The city's tips go with its streets; tips banked in earlier cities stay.
+    camp.tips = camp.tipsBanked || 0;
     delete camp.pies[city.id];
     if (city.final) startFinale(camp); else camp.phase = 'order';
   }
