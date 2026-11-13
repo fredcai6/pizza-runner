@@ -158,7 +158,7 @@
       if (this.done) return;
       this.stop();
       A.play(outcome === 'delivered' ? 'deliver' : 'lost');
-      this.onEnd({ outcome, killer: killer == null ? null : { street: this.street.id, id: killer }, street: this.street.id, x: this.p.x, topping: this.held(), left: this.left(), bites: this.bites, seconds: Math.round(this.frame / 60), removed: this.removed, checkpoints: this.found });
+      this.onEnd({ outcome, killer: killer == null ? null : { street: this.street.id, id: killer }, street: this.street.id, x: this.p.x, topping: this.held(), left: this.left(), bites: this.bites, heat: Math.max(0, this.heat / this.heatMax), seconds: Math.round(this.frame / 60), removed: this.removed, checkpoints: this.found });
     }
 
     speed() {

@@ -297,6 +297,12 @@
     }
   }
 
+  // A delivered slice earns its full tip fresh from the oven, less in a straight line as it cools, in whole cents.
+  // Heat is a share of the slice's starting heat, so bites (which cap the heat) cost money too.
+  const heatOf = result => Math.min(1, Math.max(0, result.heat ?? 1));
+  const tip = result => result.outcome === 'delivered' ? Math.round(C.TUNING.tipPerSlice * heatOf(result) * 100) / 100 : 0;
+  const dollars = n => `$${n.toFixed(2)}`;
+
   const killerOf = (world, k) => (k ? world.streets[k.street].enemies.find(e => e.id === k.id) : null);
 
   function finishRun(camp, slice, result) {
@@ -310,6 +316,7 @@
     world.filmedLast = Object.values(world.streets).some(s => s.filmed != null);
     reinforceFilmed(world);
     slice.status = delivered ? 'delivered' : 'lost';
+    camp.tips = Math.round(((camp.tips || 0) + tip(result)) * 100) / 100;
     const receipt = makeReceipt(camp, city, slice, result);
     camp.receipts.push(receipt);
     if (delivered) {
@@ -375,6 +382,8 @@
     const lines = [`1 ${C.STYLES[slice.style].name}, ${topping}`, fate];
     if (where) lines.push(`Last seen: ${where}`);
     lines.push(`${result.seconds || 0}s on route`);
+    if (result.outcome === 'delivered') lines.push(`TIP: ${dollars(tip(result))} (${Math.round(heatOf(result) * 100)}% hot)`);
+    lines.push(`TIPS SO FAR: ${dollars(camp.tips || 0)}`);
     if (result.checkpoints) lines.push(`Checkpoints found: ${result.checkpoints}`);
     if (moved) lines.push(`Cleared this trip: ${moved}`);
     lines.push(`Stays cleared: ${persistentGone(world)}`);
@@ -445,6 +454,6 @@
     return { name: file.name, claim: file.claim, notes: Object.entries(file.notes).filter(([k]) => camp.seen[`${type}.${k}`]).map(([, v]) => v) };
   }
 
-  const api = { menu, collect, epitaph, GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
+  const api = { tip, menu, collect, epitaph, GROUND, SLICES, rng, network, generateStreet, newWorld, deployment, clearSpawn, addressStreet, junction, reach, travel, routes, guide, jumpTo, newCampaign, currentCity, buildPie, placeOrder, finaleRoster, startFinale, ready, learn, feed, defeat, strike, nextPaper, breakGate, finishRun, cityComplete, afterDoor, leaveCity, retryCity, printOrder, describe, ledger, dispatch, headquarters, roster, theory, aliases, enemyFile };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_RULES = api;
 })(typeof window !== 'undefined' ? window : globalThis);
