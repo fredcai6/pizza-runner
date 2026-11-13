@@ -377,7 +377,7 @@
   const DOOR_SIGN = {
     'newyork/centralpark': 0, 'newyork/brooklyn': 70, 'chicago/loop': 66, 'chicago/lincolnpark': 60, 'chicago/wickerpark': 68,
     'dc/georgetown': 62, 'naples/harbor': 60, 'naples/center': 48, 'naples/hillside': 72,
-    'california/downtown': 74, 'california/beach': 68, 'california/bungalows': 66,
+    'california/downtown': 74, 'california/beach': 68, 'california/bungalows': 0,
   };
 
   // The delivery: the neighborhood behind, the door, whoever ordered, and the pizza that made it.
