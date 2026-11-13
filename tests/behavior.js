@@ -274,10 +274,10 @@ const serve = http.createServer((q, s) => { const u = q.url.split('?')[0]; const
       s.input.q.power = true; s.steps(30);
       ok('a shot does not break a barricade', s.run.solids().includes(s.street.barricades[0]));
       s.input.right = true; s.steps(60);
-      ok('walking into a barricade says it is solid', s.run.bark === C.TUNING.hints.barricade, s.run.bark);
+      ok('walking into a barricade says it is solid', [s.run.bark, s.run.barkNext].includes(C.VOICES.ny.hintBarricade[0]), s.run.bark);
       const b = scene(0, 'ny', null);
       b.street.boxes.push({ x: 540, w: 84, h: 84, broken: false }); b.run.enter(b.street.id, 300); b.input.right = true; b.steps(60);
-      ok('walking into a crate says it gives', b.run.bark === C.TUNING.hints.box, b.run.bark);
+      ok('walking into a crate says it gives', [b.run.bark, b.run.barkNext].includes(C.VOICES.ny.hintBox[0]), b.run.bark);
     }
     { // The corner of the screen carries a thermometer and the spare slices, and no counter text.
       const s = scene(0, 'ny', 'pepperoni');

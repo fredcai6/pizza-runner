@@ -250,30 +250,6 @@
     old: 'Sergeant Dayold', ny: 'Vinny Two-Fold', deep: 'Big Stan', jumbo: 'Phil A. Buster', naples: 'La Contessa', alewife: 'DJ Alewife',
   };
 
-  // What a pizza says out loud on the street, by event. One at a time, and not often.
-  const QUIPS = {
-    ny: {
-      deploy: ["Awright, let's get this over with.", 'Outta my way, comin\' through.'], hurt: ['Hey! Watch the crust!', 'Oh, you wanna go?', "That's comin' outta your tip."],
-      cold: ["I'm losin' my edge here."], stomp: ['Fuhgeddaboudit.', 'Get outta here!'], grab: ['Now we\'re talkin\'.'], spent: ['Aw, nuts. Plain.'],
-      filmed: ['Hey! No pictures!'], mutant: ['What was that? In the drain?'], box: ['Thank you, I do my own stunts.'], door: ["That's the place."],
-    },
-    deep: {
-      deploy: ['Slowly, then.', 'This better be worth it.'], hurt: ['That left a mark.', 'Hey.', 'I felt that.'],
-      cold: ['Sauce is setting.'], stomp: ['Sorry.', 'I warned you.'], grab: ['More. Good.'], spent: ['That was the good part.'],
-      filmed: ['Not my good side.'], mutant: ['Oh no. Not running.'], box: ['Walls are a suggestion.'], door: ['Finally.'],
-    },
-    jumbo: {
-      deploy: ['I shall be brief. I shall be enormous.', 'Mind the overhang.'], hurt: ['I object!', 'Point of order!', 'Noted, and resented!'],
-      cold: ['I am drooping, and I yield.'], stomp: ['Motion carried.', 'Sustained!'], grab: ['An earmark! For me!'], spent: ['The funds are exhausted.'],
-      filmed: ['No comment. Well, a short comment...'], mutant: ['I move to adjourn. Quickly.'], box: ['Bipartisan demolition.'], door: ['I see my constituent.'],
-    },
-    naples: {
-      deploy: ['Ninety seconds. Andiamo.', 'Try to keep up, America.'], hurt: ['Mamma mia!', 'Barbaro!', 'Ma che fai?'],
-      cold: ['Fredda! I am going fredda!'], stomp: ['Scusi.', 'Ciao ciao.'], grab: ['At last, an ingredient.'], spent: ['Is better without.'],
-      filmed: ['My left, please. My left!'], mutant: ['Madonna, what is that?'], box: ['Cardboard. Everywhere, cardboard.'], door: ['Ecco.'],
-    },
-  };
-
   // Sticky notes on "Who is The Order?", all in Sergeant Dayold's hand. They appear on fixed city milestones.
   const THEORY = [
     { from: 0, text: 'WHO IS THE ORDER?', title: true },   // the corkboard shows this one as the banner from the briefing board
@@ -295,15 +271,159 @@
     mutant: { name: 'Mutant', claim: 'What is The Order feeding them?', notes: { peeks: 'Watch the storm drains. It looks before it comes.', chases: 'It comes up behind you, fast.', feed: 'Catches food and goes back down, for good.', bite: 'One bite and it goes home. One.' } },
   };
 
-  const BARKS = {
-    hot: 'Heat holding. You are magnificent.', warm: 'Lukewarm. Stay focused.', cold: 'Cold now. The cheese has given up on you.',
-    bow: 'The ninja catches it. Bows. Here it comes back.', feed: 'It catches it and goes back down the drain.',
-    filmed: 'A teenager took your picture.', fire: 'Back in the glow. Toasty.',
-    recovered: 'Topping back in hand.', note: 'New note on the board.', paper: 'Something was in the box.',
-    pickup: 'Swapped in. Three uses.', unlocked: 'New on the menu! Three uses now, and every pie after this can wear it.', spent: 'Back to plain cheese.', checkpoint: 'Checkpoint:', gate: 'The boxes block the way. Break them.',
-    flees: 'The teenager bolts for home, phone first.', ninjaGone: 'The ninja bows once more and vanishes. Respect.', ninjaHit: 'It remembers that.', scatter: 'Everyone in sight remembers somewhere else to be.',
-    drain: 'Something in the storm drain.', almost: 'just ahead', missed: 'Rerouting...', bite: 'One bite and it goes home.', nope: 'Not this address yet.',
+  // Everything said on the street, in the voice of the pizza out there: pop-ups along the top and the bubble over its head.
+  // Each event's lines rotate, and its count is kept per pizza in the save (camp.said), so a line comes round again only after
+  // the others have had a turn. VOICE_RATE thins out events that happen a lot: 'always' speaks every time (anything that tells
+  // you where to go or what you hold), 'often' speaks the first three times and then every other time, 'sometimes' speaks the
+  // first time and then every third time. Nothing goes quiet for good. {name}, {customer}, {topping}, {street}, {gone} fill in.
+  // BUBBLE events go in the bubble over the slice; everything else is a pop-up.
+  const VOICES = {
+    ny: {
+      deploy: ["Awright, let's get this over with.", "Outta my way, comin' through.", "I fold for nobody. Let's go.", "Here we go again, boss."],
+      deliverTo: ["Deliverin' to {customer}. Easy money.", "Next stop, {customer}. I got this, boss.", "{customer}. Whatever ya say, boss."],
+      deliverToGone: ["{gone} a us still gone from these streets. Deliverin' to {customer}.", "We're down {gone} out here, boss. Still goin' to {customer}."],
+      checkpoint: ["Checkpoint: {name}. Remember that, boss.", "{name}. I'm markin' it.", "Checkpoint, {name}. Good, my feet hurt."],
+      doorAhead: ["{customer}'s door, right up here.", "That's {customer}'s place up ahead.", "Door's comin' up. {customer}."],
+      gate: ["Boxes blockin' the way. I'm breakin' 'em.", "A cardboard wall? Seriously? Bust it."],
+      nope: ["Not this door yet, boss.", "Wrong address. I ain't wastin' a delivery."],
+      unlocked: ["{topping}! That's new. Three uses, and every pie after me can wear it."],
+      pickup: ["{topping}. Three uses. Now we're talkin'.", "Swappin' in {topping}. Three shots.", "{topping}! Don't mind if I do."],
+      spent: ["Aw, nuts. Back to plain.", "Outta toppings. Just me and the cheese now.", "Plain again. I'm still a classic."],
+      recovered: ["Got my topping back.", "That's mine, thank you.", "Back in my hands, where it belongs."],
+      paper: ["Somethin' was in that box, boss. Bringin' it home.", "Paperwork in the box. Dayold's gonna love this."],
+      opened: ["{street}'s open. Let's go.", "That opened up {street}.", "Thank you, I do my own stunts. {street}'s open."],
+      note: ["Dayold's gonna want that on the board.", "Somethin' for the board, boss.", "Remember that one. For the board."],
+      hot: ["I'm hot. I'm magnificent.", "Feelin' toasty, boss.", "Heat's holdin'. I fold for nobody."],
+      warm: ["Gettin' lukewarm here.", "Losin' a little heat. I ain't worried.", "I ain't sayin' I'm cold. I'm sayin' I'm not hot."],
+      cold: ["I'm losin' my edge here, boss. Move it!", "Cheese is givin' up on me.", "Cold. Real cold. Hurry."],
+      fire: ["Ahh. Back in the glow.", "Warm again. That's the stuff.", "Toasty. Don't tell nobody I needed that."],
+      filmed: ["Hey! No pictures!", "A kid took my picture. I wasn't ready.", "Great. Now I'm online."],
+      flees: ["Yeah, run home, kid. Phone first.", "Look at 'em go.", "And stay off my block.", "Scram!"],
+      scatter: ["Everybody's got somewhere else to be. Good.", "Clear the block!", "That's right, scatter."],
+      feed: ["It took the bait and went back down.", "Enjoy your snack, pal. Stay down there.", "Back in the drain. Smart."],
+      bite: ["One bite and it goes home. Weird, but okay.", "It got a taste. It's leavin'."],
+      drain: ["What was that? In the drain?", "Somethin's in the storm drain, boss.", "Drain's movin'. I ain't scared."],
+      bow: ["The ninja caught it! And bowed! Here it comes back!", "It caught it. Duck!", "Polite, but here it comes."],
+      ninjaHit: ["It'll remember that.", "Ooh, now it's personal.", "That one's gonna hold a grudge."],
+      ninjaGone: ["The ninja bowed out. Respect.", "One bow and gone. Classy."],
+      hintBox: ["Just pizza boxes. Shoot 'em, slam 'em or bust right through."],
+      hintBarricade: ["That's solid. I'm jumpin' it."],
+      hurt: ["Hey! Watch the crust!", "Oh, you wanna go?", "That's comin' outta your tip."],
+      stomp: ["Fuhgeddaboudit.", "Get outta here!", "Folded like a lawn chair."],
+      grab: ["Now we're talkin'.", "Oh yeah.", "Gimme that."],
+    },
+    deep: {
+      deploy: ['Slowly, then.', 'This better be worth it.', 'Fine.', 'Here I go. Eventually.'],
+      deliverTo: ['{customer}. Fine.', 'Taking it to {customer}. Slowly.', '{customer}. They better be home.'],
+      deliverToGone: ['{gone} of us still gone out here. Taking it to {customer}.', 'Down {gone}. Still going to {customer}.'],
+      checkpoint: ["{name}. I'll remember it.", 'Checkpoint. {name}. Good.', "{name}. I'm starting here next time."],
+      doorAhead: ["{customer}'s door. Up ahead.", "That's the door. {customer}.", 'Door. Finally. {customer}.'],
+      gate: ["Boxes. In the way. They won't be.", 'Walls are a suggestion.'],
+      nope: ['Not this one.', 'Wrong door. ...Fine.'],
+      unlocked: ["{topping}. New. Three uses. Every pie gets it now. You're welcome."],
+      pickup: ['{topping}. Three uses.', '{topping}. More. Good.', '{topping}. Heavy. I like it.'],
+      spent: ['That was the good part.', 'Plain. Fine.', "Out of toppings. I'm still deep."],
+      recovered: ['Mine.', 'Got it back.', 'That was mine. Is mine.'],
+      paper: ["Something in the box. I'm keeping it.", 'Paperwork. For the board.'],
+      opened: ['{street} is open.', "{street}. Open now. You're welcome."],
+      note: ['That goes on the board.', 'Board material.', 'Dayold will want that.'],
+      hot: ['Hot. Good.', 'Still hot. Two inches of hot.', "I'm holding heat. It's what I do."],
+      warm: ['Lukewarm.', "Cooling. I'm not worried. ...I'm a little worried.", 'Losing heat. Slowly. Like everything.'],
+      cold: ['Sauce is setting.', 'Cold. I hate this.', "I'm setting. Like a casserole. I'm not a casserole."],
+      fire: ['Warm. Good.', "That's better.", 'Heat. Finally.'],
+      filmed: ['Not my good side.', 'I blinked.', 'They took my picture. ...Fine.'],
+      flees: ['It ran.', 'Bye.', 'Go home.', 'Phone first. Every time.'],
+      scatter: ['Everyone left. Good.', 'Nobody stays. ...Fine.'],
+      feed: ['It took it. It went down. Good.', 'Snack. Drain. Gone.'],
+      bite: ['One bite. It went home.', "It had a bite. It's leaving."],
+      drain: ["Something's in the drain.", 'Oh no. Not running.', 'Drain. Moving. I see it.'],
+      bow: ["It caught it. It's bowing. It's throwing it back.", 'Incoming. Politely.'],
+      ninjaHit: ["It'll remember that.", "Now it's mad. Quietly."],
+      ninjaGone: ['It bowed and left. Respect.', 'Gone. Good manners.'],
+      hintBox: ['Pizza boxes. I go through them.'],
+      hintBarricade: ['Solid. I have to jump. ...Fine.'],
+      hurt: ['That left a mark.', 'Hey.', 'I felt that.'],
+      stomp: ['Sorry.', 'I warned you.', 'Heavy. Told you.'],
+      grab: ['More. Good.', 'Mine now.', 'Heavier. Better.'],
+    },
+    jumbo: {
+      deploy: ['I shall be brief. I shall be enormous.', 'Mind the overhang.', 'Mr. Chairman, I rise.', 'I yield my time to myself.'],
+      deliverTo: ['Let the record show: we deliver to {customer}.', 'Mr. Chairman, the recipient is {customer}.', 'On the matter of {customer}, I rise to deliver.'],
+      deliverToGone: ['Let the record show {gone} of us remain missing. We deliver to {customer}.', '{gone} of our members are absent. We proceed to {customer}.'],
+      checkpoint: ['Checkpoint: {name}. So entered into the record.', '{name}. I move that we remember it.', 'Let the minutes reflect {name}.'],
+      doorAhead: ["{customer}'s door, just ahead. I shall be brief.", 'The residence of {customer}, approaching.', 'I see my constituent. {customer}.'],
+      gate: ['The boxes block the way. Bipartisan demolition.', 'A blockade! Of cardboard! I object!'],
+      nope: ['Point of order: not this address yet.', 'Out of order. Wrong door.'],
+      unlocked: ['{topping}! A new provision, binding on every pie hereafter. Three uses.'],
+      pickup: ['{topping}! An earmark! Three uses!', 'The chair recognizes {topping}.', '{topping}, appropriated.'],
+      spent: ['The funds are exhausted.', 'Back to plain cheese. A lean budget.', 'Appropriations: none.'],
+      recovered: ['The topping is restored to its rightful owner.', 'Recovered! Let the record show.', 'Returned to committee. My committee.'],
+      paper: ['Documents in the box! I shall read them in full.', 'A paper trail! I do love a paper trail.'],
+      opened: ['{street} is open, by unanimous consent.', 'The floor is open: {street}.'],
+      note: ['Enter that into the record.', 'A note for the board, Mr. Chairman.', 'The board will want this, in triplicate.'],
+      hot: ['Heat holding. I am, if I may, magnificent.', 'Warm, and in session.', 'The heat is sustained.'],
+      warm: ['Lukewarm. I shall continue regardless.', 'I note a decline in temperature.', 'Cooling. Noted, and resented.'],
+      cold: ['I am drooping, and I yield.', 'I wish to enter into the record that it is very cold.', 'Cold! I object, with what little warmth remains!'],
+      fire: ['Back in the glow. Sustained!', 'Warmth! The motion carries.', 'Toasty. I withdraw my objection.'],
+      filmed: ['I was photographed without comment. Without adequate comment.', 'No comment. Well, a short comment...', 'The press!'],
+      flees: ['The witness flees, phone first.', 'Let the record show it ran.', 'Dismissed!', 'Adjourned, apparently.'],
+      scatter: ['The gallery has emptied.', 'Everyone recalls a prior engagement.'],
+      feed: ['It accepts the offering and withdraws.', 'Bribery works. Noted with concern.'],
+      bite: ['One bite, and it retires.', 'A taste, then recess.'],
+      drain: ['Something stirs in the storm drain.', 'I move to adjourn. Quickly.'],
+      bow: ['The ninja catches it, bows, and returns it! Most irregular!', 'It is returned to sender!'],
+      ninjaHit: ['It will remember that, I suspect, at length.', 'A grievance has been filed.'],
+      ninjaGone: ['The ninja bows out for good. Respect.', 'It yields the floor.'],
+      hintBox: ['Mere pizza boxes. Shoot, slam or dash through them.'],
+      hintBarricade: ['Solid. One must jump it.'],
+      hurt: ['I object!', 'Point of order!', 'Noted, and resented!'],
+      stomp: ['Motion carried.', 'Sustained!', 'Overruled!'],
+      grab: ['An earmark! For me!', 'Appropriated!', 'Mine, by statute.'],
+    },
+    naples: {
+      deploy: ['Ninety seconds. Andiamo.', 'Try to keep up, America.', 'Va bene. I go.', 'Certified. Ready.'],
+      deliverTo: ['To {customer}. Ninety seconds.', 'For {customer}. Andiamo.', '{customer}. Let us not keep them waiting.'],
+      deliverToGone: ['{gone} of us still gone from these streets. For {customer}.', 'We are {gone} fewer. Still, for {customer}.'],
+      checkpoint: ['{name}. I remember.', 'Checkpoint, {name}. Ecco.', '{name}. Is noted.'],
+      doorAhead: ["{customer}'s door. Ecco.", 'Is the door. {customer}.', 'There. {customer}.'],
+      gate: ['Cardboard. Everywhere, cardboard. Break it.', 'A wall of boxes. Is an insult.'],
+      nope: ['Not this door. Not yet.', 'Wrong address. Ma dai.'],
+      unlocked: ['{topping}! New. Three uses, and every pie after me may wear it.'],
+      pickup: ['{topping}. At last, an ingredient.', '{topping}. Three uses. Basta.', '{topping}. Acceptable.'],
+      spent: ['Plain again. Is better without.', 'No more toppings. Margherita is enough.', 'Back to the classic.'],
+      recovered: ['Mine. Grazie.', 'Is back where it belongs.', 'Returned. As it should be.'],
+      paper: ['Something in the box. I take it home.', 'Papers. Dayold will be happy.'],
+      opened: ['{street} is open. Finally.', '{street}. Andiamo.'],
+      note: ['For the board.', 'Dayold will want this.', 'Another note. Is getting crowded, the board.'],
+      hot: ['Hot. As it should be.', 'From the fire. Still.', 'Perfetto.'],
+      warm: ['Lukewarm. Is not acceptable.', 'I am cooling. Hurry, America.', 'Losing heat. Already.'],
+      cold: ['Fredda! I am going fredda!', 'I was made in a fire. I do not do this.', 'Cold. Mamma mia.'],
+      fire: ['Ah. Like home.', 'Fire. Finally, something civilized.', 'Warm again. Grazie.'],
+      filmed: ['My left, please. My left!', 'A picture? I was not ready!', 'They photograph me. Naturally.'],
+      flees: ['Run. Run home.', 'Ciao ciao.', 'Phone first. Always phone first.', 'Va bene, go.'],
+      scatter: ['Everyone runs. As they should.', 'Scattered. Bene.'],
+      feed: ['It eats and goes down. Bene.', 'Fed. Gone.'],
+      bite: ['One bite, and it goes home.', 'A taste. Now it leaves.'],
+      drain: ['Madonna, what is that? In the drain?', 'Something in the drain. I do not like it.'],
+      bow: ['It catches it! It bows! It throws it back!', 'Is coming back! Polite, but coming back!'],
+      ninjaHit: ['It remembers that.', 'Now it is angry. Quietly.'],
+      ninjaGone: ['The ninja bows and vanishes. Elegant.', 'Gone. Molto elegante.'],
+      hintBox: ['Only pizza boxes. Shoot, slam or dash through.'],
+      hintBarricade: ['Solid. Jump.'],
+      hurt: ['Mamma mia!', 'Barbaro!', 'Ma che fai?'],
+      stomp: ['Scusi.', 'Ciao ciao.', 'Permesso.'],
+      grab: ['At last, an ingredient.', 'Bene.', 'This, I accept.'],
+    },
   };
+  const VOICE_RATE = {
+    hot: 'often', warm: 'often', fire: 'often', spent: 'often', recovered: 'often', filmed: 'often', grab: 'often', bow: 'often',
+    flees: 'sometimes', scatter: 'sometimes', feed: 'sometimes', bite: 'sometimes', drain: 'sometimes', ninjaHit: 'sometimes', ninjaGone: 'sometimes',
+    hurt: 'sometimes', stomp: 'sometimes',
+  };
+  const BUBBLE = new Set(['deploy', 'hurt', 'stomp', 'grab']);
+
+  // The heading line under the HUD when the slice is off its route. Not speech.
+  const BARKS = { missed: 'Rerouting...' };
 
   // The solid blocks on every street are pizza-shop stock, each with its own jiggle when hit.
   const OBSTACLES = ['flour', 'cans', 'parm', 'salami'];
@@ -336,7 +456,6 @@
     // A stomp: feet may be this far into the top share of an enemy, hands-off slack at its sides, and a few frames of apex grace.
     stomp: { window: 0.62, reachAbove: 16, slack: 18, apexVy: -3 },
     // What walking into a stack of pizza boxes or a barricade says, once a slice.
-    hints: { box: 'Just pizza boxes. Shoot them, slam them or dash through.', barricade: 'Solid. Jump it.' },
   };
   const ORDER_NUMBER = '0825';
   const PRINTER_CLOCK = '12:00 AM';
@@ -356,6 +475,17 @@
   // Where the corkboard sits in the HQ painting. The game draws live evidence onto it.
   const HQ_BOARD = { x: 712, y: 82, w: 496, h: 326 };
 
-  const api = { CITY_LOST, TOPPINGS, STYLES, SPEAKERS, QUIPS, CITIES, RETURNS, THEORY, ENEMIES, BARKS, OBSTACLES, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
+  // Which teens hang around each city: three apiece, a mix of girls and boys, with a different set of hoodies per city.
+  // Art in assets/sprites/teen-*; specs in art/paper/make_teen_cast.py. teen = the original orange hoodie.
+  //   teen-b green (puffs), teen-c navy (bowl cut), teen-d yellow (ponytail), teen-e red (braid), teen-f teal (twists), teen-g grey (red bun)
+  const TEENS = {
+    newyork: ['teen', 'teen-c', 'teen-g'],
+    chicago: ['teen-b', 'teen-e', 'teen-f'],
+    dc: ['teen-d', 'teen-c', 'teen-b'],
+    naples: ['teen-e', 'teen-g', 'teen-d'],
+    california: ['teen-f', 'teen-d', 'teen'],
+  };
+
+  const api = { TEENS, CITY_LOST, TOPPINGS, STYLES, SPEAKERS, VOICES, VOICE_RATE, BUBBLE, CITIES, RETURNS, THEORY, ENEMIES, BARKS, OBSTACLES, BOX_PAPER, PHOTO_ARRIVALS, NINJA_HITS, BITES, CHARGES, ORDER_NUMBER, PRINTER_CLOCK, ENDING, HQ_BOARD, TUNING };
   if (typeof module !== 'undefined') module.exports = api; else root.PR_CONTENT = api;
 })(typeof window !== 'undefined' ? window : globalThis);
