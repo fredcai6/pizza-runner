@@ -24,8 +24,8 @@
   const QUIP_GAP = 540, QUIP_HOLD = 130, WISP_RISE = 0.8, WISP_SWEEP = 2.4, CHOMP = 170, STUN = 150, WIPE = 22, AURA_USE = 180, BOW = 40;
 
   class Run {
-    constructor(canvas, input, { camp, city, world, slice, start, onEnd }) {
-      Object.assign(this, { canvas, ctx: canvas.getContext('2d'), input, camp, city, world, slice, onEnd });
+    constructor(canvas, input, { camp, city, world, slice, start, onEnd, onStreet }) {
+      Object.assign(this, { canvas, ctx: canvas.getContext('2d'), input, camp, city, world, slice, onEnd, onStreet });
       this.style = C.STYLES[slice.style];
       const st = this.style;
       this.topping = slice.topping;
@@ -54,6 +54,7 @@
     // Puts the slice on a stretch. Whatever is left alive on it comes along, as it was left.
     enter(id, x) {
       const street = this.street = this.world.streets[id];
+      if (this.onStreet) this.onStreet(street);
       R.travel(this.world, id);
       this.area = this.city.areas[street.area];
       this.junction = R.junction(this.world, street);

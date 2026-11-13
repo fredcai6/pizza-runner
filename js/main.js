@@ -10,8 +10,8 @@
   function load() { try { return JSON.parse(localStorage.getItem(SAVE)); } catch { return null; } }
   function save() { localStorage.setItem(SAVE, JSON.stringify(camp)); }
 
-  // Which song: HQ in the back room, the city's own in its streets, and the finale from the last
-  // street (the Bungalows) through the ending, the card and the title.
+  // Which song: HQ in the back room, the city's own in its streets, and the finale from the very last
+  // street (the one with DJ Alewife's door) through the ending, the card and the title.
   function tune(where) {
     A.song(where === 'title' || where === 'finale' || (where === 'city' && camp.finaleOn) ? 'finale' : where === 'hq' ? 'hq' : R.currentCity(camp).id);
   }
@@ -252,7 +252,6 @@
   function startRun(slice, node) {
     const city = R.currentCity(camp), world = camp.world;
     halt();
-    if (city.final && world.delivery === city.areas.length - 1) camp.finaleOn = true;
     tune('city');
     world.checkpoint = node;
     screen.classList.add('hidden');
@@ -261,7 +260,9 @@
     $('specialBtn').textContent = special || '';
     $('specialBtn').classList.toggle('off', !special);
     const mine = epoch;
-    run = new P.Run(canvas, input, { camp, city, world, slice, start: R.deployment(world, node), onEnd: result => { if (mine === epoch) debrief(slice, result); } });
+    // The finale starts the moment the slice turns onto the last street of the game: the one with the final door.
+    const lastStreet = street => { if (city.final && street.door != null && street.address === city.areas.length - 1 && !camp.finaleOn) { camp.finaleOn = true; tune('city'); } };
+    run = new P.Run(canvas, input, { camp, city, world, slice, start: R.deployment(world, node), onEnd: result => { if (mine === epoch) debrief(slice, result); }, onStreet: lastStreet });
     run.god = god;
     if (debug) window.__pr.run = run;
     run.start();

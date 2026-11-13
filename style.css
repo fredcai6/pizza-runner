@@ -110,6 +110,13 @@ h2 { align-self: flex-start; font: 700 28px/1.1 var(--display); color: var(--tex
 #dialog::after { content: ''; position: absolute; right: 14px; bottom: 10px; width: 0; height: 0; border: 9px solid transparent; border-top: 13px solid var(--coral); border-bottom: 0; opacity: 0; }
 #dialog.done::after { opacity: 1; animation: nudge .7s steps(2) infinite; }
 @keyframes nudge { 50% { transform: translateY(3px); } }
+/* One colour per speaker, so who is talking reads at a glance. Customers keep the coral. */
+.who[data-who="old"] { background: #c9781a; }
+.who[data-who="ny"] { background: #2f6fdb; }
+.who[data-who="deep"] { background: #8a4b2a; }
+.who[data-who="jumbo"] { background: #7b4fc9; }
+.who[data-who="naples"] { background: #1f9d55; }
+.who[data-who="alewife"] { background: #e83fa0; }
 .who { position: absolute; left: 14px; top: -19px; padding: 2px 14px 3px; background: var(--coral); border: 3px solid #fff; border-radius: 10px 10px 4px 4px; box-shadow: 0 0 0 2px var(--ink), 2px 3px 0 2px var(--ink); font: 600 18px var(--display); letter-spacing: .5px; color: #fff; }
 .line { font-size: var(--fs, 24px); line-height: 1.25; font-weight: 700; }
 .line .rest { visibility: hidden; }
