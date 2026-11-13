@@ -118,14 +118,18 @@ def label(t, seed, d):
 
 
 def page(spec, folder):
+    notes_path = folder / "descriptions.json"
+    notes = json.loads(notes_path.read_text()) if notes_path.exists() else {}
+    note_for = lambda name: (f'<details><summary>Listening notes (Music Flamingo)</summary><p class="notes">'
+                             f'{html.escape(notes[name])}</p></details>' if name in notes else "")
     rows = []
     for t in spec["tracks"]:
         players = "".join(
-            f'<figure><figcaption>{html.escape(t["id"])} · {label(t, seed, d)}</figcaption><audio controls preload="none" src="{name}"></audio></figure>'
+            f'<figure><figcaption>{html.escape(t["id"])} · {label(t, seed, d)}</figcaption><audio controls preload="none" src="{name}"></audio>{note_for(name)}</figure>'
             for tt, seed, d, name in clips(spec) if tt is t and (folder / name).exists())
         rows.append(f'<section><h2>{html.escape(t["id"])}: {html.escape(t["title"])}</h2>'
                     f'<p class="tags">{html.escape(t["tags"])}</p>'
-                    f'<p class="meta">{t["bpm"]} bpm · {html.escape(t["key"])} · {t["seconds"]} s'
+                    f'<p class="meta">{t["bpm"]} bpm · {html.escape(t["key"])} · {t.get("seconds", spec.get("seconds"))} s'
                     + (f' · from {html.escape(t["source"])}' if t.get("source") else "") + f'</p>{players}</section>')
     note = html.escape(spec.get("note", ""))
     (folder / "index.html").write_text(f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -133,7 +137,7 @@ def page(spec, folder):
 <style>body{{font:16px/1.5 system-ui,sans-serif;max-width:760px;margin:0 auto;padding:16px;background:#fdf6e8;color:#2a1f18}}
 h1{{font-size:1.4rem}}h2{{font-size:1.1rem;margin:0 0 4px}}section{{background:#fff;border:1px solid #0002;border-radius:12px;padding:14px;margin:14px 0}}
 .tags{{margin:0;color:#6b5747;font-size:.9rem}}.meta{{margin:2px 0 8px;color:#6b5747;font-size:.85rem}}
-figure{{margin:8px 0}}figcaption{{font-size:.85rem;font-weight:600}}audio{{width:100%}}</style></head><body>
+figure{{margin:8px 0}}figcaption{{font-size:.85rem;font-weight:600}}audio{{width:100%}}details{{margin:4px 0 0;font-size:.88rem}}summary{{cursor:pointer;color:#6b5747}}.notes{{white-space:pre-wrap;margin:6px 0}}</style></head><body>
 <h1>Pizza Runner music: {html.escape(spec['round'])}</h1><p>{note}</p>{''.join(rows)}</body></html>""")
 
 
