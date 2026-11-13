@@ -8,7 +8,7 @@ Speaker keys are `old`, `ny`, `deep`, `jumbo`, `naples`, `alewife`. **[T]** mark
 
 **Vinny Two-Fold (ny).** He is New York bravado that leaks. He drops his g's, says "boss" every other line, and says "a" for "of". He announces he isn't scared right before he is. His tics are "I fold for nobody" and "I ain't sayin' X. I'm sayin' Y", where Y is the confession. He wants respect, and he has never been indoors.
 
-**Big Stan (deep).** He is flat, short and aggrieved, and he defends himself before anyone attacks ("It's not a casserole"). He never raises his voice, because that would take effort. The pauses are the jokes, and his tic is "...Fine." He wants to be taken seriously as a pizza.
+**Big Stan (deep).** He is flat, short and aggrieved, and he defends himself before anyone attacks ("I'm not a casserole"). He never raises his voice, because that would take effort. The pauses are the jokes, and his tic is "...Fine." He wants to be taken seriously as a pizza.
 
 **La Contessa (naples).** She is imperious, theatrical and certified. She drops articles ("Is bigger now. Why is it bigger?") and counts seconds ("ninety in the fire"). She calls America "America" and treats anything non-Neapolitan as an insult. "Mamma mia" is rationed. She is quietly homesick, and she softens only about home.
 
@@ -54,9 +54,9 @@ naples: Ninety seconds in the fire. You would not last **nine**.
 
 comp: deep   (card: Big Stan / Deep Dish of Chicago)
 old: Big Stan. Two inches of sauce, four inches of grudge. Slow to start. Slower to stop.
-deep: It's not a casserole.
-old: Nobody said it was.
-deep: Somebody will.
+deep: I'm not a casserole.
+old: I didn't say you were.
+deep: Someone would.
 
 comp: jumbo   (card: Phil A. Buster / Jumbo Slice of Washington)
 old: Phil A. Buster. Largest slice in the free world. Three names, because one would not hold him.
