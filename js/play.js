@@ -1320,7 +1320,8 @@
       const { ctx, p, style: st, speech } = this;
       if (!speech) return;
       const shown = Math.min(speech.text.length, Math.floor(speech.age / 1.6));
-      if (shown < speech.text.length && speech.age % 4 === 0) A.dit(this.slice.style);
+      // Drawing goes on while paused but the age does not, so a dit here would repeat every frame.
+      if (!this.paused && shown < speech.text.length && speech.age % 4 === 0) A.dit(this.slice.style);
       ctx.font = K.body(23, 800); ctx.textAlign = 'left';
       const w = ctx.measureText(speech.text).width + 30, h = 40;
       const cx = p.x + p.w / 2 - this.cam, x = Math.max(12, Math.min(W - w - 12, cx - w / 2)), y = Math.max(176, p.y + p.h - st.height - h - 30);

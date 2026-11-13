@@ -59,10 +59,10 @@
   }
   const leaveFull = () => { if (isFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); };
   const syncFull = () => { $('fullBtn').textContent = isFull() ? 'Exit full screen' : 'Full screen'; };
-  // Playtest menu: add ?playtest=1 to the address once and it stays on. ?playtest=0 turns it off.
-  const asked = new URLSearchParams(location.search).get('playtest');
-  if (asked !== null) localStorage.setItem('pizzaRunnerPlaytest', asked);
-  const playtest = localStorage.getItem('pizzaRunnerPlaytest') === '1';
+  // Playtest menu: only at the /playtest address (archerpeligo.club/pizza-runner/playtest), or ?playtest=1 locally.
+  // It used to stick in storage once asked for; clear that so the plain address never shows it.
+  localStorage.removeItem('pizzaRunnerPlaytest');
+  const playtest = /\/playtest\/?$/.test(location.pathname) || new URLSearchParams(location.search).get('playtest') === '1';
   let god = false;
 
   function playtestMenu() {
